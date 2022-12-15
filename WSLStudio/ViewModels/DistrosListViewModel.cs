@@ -8,8 +8,7 @@ namespace WSLStudio.ViewModels;
 public class DistrosListViewModel : ObservableObject
 {
     private readonly IDataService dataService;
-    private ObservableCollection<Distribution> distros = new ObservableCollection<Distribution>();
-    private ObservableCollection<string> distrosNames= new ObservableCollection<string>();
+    private ObservableCollection<Distribution> distros = new();
 
     public DistrosListViewModel(IDataService dataService)
     {
@@ -19,42 +18,15 @@ public class DistrosListViewModel : ObservableObject
 
     public ObservableCollection<Distribution> Distros
     {
-        get
-        {
-            return distros;
-        }
-        set
-        {
-            SetProperty(ref distros, value);
-        }
-    }
-
-    public ObservableCollection<string> DistrosNames
-    {
-        get
-        {
-            return distrosNames;
-        }
-        set
-        {
-            SetProperty(ref distrosNames, value);
-        }
+        get => distros;
+        set => SetProperty(ref distros, value);
     }
 
     private void PopulateData()
     {
         distros.Clear();
-
         foreach(var distro in dataService.GetAllDistributions()) {
-            distros.Add(distro);                    
-        }
-
-        distrosNames.Clear();
-
-        foreach(var distro in Distros)
-        {
-            distrosNames.Add(distro.Name);
+            distros.Add(distro);
         }
     }
-    
 }

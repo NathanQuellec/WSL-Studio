@@ -7,16 +7,49 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:local="using:WSLStudio.Views"
+    xmlns:model="using:WSLStudio.Models"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <controls:ListDetailsView
-              ItemsSource="{x:Bind ViewModel.DistrosNames}"
-              NoSelectionContent="Select an item to view"
+              ItemsSource="{x:Bind ViewModel.Distros}"
+              NoSelectionContent="No distribution selected"
               CompactModeThresholdWidth="640">
 
+        <controls:ListDetailsView.ItemTemplate>
+            <DataTemplate x:DataType="model:Distribution">
+                <StackPanel>
+                    <RelativePanel>
+                        <Button x:Name="LaunchButton">
+                            <SymbolIcon Symbol="Play"/>
+                        </Button>
+                        <TextBlock x:Name="DistroName" 
+                                   Text="{x:Bind Path=Name, Mode=OneWay}"
+                                   RelativePanel.RightOf="LaunchButton"
+                                   VerticalAlignment="Center"
+                                   Margin="5"/>
+                    </RelativePanel>
+                </StackPanel>
+            </DataTemplate>
+        </controls:ListDetailsView.ItemTemplate>
+        <controls:ListDetailsView.DetailsTemplate>
+            <DataTemplate x:DataType="model:Distribution">
+                <StackPanel>
 
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Memory Limit :"/>
+                        <TextBlock Text="{x:Bind Path=MemoryLimit, Mode=OneWay}"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Processor Limit : "/>
+                        <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
+                    </StackPanel>
+
+                </StackPanel>
+            </DataTemplate>
+        </controls:ListDetailsView.DetailsTemplate>
     </controls:ListDetailsView>
 </Page>
