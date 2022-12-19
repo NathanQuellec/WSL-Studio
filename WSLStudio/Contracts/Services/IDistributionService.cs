@@ -7,11 +7,11 @@ using WSLStudio.Models;
 
 namespace WSLStudio.Contracts.Services;
 
-public interface IDataService
+public interface IDataDistrosService
 {
     IList<Distribution> GetAllDistributions();
     Distribution GetDistribution(int id);
-    void AddDistribution(Distribution distribution);
+    void AddDistribution(Distribution distro);
     void DeleteDistribution(int id);
     void UpdateDistribution(Distribution distribution);
 }
