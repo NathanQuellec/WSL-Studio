@@ -21,6 +21,7 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
+
     public IHost Host
     {
         get;
@@ -42,7 +43,6 @@ public partial class App : Application
     public App()
     {
         InitializeComponent();
-
         Host = Microsoft.Extensions.Hosting.Host.
         CreateDefaultBuilder().
         UseContentRoot(AppContext.BaseDirectory).
@@ -57,18 +57,19 @@ public partial class App : Application
             services.AddSingleton<IActivationService, ActivationService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
+            services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<IProcessBuilderService, ProcessBuilderService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
-            services.AddTransient<MainViewModel>();
-            services.AddTransient<MainPage>();
+            services.AddTransient<DistrosListDetailsViewModel>();
+            services.AddTransient<DistrosListDetails>();
 
             // Configuration
         }).
         Build();
-
         UnhandledException += App_UnhandledException;
     }
 
@@ -81,7 +82,6 @@ public partial class App : Application
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-
         await App.GetService<IActivationService>().ActivateAsync(args);
     }
 }
