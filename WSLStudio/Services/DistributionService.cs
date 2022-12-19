@@ -11,17 +11,44 @@ using System.Collections.ObjectModel;
 
 namespace WSLStudio.Services;
 
-public class DataDistrosService : IDataDistrosService
+public class DistributionService : IDistributionService
 {
-    private readonly IList<Distribution> _distros;
+    private readonly IList<Distribution> _distros = new List<Distribution>();
 
-    public DataDistrosService()
+    public DistributionService()
     {
-        _distros = new List<Distribution>();
-        WslCommandProcess wslCommandProcess = new WslCommandProcess();
-        ProcessStartInfo psi = wslCommandProcess.Config("cmd.exe", "/c wsl --list");
-        var proc = Process.Start(psi);
-        wslCommandProcess.WslCommandPromptResults(proc);
+        this.InitDistributionsList();
+    }
+
+    public void InitDistributionsList()
+    {
+        var process = new ProcessBuilderService()
+            .SetFileName("cmd.exe")
+            .SetArguments("/c wsl --list")
+            .SetRedirectStandardOutput(true)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+
+        process.Start();
+
+        var commandResults = process.StandardOutput.ReadToEnd();
+        commandResults = commandResults.Replace("\0", string.Empty).Replace("\r", string.Empty);
+        var distrosResults = commandResults.Split('\n');
+
+        // remove "Default" in the prompt result 
+        distrosResults[1] = distrosResults[1].Split(" ")[0];
+        Debug.WriteLine("-----------LIST OF WSL DISTROS-----------");
+        for (var i = 1; i < distrosResults.Length; i++)
+        {
+            // Exclude empty line(s) and Docker special-purpose internal Linux distros 
+            if ( distrosResults[i].Trim().Length > 0 && 
+                distrosResults[i] != "docker-desktop" && 
+                distrosResults[i] != "docker-desktop-data" )
+            {
+                this.AddDistribution( new Distribution { Name = distrosResults[i].Trim() } );
+            }
+        }
     }
 
     public IList<Distribution> GetAllDistributions()

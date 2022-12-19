@@ -24,15 +24,15 @@ namespace WSLStudio.Views;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class DistributionsListDetails : Page
+public sealed partial class DistrosListDetails : Page
 {
     public DistrosListDetailsViewModel ViewModel {
         get;
     }
 
-    public DistributionsListDetails()
+    public DistrosListDetails()
     {
-        ViewModel = App.GetService<DistributionsListDetailsViewModel>();
+        ViewModel = App.GetService<DistrosListDetailsViewModel>();
         this.InitializeComponent();
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 
@@ -11,7 +10,6 @@ using WSLStudio.Helpers;
 using WSLStudio.Services;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
-using WSLStudio.Models;
 
 namespace WSLStudio;
 
@@ -24,40 +22,9 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
 
-    private IDataService dataService = new DataService();
-
     public IHost Host
     {
         get;
-    }
-
-    public static void InitializeDistrosList(IDataService dataService)
-    {
-        ProcessStartInfo processStartInfo = new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c wsl --list");
-        processStartInfo.RedirectStandardOutput = true;
-        processStartInfo.UseShellExecute = false;
-        processStartInfo.CreateNoWindow = true;
-
-        Process proc = new();
-        proc.StartInfo = processStartInfo;
-        proc.Start();
-
-        var commandResults = proc.StandardOutput.ReadToEnd();
-        commandResults = commandResults.Replace("\0", string.Empty).Replace("\r", string.Empty);
-        var distrosResults = commandResults.Split('\n');
-
-        // remove "Default" in the prompt result 
-        distrosResults[1] = distrosResults[1].Split(" ")[0];
-        Debug.WriteLine("-----------LIST OF WSL DISTROS-----------");
-        for (var i = 1; i < distrosResults.Length; i++)
-        {
-            // Exclude empty line(s) and Docker special-purpose internal Linux distros 
-            if (distrosResults[i].Trim().Length > 0 && distrosResults[i] != "docker-desktop" && distrosResults[i] != "docker-desktop-data" )
-            {
-                dataService.AddDistribution( new Distribution { Name = distrosResults[i].Trim() } );
-            }
-        }
-
     }
 
     public static T GetService<T>()
@@ -90,21 +57,19 @@ public partial class App : Application
             services.AddSingleton<IActivationService, ActivationService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
-            services.AddSingleton<IDataService, DataService>();
+            services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<IProcessBuilderService, ProcessBuilderService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
-            services.AddTransient<DistrosListViewModel>();
-            services.AddTransient<DistrosList>();
+            services.AddTransient<DistrosListDetailsViewModel>();
+            services.AddTransient<DistrosListDetails>();
 
             // Configuration
         }).
         Build();
-
-        dataService = App.GetService<IDataService>();
-        InitializeDistrosList(dataService);
         UnhandledException += App_UnhandledException;
     }
 

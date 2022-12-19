@@ -5,15 +5,15 @@ using System.Collections.ObjectModel;
 
 namespace WSLStudio.ViewModels;
 
-public class DistributionsListDetailsViewModel : ObservableObject
+public class DistrosListDetailsViewModel : ObservableObject
 {
     private readonly IDistributionService distributionService;
     private ObservableCollection<Distribution> distros = new();
 
-    public DistributionsListDetailsViewModel(IDistributionService distributionService)
+    public DistrosListDetailsViewModel(IDistributionService distributionService)
     {
         this.distributionService = distributionService;
-        PopulateData();
+        RetrieveDistrosData();
     }
 
     public ObservableCollection<Distribution> Distros
@@ -22,7 +22,7 @@ public class DistributionsListDetailsViewModel : ObservableObject
         set => SetProperty(ref distros, value);
     }
 
-    private void PopulateData()
+    private void RetrieveDistrosData()
     {
         distros.Clear();
         foreach(var distro in distributionService.GetAllDistributions()) {
