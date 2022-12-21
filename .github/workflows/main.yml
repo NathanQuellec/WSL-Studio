@@ -42,4 +42,4 @@ jobs:
       run: msbuild $env:Solution_Name /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
 
     - name: Test
-      run: dotnet test
+      run: dotnet test $env:Test_Project_Name /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
