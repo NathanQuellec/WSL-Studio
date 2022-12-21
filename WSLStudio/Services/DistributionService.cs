@@ -8,12 +8,14 @@ using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using Community.Wsl.Sdk;
 
 namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
+    private readonly WslApi _wslApi = new WslApi();
 
     public DistributionService()
     {
@@ -22,36 +24,25 @@ public class DistributionService : IDistributionService
 
     public void InitDistributionsList()
     {
-        var process = new ProcessBuilderService()
-            .SetFileName("cmd.exe")
-            .SetArguments("/c wsl --list")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-
-        process.Start();
-
-        var commandResults = process.StandardOutput.ReadToEnd();
-        commandResults = commandResults.Replace("\0", string.Empty).Replace("\r", string.Empty);
-        var distrosResults = commandResults.Split('\n');
-
-        // remove "Default" in the prompt result 
-        distrosResults[1] = distrosResults[1].Split(" ")[0];
-        Debug.WriteLine("-----------LIST OF WSL DISTROS-----------");
-        for (var i = 1; i < distrosResults.Length; i++)
-        {
-            // Exclude empty line(s) and Docker special-purpose internal Linux distros 
-            if ( distrosResults[i].Trim().Length > 0 && 
-                distrosResults[i] != "docker-desktop" && 
-                distrosResults[i] != "docker-desktop-data" )
+        var apiDistroList = _wslApi.GetDistributionList()
+            .Where(distro => (distro.DistroName != "docker-desktop") &&
+                             (distro.DistroName != "docker-desktop-data"))
+            .Select(distro => new Distribution()
             {
-                this.AddDistribution( new Distribution { Name = distrosResults[i].Trim() } );
-            }
+                Id = distro.DistroId,
+                Path = distro.BasePath,
+                IsDefault = distro.IsDefault,
+                WslVersion = distro.WslVersion,
+                Name = distro.DistroName,
+            });
+
+        foreach (var distro in apiDistroList)
+        {
+            this.AddDistribution(distro);
         }
     }
 
-    public IList<Distribution> GetAllDistributions()
+    public IEnumerable<Distribution> GetAllDistributions()
     {
         return _distros;
     }
@@ -60,18 +51,18 @@ public class DistributionService : IDistributionService
     {
         return _distros[id];
     }
-    
+
     public void AddDistribution(Distribution distro)
     {
         _distros.Add(distro);
-        Debug.WriteLine($"Distribution {distro.Name}");
+        Debug.WriteLine($"Distribution {distro.Name} added");
     }
 
     public void DeleteDistribution(int id)
     {
         Debug.WriteLine("Delete distro");
     }
-    
+
     public void UpdateDistribution(Distribution distro)
     {
         Debug.WriteLine("Update distro");
