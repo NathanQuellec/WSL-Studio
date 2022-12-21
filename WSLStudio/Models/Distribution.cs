@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 namespace WSLStudio.Models;
 public class Distribution
 {
+    public Guid Id { get; set; }
+    public string Path { get; set; }
+    public bool IsDefault { get; set; }
+    public int WslVersion { get; set; }
     public string Name { get; set; }
     public double MemoryLimit { get; set; } = 2.0;
     public int ProcessorLimit { get; set; } = 4;
