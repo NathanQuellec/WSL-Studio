@@ -34,5 +34,7 @@ public sealed partial class DistrosListDetails : Page
     {
         ViewModel = App.GetService<DistrosListDetailsViewModel>();
         this.InitializeComponent();
+
+
     }
 }

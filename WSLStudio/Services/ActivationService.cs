@@ -36,9 +36,28 @@ public class ActivationService : IActivationService
         // Activate the MainWindow.
         App.MainWindow.Activate();
 
+        var isWslActive = App.GetService<IDistributionService>().CheckWsl();
+
+        if (App.MainWindow.Content is FrameworkElement fe && !isWslActive)
+        {
+            fe.Loaded += (ss, se) => ShowNoWslDialog();
+        }
+
         // Execute tasks after activation.
         await StartupAsync();
     }
+
+    private async void ShowNoWslDialog()
+    {
+        ContentDialog noWslDialog = new ContentDialog();
+        noWslDialog.Title = "No WSL";
+        noWslDialog.Content = "WSL is not supported or enabled";
+        noWslDialog.CloseButtonText = "OK";
+        noWslDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
+        await noWslDialog.ShowAsync();
+        App.MainWindow.Close();
+    }
+
 
     private async Task HandleActivationAsync(object activationArgs)
     {

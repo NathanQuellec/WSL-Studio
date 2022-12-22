@@ -13,6 +13,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+
     <controls:ListDetailsView
               ItemsSource="{x:Bind ViewModel.Distros}"
               NoSelectionContent="No distribution selected"
@@ -52,4 +53,5 @@
             </DataTemplate>
         </controls:ListDetailsView.DetailsTemplate>
     </controls:ListDetailsView>
+
 </Page>

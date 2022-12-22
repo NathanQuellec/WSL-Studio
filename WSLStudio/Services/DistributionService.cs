@@ -19,7 +19,8 @@ public class DistributionService : IDistributionService
 
     public DistributionService()
     {
-        this.InitDistributionsList();
+        if(this.CheckWsl())
+            this.InitDistributionsList();
     }
 
     public void InitDistributionsList()
@@ -45,15 +46,8 @@ public class DistributionService : IDistributionService
 
     public bool CheckWsl()
     {
-        if (!_wslApi.IsWslSupported())
-        {
+        if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
             return false;
-        }
-
-        if (!_wslApi.IsInstalled)
-        {
-            return false;
-        }
 
         return true;
     }

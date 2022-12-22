@@ -85,21 +85,6 @@ public partial class App : Application
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-        bool wslActive = App.GetService<IDistributionService>().CheckWsl();
-        wslActive = true;
-        NoWslDialog noWsl = new NoWslDialog();
-
-        if (!wslActive)
-        {
-            ContentDialog noWslDialog = new ContentDialog();
-            noWslDialog.XamlRoot = MainWindow.Content.XamlRoot;
-            noWslDialog.Title = "No WSL";
-            noWslDialog.Content = "WSL is not supported or enabled";
-            await noWslDialog.ShowAsync();
-        }
-        else
-        {
-            await App.GetService<IActivationService>().ActivateAsync(args);
-        }
+        await App.GetService<IActivationService>().ActivateAsync(args);
     }
 }
