@@ -11,6 +11,7 @@ namespace WSLStudio.Contracts.Services;
 public interface IDistributionService
 {
     void InitDistributionsList();
+    bool CheckWsl();
     IEnumerable<Distribution> GetAllDistributions();
     Distribution GetDistribution(int id);
     void AddDistribution(Distribution distro);

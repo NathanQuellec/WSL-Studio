@@ -11,6 +11,9 @@ using WSLStudio.Services;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
+using Community.Wsl.Sdk;
+using Microsoft.UI.Xaml.Controls;
+
 namespace WSLStudio;
 
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
@@ -82,6 +85,21 @@ public partial class App : Application
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
-        await App.GetService<IActivationService>().ActivateAsync(args);
+        bool wslActive = App.GetService<IDistributionService>().CheckWsl();
+        wslActive = true;
+        NoWslDialog noWsl = new NoWslDialog();
+
+        if (!wslActive)
+        {
+            ContentDialog noWslDialog = new ContentDialog();
+            noWslDialog.XamlRoot = MainWindow.Content.XamlRoot;
+            noWslDialog.Title = "No WSL";
+            noWslDialog.Content = "WSL is not supported or enabled";
+            await noWslDialog.ShowAsync();
+        }
+        else
+        {
+            await App.GetService<IActivationService>().ActivateAsync(args);
+        }
     }
 }

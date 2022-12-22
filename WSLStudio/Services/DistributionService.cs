@@ -25,6 +25,7 @@ public class DistributionService : IDistributionService
     public void InitDistributionsList()
     {
         var apiDistroList = _wslApi.GetDistributionList()
+            // Filter Docker special-purpose internal Linux distros 
             .Where(distro => (distro.DistroName != "docker-desktop") &&
                              (distro.DistroName != "docker-desktop-data"))
             .Select(distro => new Distribution()
@@ -40,6 +41,21 @@ public class DistributionService : IDistributionService
         {
             this.AddDistribution(distro);
         }
+    }
+
+    public bool CheckWsl()
+    {
+        if (!_wslApi.IsWslSupported())
+        {
+            return false;
+        }
+
+        if (!_wslApi.IsInstalled)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     public IEnumerable<Distribution> GetAllDistributions()

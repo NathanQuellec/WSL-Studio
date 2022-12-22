@@ -16,6 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Views\DistrosList.xaml" />
+    <None Remove="Views\NoWslDialog.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,6 +45,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WSLStudio.Core\WSLStudio.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\NoWslDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>
