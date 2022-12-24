@@ -61,7 +61,7 @@ public partial class App : Application
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IDistributionService, DistributionService>();
-            services.AddSingleton<IProcessBuilderService, ProcessBuilderService>();
+            services.AddSingleton<IWslService, WslService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

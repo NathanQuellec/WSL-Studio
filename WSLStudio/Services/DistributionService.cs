@@ -16,10 +16,12 @@ public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new WslApi();
+    private readonly IWslService _wslService;
 
-    public DistributionService()
+    public DistributionService(IWslService wslService)
     {
-        if(this.CheckWsl())
+        _wslService = wslService;
+        if (_wslService.CheckWsl())
             this.InitDistributionsList();
     }
 
@@ -42,14 +44,6 @@ public class DistributionService : IDistributionService
         {
             this.AddDistribution(distro);
         }
-    }
-
-    public bool CheckWsl()
-    {
-        if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
-            return false;
-
-        return true;
     }
 
     public IEnumerable<Distribution> GetAllDistributions()
