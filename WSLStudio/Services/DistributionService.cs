@@ -16,11 +16,10 @@ public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new WslApi();
-    private readonly IWslService _wslService;
+    private readonly IWslService _wslService = new WslService();
 
-    public DistributionService(IWslService wslService)
+    public DistributionService()
     {
-        _wslService = wslService;
         if (_wslService.CheckWsl())
             this.InitDistributionsList();
     }
