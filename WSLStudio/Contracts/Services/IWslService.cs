@@ -8,7 +8,5 @@ namespace WSLStudio.Contracts.Services;
 
 public interface IWslService
 {
-    void WslUpdate(); //v0.2
-    void GetVersion();
     bool CheckWsl();
 }

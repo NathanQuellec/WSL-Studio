@@ -9,10 +9,6 @@ public class WslService : IWslService
 {
     private readonly WslApi _wslApi = new WslApi();
 
-    public void WslUpdate() => throw new NotImplementedException();
-
-    public void GetVersion() => throw new NotImplementedException();
-
     public bool CheckWsl()
     {
         if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)

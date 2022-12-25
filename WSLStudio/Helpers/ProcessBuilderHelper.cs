@@ -7,12 +7,7 @@ namespace WSLStudio.Helpers;
 
 public class ProcessBuilderHelper
 {
-    private readonly Process _process;
-
-    public ProcessBuilderHelper()
-    {
-        this._process = new Process();
-    }
+    private readonly Process _process = new();
 
     public ProcessBuilderHelper SetFileName(string fileName)
     {
