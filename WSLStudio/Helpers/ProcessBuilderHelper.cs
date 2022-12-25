@@ -1,42 +1,50 @@
 ﻿using System.Diagnostics;
 using WSLStudio.Contracts.Services;
 
-namespace WSLStudio.Services;
+namespace WSLStudio.Helpers;
 
-public class ProcessBuilderService : IProcessBuilderService
+// TODO : Add comment 
+
+public class ProcessBuilderHelper
 {
     private readonly Process _process;
 
-    public ProcessBuilderService()
+    public ProcessBuilderHelper()
     {
         this._process = new Process();
     }
-    
-    public IProcessBuilderService SetFileName(string fileName)
+
+    public ProcessBuilderHelper SetFileName(string fileName)
     {
         this._process.StartInfo.FileName = fileName;
         return this;
     }
 
-    public IProcessBuilderService SetArguments(string args)
+    public ProcessBuilderHelper SetArguments(string args)
     {
         this._process.StartInfo.Arguments = args;
         return this;
     }
 
-    public IProcessBuilderService SetRedirectStandardOutput(bool val)
+    public ProcessBuilderHelper SetRedirectStandardOutput(bool val)
     {
         this._process.StartInfo.RedirectStandardOutput = val;
         return this;
     }
 
-    public IProcessBuilderService SetUseShellExecute(bool val)
+    public ProcessBuilderHelper SetRedirectStandardError(bool val)
+    {
+        this._process.StartInfo.RedirectStandardError = val;
+        return this;
+    }
+
+    public ProcessBuilderHelper SetUseShellExecute(bool val)
     {
         this._process.StartInfo.UseShellExecute = val;
         return this;
     }
 
-    public IProcessBuilderService SetCreateNoWindow(bool val)
+    public ProcessBuilderHelper SetCreateNoWindow(bool val)
     {
         this._process.StartInfo.CreateNoWindow = val;
         return this;

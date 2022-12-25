@@ -12,19 +12,12 @@ namespace WSLStudio.Tests.MSTest;
 [TestClass]
 public class DistributionServiceTest
 {
-    private IDistributionService distributionService;
-    //private IList<Distribution> _distros;
-
-    [TestInitialize]
-    public void TestInitialize()
-    {
-        distributionService = new DistributionService();
-    }
+    private readonly IDistributionService _distributionService = new DistributionService();
 
     [TestMethod]
     public void TestGetAllDistributions()
     {
-        var distros = distributionService.GetAllDistributions();
+        var distros = _distributionService.GetAllDistributions();
         Assert.IsNotNull(distros);
         Assert.IsInstanceOfType(distros, typeof(IList<Distribution>));
     }
@@ -33,7 +26,7 @@ public class DistributionServiceTest
     public void TestGetDistribution()
     {
         var id = 0;
-        Distribution distro = distributionService.GetDistribution(id);
+        Distribution distro = _distributionService.GetDistribution(id);
         Assert.IsNotNull(distro);
         Assert.IsInstanceOfType(distro, typeof(Distribution));
     }
@@ -47,8 +40,8 @@ public class DistributionServiceTest
             ProcessorLimit= 2,
         };
 
-        distributionService.AddDistribution(newDistro);
-        var distrosList = distributionService.GetAllDistributions();
+        _distributionService.AddDistribution(newDistro);
+        var distrosList = _distributionService.GetAllDistributions();
         Assert.IsTrue(distrosList.Contains(newDistro));    
     }
 }

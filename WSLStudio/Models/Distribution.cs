@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace WSLStudio.Models;
-public class Distribution
+public record Distribution
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     public string Path { get; set; }
     public bool IsDefault { get; set; }
     public int WslVersion { get; set; }

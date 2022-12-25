@@ -16,15 +16,18 @@ public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new WslApi();
+    private readonly IWslService _wslService = new WslService();
 
     public DistributionService()
     {
-        this.InitDistributionsList();
+        if (_wslService.CheckWsl())
+            this.InitDistributionsList();
     }
 
     public void InitDistributionsList()
     {
         var apiDistroList = _wslApi.GetDistributionList()
+            // Filter Docker special-purpose internal Linux distros 
             .Where(distro => (distro.DistroName != "docker-desktop") &&
                              (distro.DistroName != "docker-desktop-data"))
             .Select(distro => new Distribution()

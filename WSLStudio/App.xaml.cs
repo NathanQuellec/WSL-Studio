@@ -11,6 +11,9 @@ using WSLStudio.Services;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
+using Community.Wsl.Sdk;
+using Microsoft.UI.Xaml.Controls;
+
 namespace WSLStudio;
 
 // To learn more about WinUI 3, see https://docs.microsoft.com/windows/apps/winui/winui3/.
@@ -58,7 +61,7 @@ public partial class App : Application
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IDistributionService, DistributionService>();
-            services.AddSingleton<IProcessBuilderService, ProcessBuilderService>();
+            services.AddSingleton<IWslService, WslService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
