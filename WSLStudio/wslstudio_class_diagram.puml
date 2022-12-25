@@ -2,52 +2,65 @@
 'https://plantuml.com/class-diagram
 
 IDistributionService <|-- DistributionService
+IWslService <|-- WslService
 DistributionService o-- Distribution
-IProcessBuilderService <|-- ProcessBuilderService
+DistributionService --> IWslService
+
+
+class Distribution
+{
+    + <<property>> Id: Guid
+    + <<property>> Path: string
+    + <<property>> IsDefault: bool
+    + <<property>> WslVersion: int
+    + <<property>> Name: string
+    + <<property>> MemoryLimit: double
+    + <<property>> ProcessorLimit: int     
+}
 
 interface IDistributionService
 {
-    + GetAllDistributions(): IList<Distribution>
+	+ InitDistributionsList(): void
+    + GetAllDistributions(): IEnumerable<Distribution>
     + GetDistribution(id: int): Distribution
     + AddDistribution(distro: Distribution): void
     + DeleteDistribution(id: int): void
     + UpdateDistribution(distro: Distribution): void
 }
 
-class Distribution
-{
-    + <<property>> Name: string
-    + <<property>> MemoryLimit: double
-    + <<property>> ProcessorLimit: int
-     
-}
 class DistributionService
 {
 	- _distros: IList<Distribution>
-	+ GetAllDistributions(): IList<Distribution>
+	- _wslApi: WslApi
+	- _wslService: IWslService
+	+ InitDistributionsList(): void
+	+ GetAllDistributions(): IEnumerable<Distribution>
 	+ GetDistribution(id: int): Distribution
 	+ AddDistribution(distro: Distribution): void
 	+ DeleteDistribution(id: int): void
 	+ UpdateDistribution(distro: Distribution): void
 }
 
-interface IProcessBuilderService
+interface IWslService
 {
-    + SetFileName(fileName: string): void
-    + SetArguments(args: string): void
-    + SetRedirectStandardOutput(val: bool): void
-    + SetUseShellExecute(val: bool): void
-    + SetCreateNoWindow(val: bool): void
+	+ CheckWsl(): bool
 }
 
-class ProcessBuilderService
+class WslService
+{
+	- _wslApi: WslApi
+	+ CheckWsl(): bool
+}
+
+class ProcessBuilderHelper
 {
     - _process: Process
-    + SetFileName(fileName: string): void
-    + SetArguments(args: string): void
-    + SetRedirectStandardOutput(val: bool): void
-    + SetUseShellExecute(val: bool): void
-    + SetCreateNoWindow(val: bool): void
+    + SetFileName(fileName: string): ProcessBuilderHelper
+    + SetArguments(args: string): ProcessBuilderHelper
+    + SetRedirectStandardOutput(val: bool): ProcessBuilderHelper
+    + SetRedirectStandardError(val: bool): ProcessBuilderHelper
+    + SetUseShellExecute(val: bool): ProcessBuilderHelper
+    + SetCreateNoWindow(val: bool): ProcessBuilderHelper
     + Build(): Process
 }
 
