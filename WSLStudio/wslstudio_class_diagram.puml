@@ -1,0 +1,54 @@
+﻿@startuml
+'https://plantuml.com/class-diagram
+
+IDistributionService <|-- DistributionService
+DistributionService o-- Distribution
+IProcessBuilderService <|-- ProcessBuilderService
+
+interface IDistributionService
+{
+    + GetAllDistributions(): IList<Distribution>
+    + GetDistribution(id: int): Distribution
+    + AddDistribution(distro: Distribution): void
+    + DeleteDistribution(id: int): void
+    + UpdateDistribution(distro: Distribution): void
+}
+
+class Distribution
+{
+    + <<property>> Name: string
+    + <<property>> MemoryLimit: double
+    + <<property>> ProcessorLimit: int
+     
+}
+class DistributionService
+{
+	- _distros: IList<Distribution>
+	+ GetAllDistributions(): IList<Distribution>
+	+ GetDistribution(id: int): Distribution
+	+ AddDistribution(distro: Distribution): void
+	+ DeleteDistribution(id: int): void
+	+ UpdateDistribution(distro: Distribution): void
+}
+
+interface IProcessBuilderService
+{
+    + SetFileName(fileName: string): void
+    + SetArguments(args: string): void
+    + SetRedirectStandardOutput(val: bool): void
+    + SetUseShellExecute(val: bool): void
+    + SetCreateNoWindow(val: bool): void
+}
+
+class ProcessBuilderService
+{
+    - _process: Process
+    + SetFileName(fileName: string): void
+    + SetArguments(args: string): void
+    + SetRedirectStandardOutput(val: bool): void
+    + SetUseShellExecute(val: bool): void
+    + SetCreateNoWindow(val: bool): void
+    + Build(): Process
+}
+
+@enduml
