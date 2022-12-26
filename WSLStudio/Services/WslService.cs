@@ -14,6 +14,7 @@ public class WslService : IWslService
         if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
             return false;
 
-        return true;
+        return true
     }
 }
+// ERROR BUILD 
