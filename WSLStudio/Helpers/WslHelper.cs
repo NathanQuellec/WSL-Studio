@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Community.Wsl.Sdk;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
 namespace WSLStudio.Helpers;
@@ -19,7 +20,7 @@ internal static class WslHelper
         return true;
     }
 
-    public static async Task ShowNoWslDialog()
+    public static async Task NoWslDialog()
     {
         ContentDialog noWslDialog = new ContentDialog();
         noWslDialog.Title = "Impossible to detect WSL";
@@ -29,4 +30,13 @@ internal static class WslHelper
         await noWslDialog.ShowAsync();
         App.MainWindow.Close();
     }
+
+    public static void ShowNoWslDialog()
+    {
+        if (App.MainWindow.Content is FrameworkElement fe)
+        {
+            fe.Loaded += (ss, se) => WslHelper.NoWslDialog();
+        }
+    }
 }
+

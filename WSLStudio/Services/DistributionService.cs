@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Community.Wsl.Sdk;
 using WSLStudio.Helpers;
+using Microsoft.UI.Xaml;
 
 namespace WSLStudio.Services;
 
@@ -24,11 +25,11 @@ public class DistributionService : IDistributionService
             this.InitDistributionsList();
     }
 
-    public async void InitDistributionsList()
+    public  void InitDistributionsList()
     {
         try
         {
-            var apiDistroList = _wslApi.GetDistributionList()
+            var apiDistroList = _wslApi?.GetDistributionList()
                 // Filter Docker special-purpose internal Linux distros 
                 .Where(distro => (distro.DistroName != "docker-desktop") &&
                                  (distro.DistroName != "docker-desktop-data"))
@@ -45,10 +46,10 @@ public class DistributionService : IDistributionService
                 this.AddDistribution(distro);
             }
         }
-        catch (SystemException ex)
+        catch (Exception ex)
         {
             Debug.WriteLine(ex);
-            await WslHelper.ShowNoWslDialog();
+            WslHelper.ShowNoWslDialog();
         }
     }
 
