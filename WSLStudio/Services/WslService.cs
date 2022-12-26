@@ -12,7 +12,7 @@ public class WslService : IWslService
     public bool CheckWsl()
     {
         if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
-            return false;
+            rete;
 
         return true;
     }
