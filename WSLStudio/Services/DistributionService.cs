@@ -45,7 +45,7 @@ public class DistributionService : IDistributionService
                 this.AddDistribution(distro);
             }
         }
-        catch (NullReferenceException ex)
+        catch (SystemException ex)
         {
             Debug.WriteLine(ex);
             await WslHelper.ShowNoWslDialog();
