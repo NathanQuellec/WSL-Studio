@@ -9,7 +9,7 @@ public class WslService : IWslService
 {
     private readonly WslApi _wslApi = new WslApi();
 
-    public bool CheckWsl()
+    public bool CheckWsl(
     {
         if (!_wslApi.IsWslSupported() || !_wslApi.IsInstalled)
             return false;
