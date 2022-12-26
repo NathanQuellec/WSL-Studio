@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 
 using WSLStudio.Activation;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Helpers;
 using WSLStudio.Views;
 
 namespace WSLStudio.Services;
@@ -36,28 +37,14 @@ public class ActivationService : IActivationService
         // Activate the MainWindow.
         App.MainWindow.Activate();
 
-        var isWslActive = App.GetService<IWslService>().CheckWsl();
-
-        if (App.MainWindow.Content is FrameworkElement fe && !isWslActive)
+        if (App.MainWindow.Content is FrameworkElement fe && !WslHelper.CheckWsl())
         {
-            fe.Loaded += (ss, se) => ShowNoWslDialog();
+            fe.Loaded += (ss, se) => WslHelper.ShowNoWslDialog();
         }
 
         // Execute tasks after activation.
         await StartupAsync();
     }
-
-    private static async Task ShowNoWslDialog()
-    {
-        ContentDialog noWslDialog = new ContentDialog();
-        noWslDialog.Title = "Impossible to detect WSL";
-        noWslDialog.Content = "Check if WSL is supported or installed on your system";
-        noWslDialog.CloseButtonText = "Ok";
-        noWslDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
-        await noWslDialog.ShowAsync();
-        App.MainWindow.Close();
-    }
-
 
     private async Task HandleActivationAsync(object activationArgs)
     {
