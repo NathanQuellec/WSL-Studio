@@ -49,7 +49,6 @@ public class DistributionService : IDistributionService
         catch (Exception ex)
         {
             Debug.WriteLine(ex);
-            WslHelper.ShowNoWslDialog();
         }
     }
 
