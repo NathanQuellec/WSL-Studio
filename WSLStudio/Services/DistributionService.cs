@@ -9,6 +9,8 @@ using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Community.Wsl.Sdk;
+using WSLStudio.Helpers;
+using Microsoft.UI.Xaml;
 
 namespace WSLStudio.Services;
 
@@ -16,32 +18,38 @@ public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new WslApi();
-    private readonly IWslService _wslService = new WslService();
 
     public DistributionService()
     {
-        if (_wslService.CheckWsl())
+        if (WslHelper.CheckWsl())
             this.InitDistributionsList();
     }
 
-    public void InitDistributionsList()
+    public  void InitDistributionsList()
     {
-        var apiDistroList = _wslApi.GetDistributionList()
-            // Filter Docker special-purpose internal Linux distros 
-            .Where(distro => (distro.DistroName != "docker-desktop") &&
-                             (distro.DistroName != "docker-desktop-data"))
-            .Select(distro => new Distribution()
-            {
-                Id = distro.DistroId,
-                Path = distro.BasePath,
-                IsDefault = distro.IsDefault,
-                WslVersion = distro.WslVersion,
-                Name = distro.DistroName,
-            });
-
-        foreach (var distro in apiDistroList)
+        try
         {
-            this.AddDistribution(distro);
+            var apiDistroList = _wslApi?.GetDistributionList()
+                // Filter Docker special-purpose internal Linux distros 
+                .Where(distro => (distro.DistroName != "docker-desktop") &&
+                                 (distro.DistroName != "docker-desktop-data"))
+                .Select(distro => new Distribution()
+                {
+                    Id = distro.DistroId,
+                    Path = distro.BasePath,
+                    IsDefault = distro.IsDefault,
+                    WslVersion = distro.WslVersion,
+                    Name = distro.DistroName,
+                });
+            foreach (var distro in apiDistroList)
+            {
+                this.AddDistribution(distro);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+            WslHelper.ShowNoWslDialog();
         }
     }
 
