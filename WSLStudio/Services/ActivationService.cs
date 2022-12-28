@@ -37,11 +37,6 @@ public class ActivationService : IActivationService
         // Activate the MainWindow.
         App.MainWindow.Activate();
 
-        if (!WslHelper.CheckWsl())
-        {
-            WslHelper.ShowNoWslDialog();
-        }
-
         // Execute tasks after activation.
         await StartupAsync();
     }

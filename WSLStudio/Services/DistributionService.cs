@@ -17,11 +17,12 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
-    private readonly WslApi _wslApi = new WslApi();
+    private readonly WslService _wslService = new();
+    private readonly WslApi _wslApi = new();
 
     public DistributionService()
     {
-        if (WslHelper.CheckWsl())
+        if (_wslService.CheckWsl())
             this.InitDistributionsList();
     }
 
@@ -48,8 +49,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
-            WslHelper.ShowNoWslDialog();
+            Debug.WriteLine("INFO: No WSL distributions found in the system");
         }
     }
 
