@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 
@@ -43,6 +44,28 @@ public partial class App : Application
 
     public static WindowEx MainWindow { get; } = new MainWindow();
 
+    public static async Task NoWslDialog()
+    {
+        ContentDialog noWslDialog = new()
+        {
+            Title = "Impossible to detect WSL",
+            Content = "Check if WSL is supported or installed on your system",
+            CloseButtonText = "Ok",
+            XamlRoot = MainWindow.Content.XamlRoot
+        };
+        await noWslDialog.ShowAsync();
+        MainWindow.Close();
+    }
+
+    public static void ShowNoWslDialog()
+    {
+        if (MainWindow.Content is FrameworkElement fe)
+        {
+            fe.Loaded += (ss, se) => NoWslDialog();
+        }
+
+    }
+
     public App()
     {
         InitializeComponent();
@@ -61,6 +84,7 @@ public partial class App : Application
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<IWslService, WslService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
@@ -77,13 +101,19 @@ public partial class App : Application
 
     private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
-        // TODO: Log and handle exceptions as appropriate.
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
+        Console.WriteLine("App_UnhandledException caught : " + e.Message);
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
     {
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
+        var wslEnabled = App.GetService<IWslService>().CheckWsl();
+
+        if (!wslEnabled)
+            ShowNoWslDialog();
+
+
     }
 }
