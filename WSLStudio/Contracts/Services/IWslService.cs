@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace WSLStudio.Contracts.Services;
+﻿namespace WSLStudio.Contracts.Services;
 
 public interface IWslService
 {

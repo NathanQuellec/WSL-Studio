@@ -1,13 +1,11 @@
-﻿using System.Diagnostics;
+﻿using Community.Wsl.Sdk;
 using WSLStudio.Contracts.Services;
-using WSLStudio.Helpers;
-using Community.Wsl.Sdk;
 
 namespace WSLStudio.Services;
 
 public class WslService : IWslService
 {
-    private readonly WslApi _wslApi = new WslApi();
+    private readonly WslApi _wslApi = new();
 
     public bool CheckWsl()
     {
