@@ -17,6 +17,7 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
+    private readonly ProcessBuilderHelper _processBuilderHelper = new();
     private readonly WslService _wslService = new();
     private readonly WslApi _wslApi = new();
 
@@ -78,5 +79,16 @@ public class DistributionService : IDistributionService
     public void UpdateDistribution(Distribution distro)
     {
         Debug.WriteLine("Update distro");
+    }
+
+    public void LaunchDistribution(Distribution distribution)
+    {
+        var process = _processBuilderHelper.SetFileName("cmd.exe")
+            .SetArguments($"/c wsl -d {distribution.Name}")
+            .SetRedirectStandardOutput(false)
+            .SetUseShellExecute(true)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
     }
 }
