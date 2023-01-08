@@ -10,6 +10,6 @@ public interface IDistributionService
     void AddDistribution(Distribution distro);
     void DeleteDistribution(int id);
     void UpdateDistribution(Distribution distribution);
-    //void LaunchDistribution(Distribution distribution);
+    void LaunchDistribution(Distribution distribution);
     //void StopDistribution(Distribution distribution);
 }

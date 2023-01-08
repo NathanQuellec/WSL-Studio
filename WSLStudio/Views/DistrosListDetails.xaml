@@ -2,28 +2,33 @@
 <!-- Licensed under the MIT License. -->
 
 <Page
+    x:Name="Page"
     x:Class="WSLStudio.Views.DistrosListDetails"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:local="using:WSLStudio.Views"
+    xmlns:viewmodels="using:WSLStudio.ViewModels"
     xmlns:model="using:WSLStudio.Models"
+    xmlns:test="System.Windows.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
 
     <controls:ListDetailsView
-              ItemsSource="{x:Bind ViewModel.Distros}"
+        ItemsSource="{x:Bind Path=ViewModel.Distros}"
               NoSelectionContent="No distribution selected"
               CompactModeThresholdWidth="640">
-
         <controls:ListDetailsView.ItemTemplate>
             <DataTemplate x:DataType="model:Distribution">
                 <StackPanel>
                     <RelativePanel>
-                        <Button x:Name="LaunchButton">
+                        <Button x:Name="LaunchButton"
+                                Command="{Binding ElementName=Page, Path=ViewModel.LaunchDistroCommand}"
+                                CommandParameter="{x:Bind}">
                             <SymbolIcon Symbol="Play"/>
                         </Button>
                         <TextBlock x:Name="DistroName" 
@@ -35,6 +40,7 @@
                 </StackPanel>
             </DataTemplate>
         </controls:ListDetailsView.ItemTemplate>
+
         <controls:ListDetailsView.DetailsTemplate>
             <DataTemplate x:DataType="model:Distribution">
                 <StackPanel>
