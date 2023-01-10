@@ -22,26 +22,33 @@
         ItemsSource="{x:Bind Path=ViewModel.Distros}"
         NoSelectionContent="No distribution selected"
         CompactModeThresholdWidth="640">
+
         <controls:ListDetailsView.ItemTemplate>
             <DataTemplate x:DataType="model:Distribution">
                 <StackPanel>
                     <RelativePanel>
+
                         <Button x:Name="LaunchButton"
                                 Command="{Binding ElementName=Page, Path=ViewModel.LaunchDistroCommand}"
                                 CommandParameter="{x:Bind}">
                             <SymbolIcon Symbol="Play"/>
                         </Button>
+
                         <Button x:Name="StopButton"
                                 Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateBinding('Stop', Name)}"
+                                Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
+                                CommandParameter="{x:Bind}"
                                 RelativePanel.RightOf="LaunchButton"
-                                Visibility="Visible">
+                                Visibility="Collapsed">
                             <SymbolIcon Symbol="Stop"/>
                         </Button>
+
                         <TextBlock x:Name="DistroName" 
                                    Text="{x:Bind Path=Name, Mode=OneWay}"
                                    RelativePanel.RightOf="StopButton"
                                    VerticalAlignment="Center"
                                    Margin="5"/>
+
                     </RelativePanel>
                 </StackPanel>
             </DataTemplate>

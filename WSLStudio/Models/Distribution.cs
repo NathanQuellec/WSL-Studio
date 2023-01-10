@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,4 +15,5 @@ public record Distribution
     public string Name { get; set; }
     public double MemoryLimit { get; set; } = 2.0;
     public int ProcessorLimit { get; set; } = 4;
+    public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 }

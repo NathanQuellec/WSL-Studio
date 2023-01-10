@@ -6,22 +6,31 @@ using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using WSLStudio.Messages;
+using WSLStudio.Services;
 
 namespace WSLStudio.ViewModels;
 
 public class DistrosListDetailsViewModel : ObservableObject
 {
     private readonly IDistributionService _distributionService;
+    private readonly IWslService _wslService;
     private ObservableCollection<Distribution> _distros = new();
 
-    public DistrosListDetailsViewModel(IDistributionService distributionService)
+    public DistrosListDetailsViewModel(IDistributionService distributionService, IWslService wslService)
     {
         this._distributionService = distributionService;
+        this._wslService = wslService;
+
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
-        RetrieveDistrosData();
+        StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
+
+        _distributionService.InitDistributionsList();
+        this.RetrieveDistrosData();
     }
 
     public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
+
+    public RelayCommand<Distribution> StopDistroCommand { get; set; }
 
     public ObservableCollection<Distribution> Distros
     {
@@ -29,26 +38,50 @@ public class DistrosListDetailsViewModel : ObservableObject
         set => SetProperty(ref _distros, value);
     }
 
-    private void LaunchDistributionViewModel(Distribution? distro)
+    private void LaunchDistributionViewModel(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distro} distribution is launching ...");
+        Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is launching ...");
 
-        if (distro == null)
+        if (distribution == null)
         {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distro object from the xaml source");
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
         }
+        else
+        {
+            _distributionService.LaunchDistribution(distribution);
+            // Publish message  (allows us to show the stop button when the start button is clicked)
+            WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
+        }
+    }
 
-        _distributionService.LaunchDistribution(distro);
+    private void StopDistributionViewModel(Distribution? distribution)
+    {
+        Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is stopping ...");
 
-        // Publish message  (allows us to show the stop button when the start button is clicked)
-        WeakReferenceMessenger.Default.Send(new ShowStopButtonMessage());
+        if (distribution == null)
+        {
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+        }
+        else
+        {
+             _distributionService.StopDistribution(distribution);
+             WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
+        }
     }
 
     private void RetrieveDistrosData()
     {
-        _distros.Clear();
-        foreach(var distro in _distributionService.GetAllDistributions()) {
-            _distros.Add(distro);
+        try
+        {
+            _distros.Clear();
+            foreach (var distro in _distributionService.GetAllDistributions())
+            {
+                _distros.Add(distro);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
         }
     }
 

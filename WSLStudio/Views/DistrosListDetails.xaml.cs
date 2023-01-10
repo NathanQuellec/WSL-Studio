@@ -1,22 +1,11 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Data;
-using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Navigation;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.UI.Controls;
 using WSLStudio.Messages;
 using WSLStudio.ViewModels;
 
@@ -27,24 +16,52 @@ namespace WSLStudio.Views;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class DistrosListDetails : Page, IRecipient<ShowStopButtonMessage>
+public sealed partial class DistrosListDetails : Page
 {
-    public DistrosListDetailsViewModel ViewModel {
-        get;
-    }
+    private Button _distroStopButton;
+    public DistrosListDetailsViewModel ViewModel { get; }
 
     public DistrosListDetails()
     {
         this.InitializeComponent();
         ViewModel = App.GetService<DistrosListDetailsViewModel>();
-        WeakReferenceMessenger.Default.Register<ShowStopButtonMessage>(this);
+
+        WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
+        {
+            var distro = message.distribution;
+            FindDistroStopButton(this, distro.Name);
+            if (_distroStopButton != null)
+            {
+                _distroStopButton.Visibility = Visibility.Visible;
+            }
+        });
+
+        WeakReferenceMessenger.Default.Register<HideDistroStopButtonMessage>(this, (recipient, message) =>
+        {
+            var distro = message.distribution;
+            FindDistroStopButton(this, distro.Name);
+            if (_distroStopButton != null)
+            {
+                _distroStopButton.Visibility = Visibility.Collapsed;
+            }
+        });
     }
 
-
-    public void Receive(ShowStopButtonMessage message)
+    // Go through the Visual Tree recursively to find the stop button that match the Distro Name received
+    public void FindDistroStopButton(DependencyObject parent, string findDistroName)
     {
-        //Button stopButton = this.FindName("StopButton") as Button;
-
-        //stopButton.Visibility = Visibility.Collapsed;
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+        {
+            var currentChild = VisualTreeHelper.GetChild(parent, i);
+            if (currentChild != null && currentChild is Button)
+            {
+                var btn = (Button)currentChild;
+                if ((string)btn.Tag == $"Stop_{findDistroName}")
+                {
+                    _distroStopButton = btn;
+                }
+            }
+            FindDistroStopButton(currentChild, findDistroName);
+        }
     }
 }
