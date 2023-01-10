@@ -7,9 +7,9 @@ public interface IDistributionService
     void InitDistributionsList();
     IEnumerable<Distribution> GetAllDistributions();
     Distribution GetDistribution(int id);
-    void AddDistribution(Distribution distro);
+    void AddDistribution(Distribution? distro);
     void DeleteDistribution(int id);
-    void UpdateDistribution(Distribution distribution);
-    void LaunchDistribution(Distribution distribution);
-    //void StopDistribution(Distribution distribution);
+    void UpdateDistribution(Distribution? distribution);
+    void LaunchDistribution(Distribution? distribution);
+    void StopDistribution(Distribution distribution);
 }

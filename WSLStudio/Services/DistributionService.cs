@@ -17,17 +17,11 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private readonly IList<Distribution> _distros = new List<Distribution>();
-    private readonly ProcessBuilderHelper _processBuilderHelper = new();
     private readonly WslService _wslService = new();
     private readonly WslApi _wslApi = new();
 
-    public DistributionService()
-    {
-        if (_wslService.CheckWsl())
-            this.InitDistributionsList();
-    }
 
-    public  void InitDistributionsList()
+    public void InitDistributionsList()
     {
         try
         {
@@ -65,7 +59,7 @@ public class DistributionService : IDistributionService
         return _distros[id];
     }
 
-    public void AddDistribution(Distribution distro)
+    public void AddDistribution(Distribution? distro)
     {
         _distros.Add(distro);
         Debug.WriteLine($"Distribution {distro.Name} added");
@@ -76,19 +70,56 @@ public class DistributionService : IDistributionService
         Debug.WriteLine("Delete distro");
     }
 
-    public void UpdateDistribution(Distribution distro)
+    public void UpdateDistribution(Distribution? distro)
     {
         Debug.WriteLine("Update distro");
     }
 
-    public void LaunchDistribution(Distribution distribution)
+    public void LaunchDistribution(Distribution? distribution)
     {
-        var process = _processBuilderHelper.SetFileName("cmd.exe")
-            .SetArguments($"/c wsl -d {distribution.Name}")
-            .SetRedirectStandardOutput(false)
-            .SetUseShellExecute(true)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
+        try
+        {
+            ProcessBuilderHelper processBuilderHelper = new();
+            var process = processBuilderHelper.SetFileName("cmd.exe")
+                .SetArguments($"/c wsl -d {distribution?.Name}")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(true)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+            Debug.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+            distribution.RunningProcesses.Add(process);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}");
+        }
+       
+    }
+
+    public void StopDistribution(Distribution? distribution)
+    {
+        if(distribution?.RunningProcesses == null)
+        {
+            Debug.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
+                            $"they are no processes running for {distribution.Name}");
+        }
+        else
+        {
+            foreach (var process in distribution.RunningProcesses)
+            {
+
+                process.CloseMainWindow();
+                process.WaitForExit(30000);
+
+                if(process.HasExited)
+                {
+                    Debug.WriteLine($"[INFO] Process ID : {process.Id} and " +
+                                    $"NAME : {process.ProcessName} is closed");
+                }
+            }
+
+        }
+        
     }
 }
