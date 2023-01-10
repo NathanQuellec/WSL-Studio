@@ -4,6 +4,8 @@ using WSLStudio.Contracts.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using WSLStudio.Messages;
 
 namespace WSLStudio.ViewModels;
 
@@ -30,7 +32,16 @@ public class DistrosListDetailsViewModel : ObservableObject
     private void LaunchDistributionViewModel(Distribution? distro)
     {
         Debug.WriteLine($"[INFO] Command called : ${distro} distribution is launching ...");
+
+        if (distro == null)
+        {
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distro object from the xaml source");
+        }
+
         _distributionService.LaunchDistribution(distro);
+
+        // Publish message  (allows us to show the stop button when the start button is clicked)
+        WeakReferenceMessenger.Default.Send(new ShowStopButtonMessage());
     }
 
     private void RetrieveDistrosData()
