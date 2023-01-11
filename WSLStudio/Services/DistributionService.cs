@@ -59,18 +59,43 @@ public class DistributionService : IDistributionService
         return _distros[id];
     }
 
-    public void AddDistribution(Distribution? distro)
+    public void AddDistribution(Distribution? distribution)
     {
-        _distros.Add(distro);
-        Debug.WriteLine($"Distribution {distro.Name} added");
+        if (distribution != null)
+        {
+            _distros.Add(distribution);
+            Debug.WriteLine($"[INFO] Distribution {distribution.Name} added");
+        }
+        else
+        {
+            throw new ArgumentNullException();
+        }
     }
 
-    public void DeleteDistribution(int id)
+    public void RemoveDistribution(Distribution? distribution)
     {
-        Debug.WriteLine("Delete distro");
+        ProcessBuilderHelper processBuilderHelper = new();
+
+        var process = processBuilderHelper.SetFileName("cmd.exe")
+            .SetArguments($"/c wsl --unregister {distribution?.Name}")
+            .SetRedirectStandardOutput(false)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
+
+        if (distribution != null)
+        {
+            _distros.Remove(distribution);
+            Debug.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
+        }
+        else
+        {
+            throw new ArgumentNullException();
+        }
     }
 
-    public void UpdateDistribution(Distribution? distro)
+    public void RenameDistribution(Distribution? distro)
     {
         Debug.WriteLine("Update distro");
     }
@@ -94,12 +119,12 @@ public class DistributionService : IDistributionService
         {
             Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}");
         }
-       
+
     }
 
     public void StopDistribution(Distribution? distribution)
     {
-        if(distribution?.RunningProcesses == null)
+        if (distribution?.RunningProcesses == null)
         {
             Debug.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
                             $"they are no processes running for {distribution.Name}");
@@ -112,7 +137,7 @@ public class DistributionService : IDistributionService
                 process.CloseMainWindow();
                 process.WaitForExit(30000);
 
-                if(process.HasExited)
+                if (process.HasExited)
                 {
                     Debug.WriteLine($"[INFO] Process ID : {process.Id} and " +
                                     $"NAME : {process.ProcessName} is closed");
@@ -120,6 +145,6 @@ public class DistributionService : IDistributionService
             }
 
         }
-        
+
     }
 }
