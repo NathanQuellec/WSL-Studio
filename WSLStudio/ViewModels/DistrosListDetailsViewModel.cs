@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Messages;
 using WSLStudio.Services;
 
@@ -13,26 +14,30 @@ namespace WSLStudio.ViewModels;
 public class DistrosListDetailsViewModel : ObservableObject
 {
     private readonly IDistributionService _distributionService;
-    private readonly IWslService _wslService;
+    private readonly IDialogBuilderService _dialogBuilderService;
+
     private ObservableCollection<Distribution> _distros = new();
 
-    public DistrosListDetailsViewModel(IDistributionService distributionService, IWslService wslService)
+    public DistrosListDetailsViewModel ( IDistributionService distributionService,
+                                         IWslService wslService,
+                                         IDialogBuilderService dialogBuilderService )
     {
         this._distributionService = distributionService;
-        this._wslService = wslService;
+        this._dialogBuilderService = dialogBuilderService;
 
         RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
-        RenameDistroCommand = new RelayCommand<RenameDistroCmd>(RenameDistributionViewModel);
+        OpenRenameDialogCommand = new AsyncRelayCommand<Distribution>(OpenRenameDialogViewModel);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
 
         this._distributionService.InitDistributionsList();
         this.RetrieveDistrosData();
+        _dialogBuilderService = dialogBuilderService;
     }
 
     public RelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
-    public RelayCommand<RenameDistroCmd> RenameDistroCommand { get; set;}
+    public AsyncRelayCommand<Distribution> OpenRenameDialogCommand { get; set; }
 
     public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
 
@@ -59,29 +64,48 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    public void RenameDistributionViewModel(RenameDistroCmd renameDistroCmd)
+    public async Task OpenRenameDialogViewModel(Distribution? distribution)
     {
-        var distribution = renameDistroCmd.distribution;
-        var newDistroName = renameDistroCmd.newDistroName;
-
-        Debug.WriteLine($"[INFO] Command called : Renaming ${distribution.Name} ...");
-
-        if (renameDistroCmd.distribution == null)
+        Debug.WriteLine($"[INFO] Command called : Opening dialog to rename ${distribution.Name} ...");
+        var input = new TextBox()
         {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+            Header = "Renaming",
+            Height = 64,
+        };
+
+        var dialog = this._dialogBuilderService.SetTitle($"Rename '{distribution.Name}'")
+            .SetContent(input)
+            .SetPrimaryButtonText("Rename")
+            .SetCloseButtonText("Cancel")
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot);
+        var content = (TextBox)dialog.GetDialogContent();
+
+        var renameDistro = await dialog.ShowAsync();
+
+        if (renameDistro)
+        {
+            RenameDistributionViewModel(distribution, content.Text);
         }
+    }
+
+    public void RenameDistributionViewModel(Distribution distribution, string newDistroName)
+    {
+
+        Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName} in DistrosListDetailsViewModel");
+
+        if (distribution == null)
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+
         else
         {
             this._distributionService.RenameDistribution(distribution, newDistroName);
-            foreach (var distro in this._distros)
+
+            int index = this._distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
+            if (index != -1)
             {
-                if (distro.Name == distribution.Name)
-                {
-                    distro.Name = newDistroName;
-                }
+                _distros[index].Name = newDistroName;
             }
         }
-
     }
 
     private void LaunchDistributionViewModel(Distribution? distribution)
@@ -110,8 +134,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
         else
         {
-             this._distributionService.StopDistribution(distribution);
-             WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
+            this._distributionService.StopDistribution(distribution);
+            WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
         }
     }
 

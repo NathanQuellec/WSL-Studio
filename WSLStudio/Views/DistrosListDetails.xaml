@@ -27,25 +27,42 @@
             <DataTemplate x:DataType="model:Distribution">
 
                 <StackPanel>
+
                     <StackPanel.Resources>
                         <MenuFlyout x:Key="DistroMenuFlyout">
-                            <!-- MenyFlyoutItem with unique tag. Example : Tag=Remove_Debian for the Debian distro Item. -->
+
                             <MenuFlyoutItem Text="Remove" 
-                                            Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
+                                            Command="{Binding ElementName=Page, 
+                                                              Path=ViewModel.RemoveDistroCommand}"
                                             CommandParameter="{x:Bind}"/>
+
+                            <MenuFlyoutItem Text="Rename"
+                                            Command="{Binding ElementName=Page, 
+                                                              Path=ViewModel.OpenRenameDialogCommand}"
+                                            CommandParameter="{x:Bind}"/>
+
                         </MenuFlyout>
                     </StackPanel.Resources>
+
                     <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}">
+
                         <!--  Specify Binding ElementName property to access ViewModel object -->
                         <Button x:Name="LaunchButton"
-                                Command="{Binding ElementName=Page, Path=ViewModel.LaunchDistroCommand}"
+                                Command="{Binding ElementName=Page,
+                                                  Path=ViewModel.LaunchDistroCommand}"
                                 CommandParameter="{x:Bind}">
                             <SymbolIcon Symbol="Play"/>
                         </Button>
 
+                        <!-- Button with unique tag. Example : Tag=Remove_Debian for the Debian distro Item.
+                             The purpose here is to easily identify which distro need to be stopped according
+                             the clicked button.
+                             
+                        -->
                         <Button x:Name="StopButton"
-                                Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateBinding('Stop', Name)}"
-                                Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
+                                Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateString('Stop', Name)}"
+                                Command="{Binding ElementName=Page, 
+                                                  Path=ViewModel.StopDistroCommand}"
                                 CommandParameter="{x:Bind}"
                                 RelativePanel.RightOf="LaunchButton"
                                 Visibility="Collapsed">

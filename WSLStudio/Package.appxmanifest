@@ -7,6 +7,8 @@
   xmlns:genTemplate="http://schemas.microsoft.com/appx/developer/templatestudio"
   xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
+  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
   IgnorableNamespaces="uap rescap genTemplate">
 
   <Identity
@@ -18,10 +20,11 @@
     <DisplayName>WSLStudio</DisplayName>
     <PublisherDisplayName>nathan quellec</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
+
+
   </Properties>
 
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
     <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.19041.0" />
   </Dependencies>
 
@@ -60,6 +63,8 @@
 
   <Capabilities>
     <rescap:Capability Name="runFullTrust" />
+    <!-- Include the required restricted capability. -->
+    <rescap:Capability Name="unvirtualizedResources"/>
   </Capabilities>
 
   <genTemplate:Metadata>
