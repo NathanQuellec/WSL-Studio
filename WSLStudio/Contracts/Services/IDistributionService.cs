@@ -9,7 +9,7 @@ public interface IDistributionService
     Distribution GetDistribution(int id);
     void AddDistribution(Distribution? distribution);
     void RemoveDistribution(Distribution? distribution);
-    void RenameDistribution(Distribution? distribution);
+    void RenameDistribution(Distribution? distribution, string newDistroName);
     void LaunchDistribution(Distribution? distribution);
     void StopDistribution(Distribution distribution);
 }

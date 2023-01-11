@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using Community.Wsl.Sdk;
 using WSLStudio.Helpers;
 using Microsoft.UI.Xaml;
+using Microsoft.Win32;
 
 namespace WSLStudio.Services;
 
@@ -55,7 +56,6 @@ public class DistributionService : IDistributionService
 
     public Distribution GetDistribution(int id)
     {
-        //TEST ACTIONS 2
         return _distros[id];
     }
 
@@ -95,9 +95,21 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void RenameDistribution(Distribution? distro)
+    public void RenameDistribution(Distribution? distribution, string newDistroName)
     {
         Debug.WriteLine("Update distro");
+        var lxssPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
+        RegistryKey? key = Registry.CurrentUser.OpenSubKey(lxssPath);
+
+        foreach (var subKey in key.GetSubKeyNames())
+        {
+            if (subKey == distribution?.Id.ToString())
+            {
+                Debug.WriteLine("OK");
+            }
+        }
+        key.Close();
+
     }
 
     public void LaunchDistribution(Distribution? distribution)
