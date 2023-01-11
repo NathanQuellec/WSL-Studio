@@ -118,7 +118,7 @@ public class DistributionService : IDistributionService
         {
             ProcessBuilderHelper processBuilderHelper = new();
             var process = processBuilderHelper.SetFileName("cmd.exe")
-                .SetArguments($"/c wsl -d {distribution?.Name}")
+                .SetArguments($"/c wsl ~ -d {distribution?.Name}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(true)
                 .SetCreateNoWindow(true)
