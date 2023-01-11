@@ -21,12 +21,15 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService = distributionService;
         this._wslService = wslService;
 
+        RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
 
         _distributionService.InitDistributionsList();
         this.RetrieveDistrosData();
     }
+
+    public RelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
     public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
 
@@ -36,6 +39,21 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         get => _distros;
         set => SetProperty(ref _distros, value);
+    }
+
+    private void RemoveDistributionViewModel(Distribution? distribution)
+    {
+        Debug.WriteLine($"[INFO] Command called : Removing ${distribution} ...");
+
+        if (distribution == null)
+        {
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+        }
+        else
+        {
+            _distributionService.RemoveDistribution(distribution);
+            _distros.Remove(distribution);
+        }
     }
 
     private void LaunchDistributionViewModel(Distribution? distribution)
