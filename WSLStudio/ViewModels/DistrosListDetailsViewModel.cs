@@ -16,8 +16,6 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IDistributionService _distributionService;
     private readonly IDialogBuilderService _dialogBuilderService;
 
-    private ObservableCollection<Distribution> _distros = new();
-
     public DistrosListDetailsViewModel ( IDistributionService distributionService,
                                          IWslService wslService,
                                          IDialogBuilderService dialogBuilderService )
@@ -31,7 +29,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
 
         this._distributionService.InitDistributionsList();
-        this.RetrieveDistrosData();
+        this.PopulateDistrosData();
         _dialogBuilderService = dialogBuilderService;
     }
 
@@ -43,11 +41,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> StopDistroCommand { get; set; }
 
-    public ObservableCollection<Distribution> Distros
-    {
-        get => this._distros;
-        set => SetProperty(ref this._distros, value);
-    }
+    public ObservableCollection<Distribution> Distros { get; set; } = new();
 
     private void RemoveDistributionViewModel(Distribution? distribution)
     {
@@ -60,7 +54,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         else
         {
             this._distributionService.RemoveDistribution(distribution);
-            this._distros.Remove(distribution);
+            this.Distros.Remove(distribution);
         }
     }
 
@@ -98,13 +92,15 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         else
         {
-            this._distributionService.RenameDistribution(distribution, newDistroName);
-
-            int index = this._distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
+            //var newDistrosList = this.Distros;
+            int index = this.Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
             if (index != -1)
             {
-                _distros[index].Name = newDistroName;
+                this.Distros.ElementAt(index).Name = newDistroName;
+                //this.Distros = newDistrosList;
             }
+
+            this._distributionService.RenameDistribution(distribution, newDistroName);
         }
     }
 
@@ -139,14 +135,14 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void RetrieveDistrosData()
+    private void PopulateDistrosData()
     {
         try
         {
-            this._distros.Clear();
+            this.Distros.Clear();
             foreach (var distro in this._distributionService.GetAllDistributions())
             {
-                this._distros.Add(distro);
+                this.Distros.Add(distro);
             }
         }
         catch (Exception ex)

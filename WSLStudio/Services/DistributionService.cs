@@ -17,7 +17,7 @@ namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private readonly IList<Distribution> _distros = new List<Distribution>();
+    private IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
 
 
@@ -96,10 +96,12 @@ public class DistributionService : IDistributionService
     {
         Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName} in DistributionService");
 
+        var newDistrosList = this._distros;
         int index = this._distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
         if (index != -1)
         {
-            _distros[index].Name = newDistroName;
+            newDistrosList[index].Name = newDistroName;
+            this._distros = newDistrosList;
         }
         RenameDistributionWinReg(distribution, newDistroName);
     }

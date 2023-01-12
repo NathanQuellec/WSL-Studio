@@ -19,7 +19,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <controls:ListDetailsView
-        ItemsSource="{x:Bind Path=ViewModel.Distros}"
+        ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
         NoSelectionContent="No distribution selected"
         CompactModeThresholdWidth="640">
 
@@ -60,7 +60,7 @@
                              
                         -->
                         <Button x:Name="StopButton"
-                                Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateString('Stop', Name)}"
+                                Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateString('Stop', Name), Mode=OneWay}"
                                 Command="{Binding ElementName=Page, 
                                                   Path=ViewModel.StopDistroCommand}"
                                 CommandParameter="{x:Bind}"
