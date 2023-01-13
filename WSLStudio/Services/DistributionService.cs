@@ -11,13 +11,13 @@ using System.Collections.ObjectModel;
 using Community.Wsl.Sdk;
 using WSLStudio.Helpers;
 using Microsoft.UI.Xaml;
+using Microsoft.Win32;
 
 namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private readonly IList<Distribution> _distros = new List<Distribution>();
-    private readonly WslService _wslService = new();
+    private IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
 
 
@@ -55,7 +55,6 @@ public class DistributionService : IDistributionService
 
     public Distribution GetDistribution(int id)
     {
-        //TEST ACTIONS 2
         return _distros[id];
     }
 
@@ -74,9 +73,7 @@ public class DistributionService : IDistributionService
 
     public void RemoveDistribution(Distribution? distribution)
     {
-        ProcessBuilderHelper processBuilderHelper = new();
-
-        var process = processBuilderHelper.SetFileName("cmd.exe")
+        var process =  new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
             .SetRedirectStandardOutput(false)
             .SetUseShellExecute(false)
@@ -95,25 +92,60 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void RenameDistribution(Distribution? distro)
+    /**
+     * Rename distro name in the Windows Registry.
+     * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
+     * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
+     */
+    public void RenameDistribution(Distribution? distribution)
     {
-        Debug.WriteLine("Update distro");
+        Debug.WriteLine(this._distros);
+        Debug.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
+        var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
+        var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+        foreach (var subKey in lxsSubKeys.GetSubKeyNames())
+        {
+            if (subKey == $"{{{distribution?.Id.ToString()}}}")
+            {
+                var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
+                Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
+                distroSubkeys.SetValue("DistributionName", distribution.Name);
+                Debug.WriteLine($"OK {subKey}");
+                distroSubkeys.Close();
+            }
+        }
+        lxsSubKeys.Close();
     }
 
     public void LaunchDistribution(Distribution? distribution)
     {
         try
         {
-            ProcessBuilderHelper processBuilderHelper = new();
-            var process = processBuilderHelper.SetFileName("cmd.exe")
-                .SetArguments($"/c wsl -d {distribution?.Name}")
+
+            var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
+            var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+            foreach (var subKey in lxsSubKeys.GetSubKeyNames())
+            {
+                if (subKey == $"{{{distribution?.Id.ToString()}}}")
+                {
+                    var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                    var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
+                    Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
+                    distroSubkeys.Close();
+                }
+            }
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl ~ -d {distribution?.Name}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(true)
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
             Debug.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
-            distribution.RunningProcesses.Add(process);
+            distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
@@ -143,8 +175,6 @@ public class DistributionService : IDistributionService
                                     $"NAME : {process.ProcessName} is closed");
                 }
             }
-
         }
-
     }
 }

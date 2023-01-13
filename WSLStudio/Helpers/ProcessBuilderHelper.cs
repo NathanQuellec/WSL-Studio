@@ -9,10 +9,9 @@ public class ProcessBuilderHelper
 {
     private readonly Process _process = new();
 
-    public ProcessBuilderHelper SetFileName(string fileName)
+    public ProcessBuilderHelper(string fileName)
     {
         this._process.StartInfo.FileName = fileName;
-        return this;
     }
 
     public ProcessBuilderHelper SetArguments(string args)
