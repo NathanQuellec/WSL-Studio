@@ -23,7 +23,6 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IDialogBuilderService _dialogBuilderService;
 
     public DistrosListDetailsViewModel ( IDistributionService distributionService,
-                                         IWslService wslService,
                                          IDialogBuilderService dialogBuilderService )
     {
         this._distributionService = distributionService;
