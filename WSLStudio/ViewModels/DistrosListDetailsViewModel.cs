@@ -4,21 +4,27 @@ using WSLStudio.Contracts.Services;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Timers;
 using Windows.System;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI.UI.Controls;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Messages;
 using WSLStudio.Services;
 using Microsoft.UI.Xaml.Input;
+using Timer = System.Timers.Timer;
 
 namespace WSLStudio.ViewModels;
 
 public class DistrosListDetailsViewModel : ObservableObject
 {
 
-    private StackPanel _stackPanel;
+    private static StackPanel? _stackPanel;
+    private static InfoBar? _infoBar;
+    private static Timer? _timer;
+
     private readonly IDistributionService _distributionService;
     private readonly IDialogBuilderService _dialogBuilderService;
 
@@ -48,6 +54,38 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
 
+    // Send a message to the view to close the InfoBar
+    private static void CloseInfoBar(object sender, ElapsedEventArgs e)
+    {
+        lock (_infoBar)
+        {
+            WeakReferenceMessenger.Default.Send(new CloseInfoBarMessage());
+            _timer.Stop();
+        }
+    }
+
+    
+    // Open an InfoBar that closes after 2 seconds
+    private static void OpenInfoBar(string infoBarName)
+    {
+        if (_infoBar == null)
+        {
+            var appFrame = App.MainWindow.Content as Frame;
+            var appPage = appFrame.Content as Page;
+            var appDockPanel = appPage.Content as DockPanel;
+            _infoBar = appDockPanel.FindName(infoBarName) as InfoBar;
+
+            _timer = new Timer(2000); // 2000 milliseconds = 2 seconds
+            _timer.Elapsed += CloseInfoBar;
+        }
+
+        lock (_infoBar)
+        {
+            _infoBar.IsOpen = true;
+            _timer.Start();
+        }
+    }
+
     private void RemoveDistribution(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Removing ${distribution} ...");
@@ -60,9 +98,12 @@ public class DistrosListDetailsViewModel : ObservableObject
         {
             this._distributionService.RemoveDistribution(distribution);
             this.Distros.Remove(distribution);
+            OpenInfoBar("removeDistroSuccess");
         }
     }
 
+    
+    // Check if the new distribution has valid characters 
     private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var dialogContent = sender.Content as StackPanel;
@@ -85,7 +126,7 @@ public class DistrosListDetailsViewModel : ObservableObject
                 renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
             }
 
-            else if (newDistroName.Any(Char.IsWhiteSpace))
+            else if (newDistroName.Any(char.IsWhiteSpace))
             {
                 args.Cancel = true;
                 renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
@@ -105,12 +146,13 @@ public class DistrosListDetailsViewModel : ObservableObject
             }
         }
 
-        this._dialogBuilderService.SetContent(this._stackPanel);
+        this._dialogBuilderService.SetContent(_stackPanel);
     }
 
     private async Task CreateRenameDistroContentDialog(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename ${distribution.Name} ...");
+
 
         var newDistroName = new TextBox()
         {
@@ -127,7 +169,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             Visibility = Visibility.Visible,
         };
 
-        this._stackPanel = new StackPanel()
+        _stackPanel = new StackPanel()
         {
             Children =
             {
@@ -137,7 +179,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         };
 
         var contentDialog = this._dialogBuilderService.SetTitle($"Rename \"{distribution.Name}\" :")
-            .SetContent(this._stackPanel)
+            .SetContent(_stackPanel)
             .SetPrimaryButtonText("Rename")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)

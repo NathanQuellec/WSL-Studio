@@ -18,33 +18,35 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <StackPanel>
+    <controls:DockPanel
+        LastChildFill="False"
+        Padding="0,0,0,0">
         <controls:ListDetailsView
-            ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
-            NoSelectionContent="No distribution selected"
-            CompactModeThresholdWidth="640">
+                ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
+                NoSelectionContent="No distribution selected"
+                controls:DockPanel.Dock="Top"
+                CompactModeThresholdWidth="640">
 
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
 
                     <StackPanel>
-
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
                                 <MenuFlyoutItem Text="Remove" 
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RemoveDistroCommand}"
-                                                CommandParameter="{x:Bind}">
+                                                    Command="{Binding ElementName=Page, 
+                                                                      Path=ViewModel.RemoveDistroCommand}"
+                                                    CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE74D;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Rename"
-                                                    Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RenameDistroCommand}"
-                                                    CommandParameter="{x:Bind}">
+                                                        Command="{Binding ElementName=Page, 
+                                                                      Path=ViewModel.RenameDistroCommand}"
+                                                        CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8AC;"/>
                                     </MenuFlyoutItem.Icon>
@@ -63,32 +65,32 @@
 
                             <!--  Specify Binding ElementName property to access ViewModel object -->
                             <Button x:Name="LaunchButton"
-                                    Command="{Binding ElementName=Page,
-                                                      Path=ViewModel.LaunchDistroCommand}"
-                                    CommandParameter="{x:Bind}">
+                                        Command="{Binding ElementName=Page,
+                                                          Path=ViewModel.LaunchDistroCommand}"
+                                        CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Play"/>
                             </Button>
 
                             <!-- Button with unique tag. Example : Tag=Remove_Debian for the Debian distro Item.
-                                 The purpose here is to easily identify which distro need to be stopped according
-                                 the clicked button.
-                                 
-                            -->
+                                     The purpose here is to easily identify which distro need to be stopped according
+                                     the clicked button.
+                                     
+                                -->
                             <Button x:Name="StopButton"
-                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
-                                    Command="{Binding ElementName=Page, 
-                                                      Path=ViewModel.StopDistroCommand}"
-                                    CommandParameter="{x:Bind}"
-                                    RelativePanel.RightOf="LaunchButton"
-                                    Visibility="Collapsed">
+                                        Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
+                                        Command="{Binding ElementName=Page, 
+                                                          Path=ViewModel.StopDistroCommand}"
+                                        CommandParameter="{x:Bind}"
+                                        RelativePanel.RightOf="LaunchButton"
+                                        Visibility="Collapsed">
                                 <SymbolIcon Symbol="Stop"/>
                             </Button>
 
                             <TextBlock x:Name="DistroName" 
-                                       Text="{Binding Path=Name, Mode=TwoWay}"
-                                       RelativePanel.RightOf="StopButton"
-                                       VerticalAlignment="Center"
-                                       Margin="5"/>
+                                           Text="{Binding Path=Name, Mode=TwoWay}"
+                                           RelativePanel.RightOf="StopButton"
+                                           VerticalAlignment="Center"
+                                           Margin="5"/>
 
                         </RelativePanel>
                     </StackPanel>
@@ -114,9 +116,13 @@
             </controls:ListDetailsView.DetailsTemplate>
         </controls:ListDetailsView>
 
-        <!--<InfoBar x:Name="errorVirtualization"
-                 Severity="Error"
-                 Title="Virtualization disabled"
-                 IsOpen="False"/>-->
-    </StackPanel>
+        <InfoBar x:Name="removeDistroSuccess"
+                     Severity="Success"
+                     Title="WSL Studio has successfully removed the distribution from the system."
+                     IsOpen="False"
+                     Height="100"
+                     Width="450"
+                     Margin="0, 0, 0, 0"
+                     controls:DockPanel.Dock="Bottom"/>
+    </controls:DockPanel>
 </Page>
