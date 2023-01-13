@@ -45,9 +45,20 @@ public sealed partial class DistrosListDetails : Page
                 _distroStopButton.Visibility = Visibility.Collapsed;
             }
         });
+
+        /*
+         * Close InfoBar after timer set in DistroListDetailsViewModel.cs:RemoveSuccessInfoBar()
+         */
+        WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
+        {
+            var dispatcher = DispatcherQueue.TryEnqueue(() => removeDistroSuccess.IsOpen = false);
+        });
     }
 
-    // Go through the Visual Tree recursively to find the stop button that match the Distro Name received
+    /*
+     * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
+     * as we cannot set a dynamic x:Name property for the Stop button.
+     */
     public void FindDistroStopButton(DependencyObject parent, string findDistroName)
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
