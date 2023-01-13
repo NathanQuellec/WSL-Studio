@@ -12,4 +12,5 @@ public interface IDistributionService
     void RenameDistribution(Distribution? distribution);
     void LaunchDistribution(Distribution? distribution);
     void StopDistribution(Distribution? distribution);
+    void OpenDistributionFileSystem(Distribution? distribution);
 }

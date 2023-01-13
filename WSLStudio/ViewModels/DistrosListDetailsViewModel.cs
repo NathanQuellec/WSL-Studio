@@ -34,10 +34,10 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService = distributionService;
         this._dialogBuilderService = dialogBuilderService;
 
-        RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistribution);
-        RenameDistroCommand = new AsyncRelayCommand<Distribution>(CreateRenameDistroContentDialog);
-        LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistribution);
-        StopDistroCommand = new RelayCommand<Distribution>(StopDistribution);
+        RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
+        RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
+        LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
+        StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -86,7 +86,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void RemoveDistribution(Distribution? distribution)
+    private void RemoveDistributionViewModel(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Removing ${distribution} ...");
 
@@ -117,7 +117,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         {
             renameDistroErrorInfoBar.IsOpen = true;
 
-            var regexItem = new Regex("^[a-zA-Z0-9 ]*$");
+            var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
 
 
             if (string.IsNullOrWhiteSpace(newDistroName))
@@ -149,10 +149,9 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._dialogBuilderService.SetContent(_stackPanel);
     }
 
-    private async Task CreateRenameDistroContentDialog(Distribution? distribution)
+    private async Task RenameDistributionDialog(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename ${distribution.Name} ...");
-
 
         var newDistroName = new TextBox()
         {
@@ -191,11 +190,11 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            RenameDistribution(distribution, newDistroName.Text);
+            RenameDistributionViewModel(distribution, newDistroName.Text);
         }
     }
 
-    private void RenameDistribution(Distribution distribution, string newDistroName)
+    private void RenameDistributionViewModel(Distribution distribution, string newDistroName)
     {
         Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
@@ -214,7 +213,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void LaunchDistribution(Distribution? distribution)
+    private void LaunchDistributionViewModel(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is launching ...");
 
@@ -230,7 +229,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void StopDistribution(Distribution? distribution)
+    private void StopDistributionViewModel(Distribution? distribution)
     {
         Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is stopping ...");
 
@@ -243,6 +242,11 @@ public class DistrosListDetailsViewModel : ObservableObject
             this._distributionService.StopDistribution(distribution);
             WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
         }
+    }
+
+    private void OpenDistributionFileSystemViewModel(Distribution? distribution)
+    {
+
     }
 
     private void PopulateDistributionsCollection()

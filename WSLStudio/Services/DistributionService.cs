@@ -177,4 +177,9 @@ public class DistributionService : IDistributionService
             }
         }
     }
+
+    public void OpenDistributionFileSystem(Distribution? distribution)
+    {
+        //
+    }
 }
