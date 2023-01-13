@@ -142,7 +142,8 @@ public partial class App : Application
             ShowNoWslDialog();
         }
 
-        if (!wslService.CheckProcessorVirtualization())
+        var virtEnabled = wslService.CheckProcessorVirtualization();
+        if (!virtEnabled)
         {
             ShowVirtualizationDisabledDialog();
         }
