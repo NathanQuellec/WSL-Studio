@@ -3,5 +3,5 @@
 public interface IWslService
 {
     bool CheckWsl();
-    bool CheckProcessorVirtualization();
+    bool CheckHypervisor();
 }
