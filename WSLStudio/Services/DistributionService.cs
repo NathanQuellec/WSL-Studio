@@ -17,7 +17,7 @@ namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private const string WSL_UNC_PATH = @"\\wsl$";
+    private const string WSL_UNC_PATH = @"\\wsl.localhost";
 
     private IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
@@ -178,6 +178,8 @@ public class DistributionService : IDistributionService
             }
         }
     }
+
+    // TODO: Check why opening distro file system invoke sometimes an error. 
 
     public void OpenDistributionFileSystem(Distribution? distribution)
     {
