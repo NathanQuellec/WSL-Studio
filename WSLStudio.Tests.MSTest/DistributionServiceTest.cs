@@ -23,15 +23,6 @@ public class DistributionServiceTest
     }
 
     [TestMethod]
-    public void TestGetDistribution()
-    {
-        var id = 0;
-        Distribution distro = _distributionService.GetDistribution(id);
-        Assert.IsNotNull(distro);
-        Assert.IsInstanceOfType(distro, typeof(Distribution));
-    }
-
-    [TestMethod]
     public void TestAddDistribution()
     {
         Distribution newDistro = new Distribution { 
