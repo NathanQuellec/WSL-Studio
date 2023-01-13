@@ -18,99 +18,105 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <controls:ListDetailsView
-        ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
-        NoSelectionContent="No distribution selected"
-        CompactModeThresholdWidth="640">
+    <StackPanel>
+        <controls:ListDetailsView
+            ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
+            NoSelectionContent="No distribution selected"
+            CompactModeThresholdWidth="640">
 
-        <controls:ListDetailsView.ItemTemplate>
-            <DataTemplate x:DataType="model:Distribution">
+            <controls:ListDetailsView.ItemTemplate>
+                <DataTemplate x:DataType="model:Distribution">
 
-                <StackPanel>
+                    <StackPanel>
 
-                    <StackPanel.Resources>
-                        <MenuFlyout x:Key="DistroMenuFlyout">
+                        <StackPanel.Resources>
+                            <MenuFlyout x:Key="DistroMenuFlyout">
 
-                            <MenuFlyoutItem Text="Remove" 
-                                            Command="{Binding ElementName=Page, 
-                                                              Path=ViewModel.RemoveDistroCommand}"
-                                            CommandParameter="{x:Bind}">
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon Glyph="&#xE74D;"/>
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
-
-                            <MenuFlyoutItem Text="Rename"
+                                <MenuFlyoutItem Text="Remove" 
                                                 Command="{Binding ElementName=Page, 
-                                                              Path=ViewModel.RenameDistroCommand}"
+                                                                  Path=ViewModel.RemoveDistroCommand}"
                                                 CommandParameter="{x:Bind}">
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon Glyph="&#xE8AC;"/>
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE74D;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
 
-                            <MenuFlyoutItem Text="File Explorer">
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon Glyph="&#xEC50;"/>
-                                </MenuFlyoutItem.Icon>
-                            </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Rename"
+                                                    Command="{Binding ElementName=Page, 
+                                                                  Path=ViewModel.RenameDistroCommand}"
+                                                    CommandParameter="{x:Bind}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8AC;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
 
-                        </MenuFlyout>
-                    </StackPanel.Resources>
+                                <MenuFlyoutItem Text="File Explorer">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xEC50;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
 
-                    <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}">
+                            </MenuFlyout>
+                        </StackPanel.Resources>
 
-                        <!--  Specify Binding ElementName property to access ViewModel object -->
-                        <Button x:Name="LaunchButton"
-                                Command="{Binding ElementName=Page,
-                                                  Path=ViewModel.LaunchDistroCommand}"
-                                CommandParameter="{x:Bind}">
-                            <SymbolIcon Symbol="Play"/>
-                        </Button>
+                        <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}">
 
-                        <!-- Button with unique tag. Example : Tag=Remove_Debian for the Debian distro Item.
-                             The purpose here is to easily identify which distro need to be stopped according
-                             the clicked button.
-                             
-                        -->
-                        <Button x:Name="StopButton"
-                                Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
-                                Command="{Binding ElementName=Page, 
-                                                  Path=ViewModel.StopDistroCommand}"
-                                CommandParameter="{x:Bind}"
-                                RelativePanel.RightOf="LaunchButton"
-                                Visibility="Collapsed">
-                            <SymbolIcon Symbol="Stop"/>
-                        </Button>
+                            <!--  Specify Binding ElementName property to access ViewModel object -->
+                            <Button x:Name="LaunchButton"
+                                    Command="{Binding ElementName=Page,
+                                                      Path=ViewModel.LaunchDistroCommand}"
+                                    CommandParameter="{x:Bind}">
+                                <SymbolIcon Symbol="Play"/>
+                            </Button>
 
-                        <TextBlock x:Name="DistroName" 
-                                   Text="{Binding Path=Name, Mode=TwoWay}"
-                                   RelativePanel.RightOf="StopButton"
-                                   VerticalAlignment="Center"
-                                   Margin="5"/>
+                            <!-- Button with unique tag. Example : Tag=Remove_Debian for the Debian distro Item.
+                                 The purpose here is to easily identify which distro need to be stopped according
+                                 the clicked button.
+                                 
+                            -->
+                            <Button x:Name="StopButton"
+                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
+                                    Command="{Binding ElementName=Page, 
+                                                      Path=ViewModel.StopDistroCommand}"
+                                    CommandParameter="{x:Bind}"
+                                    RelativePanel.RightOf="LaunchButton"
+                                    Visibility="Collapsed">
+                                <SymbolIcon Symbol="Stop"/>
+                            </Button>
 
-                    </RelativePanel>
-                </StackPanel>
-            </DataTemplate>
-        </controls:ListDetailsView.ItemTemplate>
+                            <TextBlock x:Name="DistroName" 
+                                       Text="{Binding Path=Name, Mode=TwoWay}"
+                                       RelativePanel.RightOf="StopButton"
+                                       VerticalAlignment="Center"
+                                       Margin="5"/>
 
-        <controls:ListDetailsView.DetailsTemplate>
-            <DataTemplate x:DataType="model:Distribution">
-                <StackPanel>
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Memory Limit :"/>
-                        <TextBlock Text="{x:Bind Path=MemoryLimit, Mode=OneWay}"/>
+                        </RelativePanel>
                     </StackPanel>
+                </DataTemplate>
+            </controls:ListDetailsView.ItemTemplate>
 
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Processor Limit : "/>
-                        <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
+            <controls:ListDetailsView.DetailsTemplate>
+                <DataTemplate x:DataType="model:Distribution">
+                    <StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Memory Limit :"/>
+                            <TextBlock Text="{x:Bind Path=MemoryLimit, Mode=OneWay}"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Processor Limit : "/>
+                            <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
+                        </StackPanel>
+
                     </StackPanel>
+                </DataTemplate>
+            </controls:ListDetailsView.DetailsTemplate>
+        </controls:ListDetailsView>
 
-                </StackPanel>
-            </DataTemplate>
-        </controls:ListDetailsView.DetailsTemplate>
-    </controls:ListDetailsView>
-
+        <!--<InfoBar x:Name="errorVirtualization"
+                 Severity="Error"
+                 Title="Virtualization disabled"
+                 IsOpen="False"/>-->
+    </StackPanel>
 </Page>

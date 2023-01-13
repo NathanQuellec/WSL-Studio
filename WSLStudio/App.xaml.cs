@@ -13,6 +13,7 @@ using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
 using Community.Wsl.Sdk;
+using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 
 namespace WSLStudio;
@@ -50,6 +51,7 @@ public partial class App : Application
             .SetTitle("Impossible to detect WSL")
             .SetContent("Check if WSL is supported or installed on your system")
             .SetCloseButtonText("Ok")
+            .SetDefaultButton(ContentDialogButton.Close)
             .SetXamlRoot(MainWindow.Content.XamlRoot)
             .Build();
 
@@ -64,6 +66,28 @@ public partial class App : Application
             fe.Loaded += (ss, se) => NoWslDialog();
         }
 
+    }
+
+    public static async Task VirtualizationDisabled()
+    {
+        var contentDialog = App.GetService<IDialogBuilderService>()
+            .SetTitle("Virtualization Disabled in Firmware")
+            .SetContent("Enable the optional 'Virtual Computer Platform' component and ensure that virtualization is enabled in the BIOS.")
+            .SetCloseButtonText("Ok")
+            .SetDefaultButton(ContentDialogButton.Close)
+            .SetXamlRoot(MainWindow.Content.XamlRoot)
+            .Build();
+
+        await contentDialog.ShowAsync();
+        MainWindow.Close();
+    }
+
+    public static void ShowVirtualizationDisabledDialog()
+    {
+        if (MainWindow.Content is FrameworkElement fe)
+        {
+            fe.Loaded += (ss, se) => VirtualizationDisabled();
+        }
     }
 
     public App()
@@ -111,10 +135,17 @@ public partial class App : Application
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
 
-        var wslEnabled = App.GetService<IWslService>().CheckWsl();
+        var wslService = App.GetService<IWslService>();
 
-        if (!wslEnabled)
+        if (!wslService.CheckWsl())
+        {
             ShowNoWslDialog();
+        }
+
+        if (!wslService.CheckProcessorVirtualization())
+        {
+            ShowVirtualizationDisabledDialog();
+        }
 
 
     }
