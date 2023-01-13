@@ -60,7 +60,7 @@
                              
                         -->
                         <Button x:Name="StopButton"
-                                Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop', Name), Mode=OneWay}"
+                                Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
                                 Command="{Binding ElementName=Page, 
                                                   Path=ViewModel.StopDistroCommand}"
                                 CommandParameter="{x:Bind}"
