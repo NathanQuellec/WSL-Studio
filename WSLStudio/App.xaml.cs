@@ -46,14 +46,14 @@ public partial class App : Application
 
     public static async Task NoWslDialog()
     {
-        ContentDialog noWslDialog = new()
-        {
-            Title = "Impossible to detect WSL",
-            Content = "Check if WSL is supported or installed on your system",
-            CloseButtonText = "Ok",
-            XamlRoot = MainWindow.Content.XamlRoot
-        };
-        await noWslDialog.ShowAsync();
+        var contentDialog = App.GetService<IDialogBuilderService>()
+            .SetTitle("Impossible to detect WSL")
+            .SetContent("Check if WSL is supported or installed on your system")
+            .SetCloseButtonText("Ok")
+            .SetXamlRoot(MainWindow.Content.XamlRoot)
+            .Build();
+
+        await contentDialog.ShowAsync();
         MainWindow.Close();
     }
 
@@ -110,6 +110,7 @@ public partial class App : Application
     {
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
+
         var wslEnabled = App.GetService<IWslService>().CheckWsl();
 
         if (!wslEnabled)

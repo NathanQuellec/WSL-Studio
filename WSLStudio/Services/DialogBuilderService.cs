@@ -41,9 +41,22 @@ public class DialogBuilderService : IDialogBuilderService
         return this;
     }
 
+    public IDialogBuilderService SetSecondaryButtonClick(
+        TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventHandler)
+    {
+        this._contentDialog.SecondaryButtonClick += clickEventHandler;
+        return this;
+    }
+
     public IDialogBuilderService SetCloseButtonText(string closeButtonText)
     {
         this._contentDialog.CloseButtonText = closeButtonText;
+        return this;
+    }
+
+    public IDialogBuilderService SetCloseButtonClick(TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventHandler)
+    {
+        this._contentDialog.CloseButtonClick += clickEventHandler;
         return this;
     }
 
