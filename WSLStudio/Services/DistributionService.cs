@@ -92,22 +92,14 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void RenameDistribution(Distribution? distribution, string newDistroName)
+    /**
+     * Rename distro name in the Windows Registry.
+     * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
+     * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
+     */
+    public void RenameDistribution(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName} in DistributionService");
-
-        var newDistrosList = this._distros;
-        int index = this._distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
-        if (index != -1)
-        {
-            newDistrosList[index].Name = newDistroName;
-            this._distros = newDistrosList;
-        }
-        RenameDistributionWinReg(distribution, newDistroName);
-    }
-
-    public void RenameDistributionWinReg(Distribution? distribution, string newDistroName)
-    {
+        Debug.WriteLine(this._distros);
         Debug.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
         var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
@@ -119,7 +111,7 @@ public class DistributionService : IDistributionService
                 var distroRegPath = Path.Combine(lxssRegPath, subKey);
                 var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
                 Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
-                distroSubkeys.SetValue("DistributionName", newDistroName);
+                distroSubkeys.SetValue("DistributionName", distribution.Name);
                 Debug.WriteLine($"OK {subKey}");
                 distroSubkeys.Close();
             }

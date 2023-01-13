@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -35,6 +37,7 @@ public class Distribution : INotifyPropertyChanged
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
+        Debug.WriteLine($"[INFO] PropertyChanged Event Raised for property \"{propertyName}\"");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

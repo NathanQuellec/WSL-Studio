@@ -14,7 +14,7 @@
     xmlns:test="System.Windows.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -38,7 +38,7 @@
 
                             <MenuFlyoutItem Text="Rename"
                                             Command="{Binding ElementName=Page, 
-                                                              Path=ViewModel.OpenRenameDialogCommand}"
+                                                              Path=ViewModel.RenameDistroCommand}"
                                             CommandParameter="{x:Bind}"/>
 
                         </MenuFlyout>
@@ -60,7 +60,7 @@
                              
                         -->
                         <Button x:Name="StopButton"
-                                Tag="{x:Bind Path=functions:BindingFormatHandler.ConcatenateString('Stop', Name), Mode=OneWay}"
+                                Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop', Name), Mode=OneWay}"
                                 Command="{Binding ElementName=Page, 
                                                   Path=ViewModel.StopDistroCommand}"
                                 CommandParameter="{x:Bind}"
@@ -70,7 +70,7 @@
                         </Button>
 
                         <TextBlock x:Name="DistroName" 
-                                   Text="{x:Bind Path=Name, Mode=TwoWay}"
+                                   Text="{Binding Path=Name, Mode=TwoWay}"
                                    RelativePanel.RightOf="StopButton"
                                    VerticalAlignment="Center"
                                    Margin="5"/>
