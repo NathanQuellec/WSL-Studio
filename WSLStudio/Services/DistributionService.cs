@@ -17,9 +17,10 @@ namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
+    private const string WSL_UNC_PATH = @"\\wsl$";
+
     private IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
-
 
     public void InitDistributionsList()
     {
@@ -177,4 +178,15 @@ public class DistributionService : IDistributionService
             }
         }
     }
+
+    public void OpenDistributionFileSystem(Distribution? distribution)
+    {
+        string distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
+
+        var processBuilder = new ProcessBuilderHelper("explorer.exe")
+            .SetArguments(distroPath)
+            .Build();
+        processBuilder.Start();
+    }
+
 }
