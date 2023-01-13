@@ -35,24 +35,27 @@
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
                                 <MenuFlyoutItem Text="Remove" 
-                                                    Command="{Binding ElementName=Page, 
-                                                                      Path=ViewModel.RemoveDistroCommand}"
-                                                    CommandParameter="{x:Bind}">
+                                                Command="{Binding ElementName=Page, 
+                                                                  Path=ViewModel.RemoveDistroCommand}"
+                                                CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE74D;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Rename"
-                                                        Command="{Binding ElementName=Page, 
-                                                                      Path=ViewModel.RenameDistroCommand}"
-                                                        CommandParameter="{x:Bind}">
+                                                Command="{Binding ElementName=Page, 
+                                                                  Path=ViewModel.RenameDistroCommand}"
+                                                CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8AC;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
-                                <MenuFlyoutItem Text="File Explorer">
+                                <MenuFlyoutItem Text="File Explorer"
+                                                Command="{Binding ElementName=Page,
+                                                                  Path=ViewModel.OpenDistroFileSystemCommand}"
+                                                CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xEC50;"/>
                                     </MenuFlyoutItem.Icon>
@@ -91,7 +94,6 @@
                                            RelativePanel.RightOf="StopButton"
                                            VerticalAlignment="Center"
                                            Margin="5"/>
-
                         </RelativePanel>
                     </StackPanel>
                 </DataTemplate>
@@ -100,7 +102,6 @@
             <controls:ListDetailsView.DetailsTemplate>
                 <DataTemplate x:DataType="model:Distribution">
                     <StackPanel>
-
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="Memory Limit :"/>
                             <TextBlock Text="{x:Bind Path=MemoryLimit, Mode=OneWay}"/>
@@ -110,13 +111,12 @@
                             <TextBlock Text="Processor Limit : "/>
                             <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
                         </StackPanel>
-
                     </StackPanel>
                 </DataTemplate>
             </controls:ListDetailsView.DetailsTemplate>
         </controls:ListDetailsView>
 
-        <InfoBar x:Name="removeDistroSuccess"
+        <InfoBar x:Name="RemoveDistroSuccess"
                      Severity="Success"
                      Title="WSL Studio has successfully removed the distribution from the system."
                      IsOpen="False"

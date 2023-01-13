@@ -38,6 +38,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
+        OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -52,6 +53,8 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> StopDistroCommand { get; set; }
 
+    public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
+
     public ObservableCollection<Distribution> Distros { get; set; } = new();
 
     // Send a message to the view to close the InfoBar
@@ -64,7 +67,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    
     // Open an InfoBar that closes after 2 seconds
     private static void OpenInfoBar(string infoBarName)
     {
@@ -92,7 +94,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (distribution == null)
         {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
         }
         else
         {
@@ -102,7 +104,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    
     // Check if the new distribution has valid characters 
     private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
@@ -199,7 +200,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
         if (distribution == null)
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
 
         else
         {
@@ -219,7 +220,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (distribution == null)
         {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
         }
         else
         {
@@ -235,7 +236,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (distribution == null)
         {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the xaml source");
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
         }
         else
         {
@@ -246,7 +247,16 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void OpenDistributionFileSystemViewModel(Distribution? distribution)
     {
+        Debug.WriteLine($"[INFO] Command called : ${distribution} file system is opening ...");
 
+        if (distribution == null)
+        {
+            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
+        }
+        else
+        {
+            this._distributionService.OpenDistributionFileSystem(distribution);
+        }
     }
 
     private void PopulateDistributionsCollection()
