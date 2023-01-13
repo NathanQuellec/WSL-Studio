@@ -13,16 +13,22 @@ public interface IDialogBuilderService
 
     IDialogBuilderService SetPrimaryButtonText(string primaryButtonText);
 
-    public IDialogBuilderService SetPrimaryButtonClick(
-        TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventFunc);
+    IDialogBuilderService SetPrimaryButtonClick(
+        TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventHandler);
 
     IDialogBuilderService SetSecondaryButtonText(string secondaryButtonText);
 
+    IDialogBuilderService SetSecondaryButtonClick(
+        TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventHandler);
+
     IDialogBuilderService SetCloseButtonText(string closeButtonText);
+
+    IDialogBuilderService SetCloseButtonClick(
+        TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs> clickEventHandler);
 
     IDialogBuilderService SetDefaultButton(ContentDialogButton button);
 
     IDialogBuilderService SetXamlRoot(XamlRoot xamlRoot);
 
-    public ContentDialog Build();
+    ContentDialog Build();
 }
