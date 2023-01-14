@@ -1,67 +1,170 @@
 ﻿@startuml
 'https://plantuml.com/class-diagram
 
+!theme vibrant
 IDistributionService <|-- DistributionService
+IDialogBuilderService <|-- DialogBuilderService
 IWslService <|-- WslService
 DistributionService o-- Distribution
-DistributionService --> IWslService
-
-
+DistributionService --> ProcessBuilderHelper
+DistrosListDetailsViewModel ..> IDialogBuilderService
+DistrosListDetailsViewModel ..> IDistributionService
+DistrosListDetailsView ..> DistrosListDetailsViewModel
+DistrosListDetailsViewModel --> App
+App ..> IWslService
+App ..> IDialogBuilderService
+App --> MainWindow
 class Distribution
 {
     + <<property>> Id: Guid
     + <<property>> Path: string
     + <<property>> IsDefault: bool
     + <<property>> WslVersion: int
-    + <<property>> Name: string
     + <<property>> MemoryLimit: double
-    + <<property>> ProcessorLimit: int     
-}
-
-interface IDistributionService
-{
-	+ InitDistributionsList(): void
-    + GetAllDistributions(): IEnumerable<Distribution>
-    + GetDistribution(id: int): Distribution
-    + AddDistribution(distro: Distribution): void
-    + DeleteDistribution(id: int): void
-    + UpdateDistribution(distro: Distribution): void
-}
-
-class DistributionService
-{
-	- _distros: IList<Distribution>
-	- _wslApi: WslApi
-	- _wslService: IWslService
-	+ InitDistributionsList(): void
-	+ GetAllDistributions(): IEnumerable<Distribution>
-	+ GetDistribution(id: int): Distribution
-	+ AddDistribution(distro: Distribution): void
-	+ DeleteDistribution(id: int): void
-	+ UpdateDistribution(distro: Distribution): void
-}
-
-interface IWslService
-{
-	+ CheckWsl(): bool
-}
-
-class WslService
-{
-	- _wslApi: WslApi
-	+ CheckWsl(): bool
+    + <<property>> ProcessorLimit: int
+    + <<property>> Name: string
+    + <<event>> PropertyChanged: PropertyChangedEventHandler?
+    # <<virtual>> OnPropertyChanged(propertyName: string?)
 }
 
 class ProcessBuilderHelper
 {
     - _process: Process
-    + SetFileName(fileName: string): ProcessBuilderHelper
+    + ProcessBuilderHelper(fileName: string)
     + SetArguments(args: string): ProcessBuilderHelper
     + SetRedirectStandardOutput(val: bool): ProcessBuilderHelper
     + SetRedirectStandardError(val: bool): ProcessBuilderHelper
     + SetUseShellExecute(val: bool): ProcessBuilderHelper
     + SetCreateNoWindow(val: bool): ProcessBuilderHelper
     + Build(): Process
+}
+
+
+interface IDistributionService 
+{
+	+ InitDistributionsList()
+	+ GetAllDistributions() : IEnumerable<Distribution>
+	+ GetDistribution(id: int) : Distribution
+	+ AddDistribution(distribution: Distribution?)
+	+ RemoveDistribution(distribution: Distribution?)
+	+ RenameDistribution(distribution: Distribution?)
+	+ LaunchDistribution(distribution: Distribution?)
+	+ StopDistribution(distribution: Distribution?)
+	+ OpenDistributionFileSystem(distribution: Distribution?)
+}
+
+class DistributionService 
+{
+	- WSL_UNC_PATH: string
+	- _distros: IList<Distribution>
+	- _wslApi: WslApi
+	+ InitDistributionsList()
+	+ GetAllDistributions() : IEnumerable<Distribution>
+	+ GetDistribution(id: int) : Distribution
+	+ AddDistribution(distribution: Distribution?)
+	+ RemoveDistribution(distribution: Distribution?)
+	+ RenameDistribution(distribution: Distribution?)
+	+ LaunchDistribution(distribution: Distribution?)
+	+ StopDistribution(distribution: Distribution?)
+	+ OpenDistributionFileSystem(distribution: Distribution?)
+}
+
+interface IWslService
+{
+	+ CheckWsl(): bool
+	+ CheckHypervisor(): bool
+}
+
+class WslService
+{
+	- _wslApi: WslApi
+	+ CheckWsl(): bool
+	+ CheckHypervisor(): bool
+}
+
+interface IDialogBuilderService 
+{
+  + SetTitle(title: object) : IDialogBuilderService
+  + SetContent(content: object) : IDialogBuilderService
+  + SetPrimaryButtonText(primaryButtonText: string) : IDialogBuilderService
+  + SetPrimaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetSecondaryButtonText(secondaryButtonText: string) : IDialogBuilderService
+  + SetSecondaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetCloseButtonText(closeButtonText: string) : IDialogBuilderService
+  + SetCloseButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetDefaultButton(button: ContentDialogButton) : IDialogBuilderService
+  + SetXamlRoot(xamlRoot: XamlRoot) : IDialogBuilderService
+  + Build() : ContentDialog
+}
+
+class DialogBuilderService 
+{
+  - _contentDialog: ContentDialog
+  + SetTitle(title: object) : IDialogBuilderService
+  + SetContent(content: object) : IDialogBuilderService
+  + SetPrimaryButtonText(primaryButtonText: string) : IDialogBuilderService
+  + SetPrimaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetSecondaryButtonText(secondaryButtonText: string) : IDialogBuilderService
+  + SetSecondaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetCloseButtonText(closeButtonText: string) : IDialogBuilderService
+  + SetCloseButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
+  + SetDefaultButton(button: ContentDialogButton) : IDialogBuilderService
+  + SetXamlRoot(xamlRoot: XamlRoot) : IDialogBuilderService
+  + Build() : ContentDialog
+}
+
+class DistrosListDetailsViewModel 
+{
+  - _dialogStackPanel : StackPanel?
+  - _infoBar : InfoBar?
+  - _timer : Timer?
+  - _distributionService : IDistributionService
+  - _dialogBuilderService : IDialogBuilderService
+  + <<property>> RemoveDistroCommand : RelayCommand<Distribution>
+  + <<property>> RenameDistroCommand : AsyncRelayCommand<Distribution>
+  + <<property>> LaunchDistroCommand : RelayCommand<Distribution>
+  + <<property>> StopDistroCommand : RelayCommand<Distribution>
+  + <<property>> OpenDistroFileSystemCommand : RelayCommand<Distribution>
+  + <<property>> Distros : ObservableCollection<Distribution>
+  
+  + DistrosListDetailsViewModel(distributionService: IDistributionService, dialogBuilderService: IDialogBuilderService)
+  + {static} CloseInfoBar(sender: object, e: ElapsedEventArgs)
+  + {static} OpenInfoBar(infoBarName: string)
+  + RemoveDistributionViewModel(distribution: Distribution?)
+  + ValidateDistributionName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  + RenameDistributionDialog(distribution: Distribution?) : Task
+  + LaunchDistributionViewModel(distribution: Distribution?)
+  + StopDistributionViewModel(distribution: Distribution?)
+  + OpenDistributionFileSystemViewModel(distribution: Distribution?)
+  + PopulateDistributionsCollection()
+}
+
+class DistrosListDetailsView
+{
+    - _distroStopButton: Button
+    + <<property>> ViewModel: DistrosListDetailsViewModel
+    + DistrosListDetailsView()
+    + FindDistroStopButton(parent: DependencyObject, findDistroName: string)
+
+}
+
+class App
+{
+    + <<property>> Host: IHost
+    + {static} <<property>> MainWindow: WindowEx
+    + App()
+    + {static} GetService<T>(): T
+    + {static} NoWslDialog(): Task
+    + {static} ShowNoWslDialog()
+    + {static} VirtualizationDisabled(): Task
+    + {static} ShowVirtualizationDisabledDialog
+    - App_UnhandledException(sender: object, e: UnhandledExceptionEventArgs)
+    # OnLaunched(args: LaunchActivatedEventArgs)
+}
+
+class MainWindow
+{
+    + MainWindow()
 }
 
 @enduml

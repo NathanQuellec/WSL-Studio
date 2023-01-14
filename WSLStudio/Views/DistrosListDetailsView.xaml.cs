@@ -16,15 +16,15 @@ namespace WSLStudio.Views;
 /// <summary>
 /// An empty page that can be used on its own or navigated to within a Frame.
 /// </summary>
-public sealed partial class DistrosListDetails : Page
+public sealed partial class DistrosListDetailsView : Page
 {
-    private Button _distroStopButton;
-    public DistrosListDetailsViewModel ViewModel { get; }
+    private Button _distroStopButton = new();
 
-    public DistrosListDetails()
+    public DistrosListDetailsViewModel ViewModel { get; } =  App.GetService<DistrosListDetailsViewModel>();
+
+    public DistrosListDetailsView()
     {
         this.InitializeComponent();
-        ViewModel = App.GetService<DistrosListDetailsViewModel>();
 
         WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
         {
@@ -57,7 +57,7 @@ public sealed partial class DistrosListDetails : Page
      * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
      * as we cannot set a dynamic x:Name property for the Stop button.
      */
-    public void FindDistroStopButton(DependencyObject parent, string findDistroName)
+    public void FindDistroStopButton(DependencyObject parent, string searchDistroName)
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {
@@ -65,12 +65,12 @@ public sealed partial class DistrosListDetails : Page
             if (currentChild != null && currentChild is Button)
             {
                 var btn = (Button)currentChild;
-                if ((string)btn.Tag == $"Stop_{findDistroName}")
+                if ((string)btn.Tag == $"Stop_{searchDistroName}")
                 {
                     _distroStopButton = btn;
                 }
             }
-            FindDistroStopButton(currentChild, findDistroName);
+            FindDistroStopButton(currentChild, searchDistroName);
         }
     }
 }

@@ -17,6 +17,9 @@ public class Distribution : INotifyPropertyChanged
     public string Path { get; set; }
     public bool IsDefault { get; set; }
     public int WslVersion { get; set; }
+    public double MemoryLimit { get; set; } = 2.0;
+    public int ProcessorLimit { get; set; } = 4;
+    public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;
     public string Name
@@ -28,10 +31,6 @@ public class Distribution : INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
-
-    public double MemoryLimit { get; set; } = 2.0;
-    public int ProcessorLimit { get; set; } = 4;
-    public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

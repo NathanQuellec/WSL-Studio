@@ -21,7 +21,7 @@ namespace WSLStudio.ViewModels;
 public class DistrosListDetailsViewModel : ObservableObject
 {
 
-    private static StackPanel? _stackPanel;
+    private static StackPanel? _dialogStackPanel;
     private static InfoBar? _infoBar;
     private static Timer? _timer;
 
@@ -147,7 +147,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             }
         }
 
-        this._dialogBuilderService.SetContent(_stackPanel);
+        this._dialogBuilderService.SetContent(_dialogStackPanel);
     }
 
     private async Task RenameDistributionDialog(Distribution? distribution)
@@ -169,7 +169,8 @@ public class DistrosListDetailsViewModel : ObservableObject
             Visibility = Visibility.Visible,
         };
 
-        _stackPanel = new StackPanel()
+   
+        _dialogStackPanel = new StackPanel()
         {
             Children =
             {
@@ -179,7 +180,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         };
 
         var contentDialog = this._dialogBuilderService.SetTitle($"Rename \"{distribution.Name}\" :")
-            .SetContent(_stackPanel)
+            .SetContent(_dialogStackPanel)
             .SetPrimaryButtonText("Rename")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
