@@ -100,7 +100,12 @@ public class DistrosListDetailsViewModel : ObservableObject
         {
             this._distributionService.RemoveDistribution(distribution);
             this.Distros.Remove(distribution);
-            OpenInfoBar("RemoveDistroSuccess");
+
+            if (!Distros.Contains(distribution))
+            {
+                OpenInfoBar("RemoveDistroSuccess");
+            }
+                
         }
     }
 
