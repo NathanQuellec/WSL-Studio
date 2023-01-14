@@ -137,7 +137,7 @@
             </controls:ListDetailsView.DetailsTemplate>
         </controls:ListDetailsView>
 
-        <InfoBar x:Name="RemoveDistroSuccess"
+        <InfoBar x:Name="RemoveDistroInfoSuccess"
                      Severity="Success"
                      Title="WSL Studio has successfully removed the distribution from the system."
                      IsOpen="False"
