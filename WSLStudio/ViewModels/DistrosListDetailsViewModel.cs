@@ -90,7 +90,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void RemoveDistributionViewModel(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : Removing ${distribution} ...");
+        Debug.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
 
         if (distribution == null)
         {
@@ -152,7 +152,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private async Task RenameDistributionDialog(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename ${distribution.Name} ...");
+        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
 
         var newDistroName = new TextBox()
         {
@@ -217,7 +217,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void LaunchDistributionViewModel(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is launching ...");
+        Debug.WriteLine($"[INFO] Command called : ${distribution.Name} distribution is launching ...");
 
         if (distribution == null)
         {
@@ -233,7 +233,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void StopDistributionViewModel(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distribution} distribution is stopping ...");
+        Debug.WriteLine($"[INFO] Command called : {distribution.Name} distribution is stopping ...");
 
         if (distribution == null)
         {
@@ -248,7 +248,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void OpenDistributionFileSystemViewModel(Distribution? distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distribution} file system is opening ...");
+        Debug.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
         if (distribution == null)
         {
@@ -264,6 +264,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         try
         {
+            Debug.WriteLine($"[INFO] Populate distributions collection");
             this.Distros.Clear();
             foreach (var distro in this._distributionService.GetAllDistributions())
             {
