@@ -116,7 +116,7 @@ public partial class App : Application
 
             // Views and ViewModels
             services.AddTransient<DistrosListDetailsViewModel>();
-            services.AddTransient<DistrosListDetails>();
+            services.AddTransient<DistrosListDetailsView>();
 
             // Configuration
         }).
@@ -147,7 +147,5 @@ public partial class App : Application
         {
             ShowVirtualizationDisabledDialog();
         }
-
-
     }
 }
