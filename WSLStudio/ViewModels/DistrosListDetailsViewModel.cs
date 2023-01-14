@@ -39,10 +39,10 @@ public class DistrosListDetailsViewModel : ObservableObject
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
+        CreateDistroCommand = new RelayCommand(CreateDistributionViewModel);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
-        _dialogBuilderService = dialogBuilderService;
     }
 
     public RelayCommand<Distribution> RemoveDistroCommand { get; set; }
@@ -55,7 +55,27 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
 
+    public RelayCommand CreateDistroCommand { get; set; }
+
     public ObservableCollection<Distribution> Distros { get; set; } = new();
+
+
+    private void PopulateDistributionsCollection()
+    {
+        try
+        {
+            Debug.WriteLine($"[INFO] Populate distributions collection");
+            this.Distros.Clear();
+            foreach (var distro in this._distributionService.GetAllDistributions())
+            {
+                this.Distros.Add(distro);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+    }
 
     // Send a message to the view to close the InfoBar
     private static void CloseInfoBar(object sender, ElapsedEventArgs e)
@@ -265,21 +285,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void PopulateDistributionsCollection()
+    private void CreateDistributionViewModel()
     {
-        try
-        {
-            Debug.WriteLine($"[INFO] Populate distributions collection");
-            this.Distros.Clear();
-            foreach (var distro in this._distributionService.GetAllDistributions())
-            {
-                this.Distros.Add(distro);
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine(ex);
-        }
+        this._distributionService.CreateDistribution();
     }
-
 }

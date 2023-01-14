@@ -21,6 +21,23 @@
     <controls:DockPanel
         LastChildFill="False"
         Padding="0,0,0,0">
+
+        <Grid x:Name="AppTitleBar"
+              Height="32"
+              Margin="0 0 0 5"
+              controls:DockPanel.Dock="Top">
+            <Image Source="/Assets/WindowIcon.ico"
+                   HorizontalAlignment="Left" 
+                   Width="16" Height="16" 
+                   Margin="8,0"/>
+            <TextBlock x:Name="AppTitleTextBlock" 
+                       Text="WSL Studio"
+                       TextWrapping="NoWrap"
+                       Style="{StaticResource CaptionTextBlockStyle}" 
+                       VerticalAlignment="Center"
+                       Margin="28,0,0,0"/>
+        </Grid>
+
         <controls:ListDetailsView
                 ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
                 NoSelectionContent="No distribution selected"
@@ -60,6 +77,10 @@
                                         <FontIcon Glyph="&#xEC50;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+
+                                <MenuFlyoutItem Text="Docker Test"
+                                                Command="{Binding ElementName=Page,
+                                                                  Path=ViewModel.CreateDistroCommand}"/>
 
                             </MenuFlyout>
                         </StackPanel.Resources>

@@ -9,6 +9,7 @@ using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using Community.Wsl.Sdk;
+using Docker.DotNet;
 using WSLStudio.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.Win32;
@@ -38,10 +39,13 @@ public class DistributionService : IDistributionService
                     WslVersion = distro.WslVersion,
                     Name = distro.DistroName,
                 });
-            foreach (var distro in apiDistroList)
-            {
-                this.AddDistribution(distro);
-            }
+
+            if (apiDistroList == null)
+                return;
+
+            foreach (var distro in apiDistroList) 
+                this._distros.Add(distro);
+            
         }
         catch (Exception ex)
         {
@@ -54,22 +58,13 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    public Distribution GetDistribution(int id)
+    public void CreateDistribution()
     {
-        return _distros[id];
-    }
+        DockerClient client = new DockerClientConfiguration(
+                new Uri("npipe//./pipe/docker_engine"))
+            .CreateClient();
 
-    public void AddDistribution(Distribution? distribution)
-    {
-        if (distribution != null)
-        {
-            _distros.Add(distribution);
-            Debug.WriteLine($"[INFO] Distribution {distribution.Name} added");
-        }
-        else
-        {
-            throw new ArgumentNullException();
-        }
+
     }
 
     public void RemoveDistribution(Distribution? distribution)
