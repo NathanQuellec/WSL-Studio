@@ -1,4 +1,5 @@
-﻿using WSLStudio.Helpers;
+﻿using ColorCode.Styling;
+using WSLStudio.Helpers;
 
 namespace WSLStudio;
 
@@ -8,8 +9,7 @@ public sealed partial class MainWindow : WindowEx
     {
         InitializeComponent();
 
-        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets/WindowIcon.ico"));
         Content = null;
-        Title = "WSL Studio";
+        ExtendsContentIntoTitleBar = true;
     }
 }

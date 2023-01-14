@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using CommunityToolkit.Mvvm.Messaging;
+using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.ViewModels;
 
@@ -25,6 +26,9 @@ public sealed partial class DistrosListDetailsView : Page
     public DistrosListDetailsView()
     {
         this.InitializeComponent();
+
+        App.MainWindow.SetTitleBar(AppTitleBar);
+        TitleBarHelper.UpdateTitleBar(ElementTheme.Default);
 
         WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
         {
