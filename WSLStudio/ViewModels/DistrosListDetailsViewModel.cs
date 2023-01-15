@@ -123,7 +123,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
             if (!Distros.Contains(distribution))
             {
-                OpenInfoBar("RemoveDistroSuccess");
+                OpenInfoBar("RemoveDistroInfoSuccess");
             }
                 
         }

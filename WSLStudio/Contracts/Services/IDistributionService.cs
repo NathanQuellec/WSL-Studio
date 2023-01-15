@@ -6,7 +6,7 @@ public interface IDistributionService
 {
     void InitDistributionsList();
     IEnumerable<Distribution> GetAllDistributions();
-    void CreateDistribution();
+    Task CreateDistribution();
     void RemoveDistribution(Distribution? distribution);
     void RenameDistribution(Distribution? distribution);
     void LaunchDistribution(Distribution? distribution);
