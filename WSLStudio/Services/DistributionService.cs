@@ -62,31 +62,6 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    public async Task CreateDistributionProcess()
-    {
-        //var isDockerPipeExist = Directory.GetFiles("\\\\.\\pipe\\", "^docker_engine$").Length == 1;
-        try
-        {
-
-
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments("/c docker build -t wsl-studio-dev3 -f \"C:\\Users\\nathan\\Documents\\wsl-studioDEV\\Dockerfile\" \"C:\\Users\\nathan\\Documents\\wsl-studioDEV\"")
-                .SetRedirectStandardOutput(true)
-                .SetRedirectStandardError(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-
-            process.Start();
-            await process.WaitForExitAsync();
-
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine("[ERROR] Docker engine named pipe not found");
-        }
-    }
-
     private static Stream CreateTarballForDockerfileDirectory(string directory)
     {
         var tarball = new MemoryStream();
