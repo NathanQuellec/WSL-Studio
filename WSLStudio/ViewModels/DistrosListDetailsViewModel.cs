@@ -15,6 +15,7 @@ using WSLStudio.Messages;
 using WSLStudio.Services;
 using Microsoft.UI.Xaml.Input;
 using Timer = System.Timers.Timer;
+using System.Xml.Linq;
 
 namespace WSLStudio.ViewModels;
 
@@ -39,7 +40,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
-        CreateDistroCommand = new RelayCommand(CreateDistributionViewModel);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionViewModel);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -55,7 +56,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
 
-    public RelayCommand CreateDistroCommand { get; set; }
+    public AsyncRelayCommand CreateDistroCommand { get; set; }
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
 
@@ -285,8 +286,13 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void CreateDistributionViewModel()
+    private async Task CreateDistributionViewModel()
     {
-        this._distributionService.CreateDistribution();
+        string distroName = "NewDistro";
+        double memoryLimit = 4.0;
+        int processorLimit = 2;
+        string resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
+
+        await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
     }
 }

@@ -23,6 +23,8 @@
 
 	  <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
 
+	  <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
+
 	  <!-- On Windows 10, version 21H1 and later OS versions, you can declare specific file system and/or registry locations that you want to be unvirtualized. 
     If these are recognized on the current device, then they take precedence over the old declarations. On older devices,
     the new declarations are ignored and the old ones are honored. -->
@@ -32,6 +34,13 @@
 			  <virtualization:ExcludedKey>HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Lxss</virtualization:ExcludedKey>
 		  </virtualization:ExcludedKeys>
 	  </virtualization:RegistryWriteVirtualization>
+
+	  <virtualization:FileSystemWriteVirtualization>
+		  <virtualization:ExcludedDirectories>
+			  <virtualization:ExcludedDirectory>$(KnownFolder:LocalAppData)\Fabrikam\Widgets</virtualization:ExcludedDirectory>
+			  <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\WslStudio</virtualization:ExcludedDirectory>
+		  </virtualization:ExcludedDirectories>
+	  </virtualization:FileSystemWriteVirtualization>
   </Properties>
 
   <Dependencies>

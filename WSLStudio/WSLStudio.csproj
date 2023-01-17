@@ -55,6 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
   </ItemGroup>
   

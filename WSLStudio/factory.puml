@@ -1,0 +1,72 @@
+﻿@startuml
+'https://plantuml.com/class-diagram
+
+IDistributionService <|-- DistributionService
+IDistributionFactory <|-- DockerfileDistributionFactory
+IDistributionFactory <|-- ArchiveDistributionFactory
+DistributionService o-- Distribution
+
+abstract class IDistributionFactory
+{
+    + CreateDistribution(resourceOrigin: string): Distribution
+    + ImportDistribution(tarball: Stream): Task
+}
+
+class DockerfileDistributionFactory
+{
+    + CreateDistribution(resourceOrigin: string): Distribution
+    + CreateTarballForDockerfileDirectory(directory: string): Stream
+    + BuildDockerImage(): Task
+    + RunDockerContainer(): Task
+    + ExportDockerContainer(): Task
+}
+
+class ArchiveDistributionFactory
+{
+    + CreateDistribution(resourceOrigin: string): Distribution
+}
+
+
+class Distribution
+{
+    + <<property>> Id: Guid
+    + <<property>> Path: string
+    + <<property>> IsDefault: bool
+    + <<property>> WslVersion: int
+    + <<property>> MemoryLimit: double
+    + <<property>> ProcessorLimit: int
+    + <<property>> Name: string
+    + <<event>> PropertyChanged: PropertyChangedEventHandler?
+    # <<virtual>> OnPropertyChanged(propertyName: string?)
+}
+
+interface IDistributionService 
+{
+	+ InitDistributionsList()
+	+ GetAllDistributions() : IEnumerable<Distribution>
+	+ AddDistribution(distribution: Distribution?)
+	+ RemoveDistribution(distribution: Distribution?)
+	+ RenameDistribution(distribution: Distribution?)
+	+ LaunchDistribution(distribution: Distribution?)
+	+ StopDistribution(distribution: Distribution?)
+	+ OpenDistributionFileSystem(distribution: Distribution?)
+	+ CreateDistribution(resourceOrigin: string)
+}
+
+class DistributionService 
+{
+	- WSL_UNC_PATH: string
+	- _distros: IList<Distribution>
+	- _wslApi: WslApi
+	+ InitDistributionsList()
+	+ GetAllDistributions() : IEnumerable<Distribution>
+	+ AddDistribution(distribution: Distribution?)
+	+ RemoveDistribution(distribution: Distribution?)
+	+ RenameDistribution(distribution: Distribution?)
+	+ LaunchDistribution(distribution: Distribution?)
+	+ StopDistribution(distribution: Distribution?)
+	+ OpenDistributionFileSystem(distribution: Distribution?)
+	+ CreateDistribution(resourceOrigin: string)
+}
+
+@enduml

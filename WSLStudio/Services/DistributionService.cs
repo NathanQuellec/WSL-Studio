@@ -16,6 +16,7 @@ using WSLStudio.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.Win32;
 using ICSharpCode.SharpZipLib.Tar;
+using WSLStudio.Services.Factories;
 
 namespace WSLStudio.Services;
 
@@ -26,6 +27,18 @@ public class DistributionService : IDistributionService
 
     private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
+
+    private DockerfileDistributionFactory _factory;
+
+    public DistributionService()
+    {
+        _factory = new DockerfileDistributionFactory();
+    }
+
+    public async Task CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
+    {
+        await _factory.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+    }
 
     public void InitDistributionsList()
     {
@@ -62,87 +75,11 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    private static Stream CreateTarballForDockerfileDirectory(string directory)
-    {
-        var tarball = new MemoryStream();
-        var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
-
-        using var archive = new TarOutputStream(tarball)
-        {
-            //Prevent the TarOutputStream from closing the underlying memory stream when done
-            IsStreamOwner = false
-        };
-
-        foreach (var file in files)
-        {
-            //Replacing slashes as KyleGobel suggested and removing leading /
-            string tarName = file.Substring(directory.Length).Replace('\\', '/').TrimStart('/');
-
-            //Let's create the entry header
-            var entry = TarEntry.CreateTarEntry(tarName);
-            using var fileStream = File.OpenRead(file);
-            entry.Size = fileStream.Length;
-            archive.PutNextEntry(entry);
-
-            //Now write the bytes of data
-            byte[] localBuffer = new byte[32 * 1024];
-            while (true)
-            {
-                int numRead = fileStream.Read(localBuffer, 0, localBuffer.Length);
-                if (numRead <= 0)
-                    break;
-
-                archive.Write(localBuffer, 0, numRead);
-            }
-
-            //Nothing more to do with this entry
-            archive.CloseEntry();
-        }
-        archive.Close();
-
-        //Reset the stream and return it, so it can be used by the caller
-        tarball.Position = 0;
-        return tarball;
-    }
-
-
-    public async Task CreateDistribution()
-    {
-        //var isDockerPipeExist = Directory.GetFiles("\\\\.\\pipe\\", "^docker_engine$").Length == 1;
-        try
-        {
-          var workingDirectory = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
-
-            using var tarball = CreateTarballForDockerfileDirectory(workingDirectory);
-
-            IList<string> tags = new List<string>()
-            {
-                "wsl-studio-2"
-            };
-            var imageBuildParameters = new ImageBuildParameters
-            {
-               Tags = tags
-            };
-            //C# 8.0 using syntax
-            var progress = new Progress<JSONMessage>();
-
-            using var dockerClient = new DockerClientConfiguration(new Uri("npipe://./pipe/docker_engine")).CreateClient();
-            await dockerClient.Images.BuildImageFromDockerfileAsync(imageBuildParameters, tarball, null, null, progress);
-
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine("[ERROR] Docker engine named pipe not found");
-        }
-    }
-
     public void RemoveDistribution(Distribution? distribution)
     {
         var process =  new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(true)
-            .SetCreateNoWindow(false)
+            .SetCreateNoWindow(true)
             .Build();
         process.Start();
 
@@ -254,5 +191,6 @@ public class DistributionService : IDistributionService
             .Build();
         processBuilder.Start();
     }
+
 
 }
