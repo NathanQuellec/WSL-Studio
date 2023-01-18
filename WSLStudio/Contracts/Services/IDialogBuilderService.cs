@@ -30,5 +30,7 @@ public interface IDialogBuilderService
 
     IDialogBuilderService SetXamlRoot(XamlRoot xamlRoot);
 
+    IDialogBuilderService AddContent(FrameworkElement element);
+
     ContentDialog Build();
 }

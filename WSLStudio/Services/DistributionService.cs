@@ -35,9 +35,11 @@ public class DistributionService : IDistributionService
         _factory = new DockerfileDistributionFactory();
     }
 
-    public async Task CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
+    public async Task<Distribution> CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
     {
-        await _factory.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        var newDistro = await _factory.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        this._distros.Add(newDistro);
+        return newDistro;
     }
 
     public void InitDistributionsList()

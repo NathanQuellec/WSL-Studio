@@ -53,7 +53,7 @@ public sealed partial class DistrosListDetailsView : Page
         //Close InfoBar after timer set in DistroListDetailsViewModel.cs:RemoveSuccessInfoBar()
         WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
         {
-            var dispatcher = DispatcherQueue.TryEnqueue(() => RemoveDistroInfoSuccess.IsOpen = false);
+            DispatcherQueue.TryEnqueue(() => RemoveDistroInfoSuccess.IsOpen = false);
         });
     }
 

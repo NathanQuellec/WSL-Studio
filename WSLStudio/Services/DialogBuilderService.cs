@@ -10,6 +10,7 @@ namespace WSLStudio.Services;
 public class DialogBuilderService : IDialogBuilderService
 {
     private readonly ContentDialog _contentDialog = new();
+    private readonly StackPanel _stackPanel = new();
 
     public IDialogBuilderService SetTitle(object title)
     {
@@ -69,6 +70,13 @@ public class DialogBuilderService : IDialogBuilderService
     public IDialogBuilderService SetXamlRoot(XamlRoot xamlRoot)
     {
         this._contentDialog.XamlRoot = xamlRoot;
+        return this;
+    }
+
+    public IDialogBuilderService AddContent(FrameworkElement element)
+    {
+        this._stackPanel.Children.Add(element); 
+        this._contentDialog.Content = this._stackPanel;
         return this;
     }
 

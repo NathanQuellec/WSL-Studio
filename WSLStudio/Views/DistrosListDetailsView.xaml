@@ -18,14 +18,15 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <controls:DockPanel
-        LastChildFill="False"
-        Padding="0,0,0,0">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="32"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar"
-              Height="32"
-              Margin="0 0 0 5"
-              controls:DockPanel.Dock="Top">
+        <StackPanel x:Name="AppTitleBar"
+                    Orientation="Horizontal"
+                    Grid.Row="0">
             <Image Source="/Assets/WindowIcon.ico"
                    HorizontalAlignment="Left" 
                    Width="16" Height="16" 
@@ -36,13 +37,16 @@
                        Style="{StaticResource CaptionTextBlockStyle}" 
                        VerticalAlignment="Center"
                        Margin="28,0,0,0"/>
-        </Grid>
+        </StackPanel>
+
+
 
         <controls:ListDetailsView
+                Margin="0 10 0 0"
+                Grid.Row="1"
+                BackButtonBehavior="Automatic"
                 ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
-                NoSelectionContent="No distribution selected"
-                controls:DockPanel.Dock="Top"
-                CompactModeThresholdWidth="640">
+                NoSelectionContent="No distribution selected">
 
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
@@ -132,18 +136,29 @@
                             <TextBlock Text="Processor Limit : "/>
                             <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
                         </StackPanel>
+
                     </StackPanel>
                 </DataTemplate>
             </controls:ListDetailsView.DetailsTemplate>
+
+            <controls:ListDetailsView.ListCommandBar>
+                <CommandBar>
+                    <AppBarButton Icon="Add" 
+                                  Label="Add"
+                                  Command="{Binding ElementName=Page,
+                                                    Path=ViewModel.CreateDistroCommand}"/>
+                </CommandBar>
+            </controls:ListDetailsView.ListCommandBar>
         </controls:ListDetailsView>
 
         <InfoBar x:Name="RemoveDistroInfoSuccess"
+                     VerticalAlignment="Bottom"
+                     Grid.Row="1"
                      Severity="Success"
                      Title="WSL Studio has successfully removed the distribution from the system."
                      IsOpen="False"
                      Height="100"
-                     Width="450"
-                     Margin="0, 0, 0, 0"
-                     controls:DockPanel.Dock="Bottom"/>
-    </controls:DockPanel>
+                     Width="450"/>
+
+    </Grid>
 </Page>

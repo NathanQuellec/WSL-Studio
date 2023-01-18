@@ -21,19 +21,14 @@ namespace WSLStudio.ViewModels;
 
 public class DistrosListDetailsViewModel : ObservableObject
 {
-
-    private static StackPanel? _dialogStackPanel;
     private static InfoBar? _infoBar;
     private static Timer? _timer;
 
     private readonly IDistributionService _distributionService;
-    private readonly IDialogBuilderService _dialogBuilderService;
 
-    public DistrosListDetailsViewModel ( IDistributionService distributionService,
-                                         IDialogBuilderService dialogBuilderService )
+    public DistrosListDetailsViewModel ( IDistributionService distributionService )
     {
         this._distributionService = distributionService;
-        this._dialogBuilderService = dialogBuilderService;
 
         RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
@@ -95,8 +90,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         {
             var appFrame = App.MainWindow.Content as Frame;
             var appPage = appFrame.Content as Page;
-            var appDockPanel = appPage.Content as DockPanel;
-            _infoBar = appDockPanel.FindName(infoBarName) as InfoBar;
+            var appGrid = appPage.Content as Grid;
+            _infoBar = appGrid.FindName(infoBarName) as InfoBar;
 
             _timer = new Timer(2000); // 2000 milliseconds = 2 seconds
             _timer.Elapsed += CloseInfoBar;
@@ -109,24 +104,16 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    private void RemoveDistributionViewModel(Distribution? distribution)
+    private void RemoveDistributionViewModel(Distribution distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
 
-        if (distribution == null)
-        {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
-        }
-        else
-        {
-            this._distributionService.RemoveDistribution(distribution);
-            this.Distros.Remove(distribution);
+        this._distributionService.RemoveDistribution(distribution);
+        this.Distros.Remove(distribution);
 
-            if (!Distros.Contains(distribution))
-            {
-                OpenInfoBar("RemoveDistroInfoSuccess");
-            }
-                
+        if (!Distros.Contains(distribution))
+        {
+            OpenInfoBar("RemoveDistroInfoSuccess");
         }
     }
 
@@ -138,6 +125,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         var newDistroNameInput = dialogContent?.Children.First() as TextBox;
         var newDistroName = newDistroNameInput?.Text;
 
+        var namesList = this.Distros.Select(distro => distro.Name).ToList();
+
         var renameDistroErrorInfoBar = dialogContent?.Children.Last() as InfoBar;
 
         if (renameDistroErrorInfoBar != null)
@@ -145,7 +134,6 @@ public class DistrosListDetailsViewModel : ObservableObject
             renameDistroErrorInfoBar.IsOpen = true;
 
             var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
-
 
             if (string.IsNullOrWhiteSpace(newDistroName))
             {
@@ -171,16 +159,23 @@ public class DistrosListDetailsViewModel : ObservableObject
                 args.Cancel = true;
                 renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
             }
+
+            else if (namesList.Contains(newDistroName))
+            {
+                args.Cancel = true;
+                renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
+            }
         }
 
-        this._dialogBuilderService.SetContent(_dialogStackPanel);
     }
 
-    private async Task RenameDistributionDialog(Distribution? distribution)
+    private async Task RenameDistributionDialog(Distribution distribution)
     {
         Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
 
-        var newDistroName = new TextBox()
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+        var newDistroNameInput = new TextBox()
         {
             Margin = new Thickness(0 ,20, 0, 15),
             Height = 32,
@@ -195,18 +190,10 @@ public class DistrosListDetailsViewModel : ObservableObject
             Visibility = Visibility.Visible,
         };
 
-   
-        _dialogStackPanel = new StackPanel()
-        {
-            Children =
-            {
-                newDistroName,
-                renameDistroErrorInfoBar,
-            },
-        };
 
-        var contentDialog = this._dialogBuilderService.SetTitle($"Rename \"{distribution.Name}\" :")
-            .SetContent(_dialogStackPanel)
+        var contentDialog = dialogService.SetTitle($"Rename \"{distribution.Name}\" :")
+            .AddContent(newDistroNameInput)
+            .AddContent(renameDistroErrorInfoBar)
             .SetPrimaryButtonText("Rename")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
@@ -218,7 +205,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            RenameDistributionViewModel(distribution, newDistroName.Text);
+            RenameDistributionViewModel(distribution, newDistroNameInput.Text);
         }
     }
 
@@ -226,73 +213,49 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
-        if (distribution == null)
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
-
-        else
+        var index = this.Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
+        if (index != -1)
         {
-            int index = this.Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
-            if (index != -1)
-            {
-                this.Distros.ElementAt(index).Name = newDistroName;
-            }
-
-            this._distributionService.RenameDistribution(distribution);
+            this.Distros.ElementAt(index).Name = newDistroName;
         }
+
+        this._distributionService.RenameDistribution(distribution);
+        
     }
 
-    private void LaunchDistributionViewModel(Distribution? distribution)
+    private void LaunchDistributionViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distribution.Name} distribution is launching ...");
+        Debug.WriteLine($"[INFO] Command called : ${distribution!.Name} distribution is launching ...");
 
-        if (distribution == null)
-        {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
-        }
-        else
-        {
-            this._distributionService.LaunchDistribution(distribution);
-            // Publish message  (allows us to show the stop button when the start button is clicked)
-            WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
-        }
+        this._distributionService.LaunchDistribution(distribution);
+        // Publish message  (allows us to show the stop button when the start button is clicked)
+        WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
 
-    private void StopDistributionViewModel(Distribution? distribution)
+    private void StopDistributionViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : {distribution.Name} distribution is stopping ...");
+        Debug.WriteLine($"[INFO] Command called : {distribution!.Name} distribution is stopping ...");
 
-        if (distribution == null)
-        {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
-        }
-        else
-        {
-            this._distributionService.StopDistribution(distribution);
-            WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
-        }
+        this._distributionService.StopDistribution(distribution);
+        WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
     }
 
-    private void OpenDistributionFileSystemViewModel(Distribution? distribution)
+    private void OpenDistributionFileSystemViewModel(Distribution distribution)
     {
         Debug.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
-        if (distribution == null)
-        {
-            Debug.WriteLine($"[ERROR] Impossible to retrieve the distribution object from the XAML source");
-        }
-        else
-        {
-            this._distributionService.OpenDistributionFileSystem(distribution);
-        }
+        this._distributionService.OpenDistributionFileSystem(distribution);
     }
 
     private async Task CreateDistributionViewModel()
     {
-        string distroName = "NewDistro";
-        double memoryLimit = 4.0;
-        int processorLimit = 2;
-        string resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
+        var distroName = "NewDistro";
+        var memoryLimit = 4.0;
+        var processorLimit = 2;
+        var resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
 
-        await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        this.Distros.Add(newDistro);
+
     }
 }
