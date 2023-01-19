@@ -66,13 +66,9 @@ public sealed partial class DistrosListDetailsView : Page
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {
             var currentChild = VisualTreeHelper.GetChild(parent, i);
-            if (currentChild != null && currentChild is Button)
+            if (currentChild != null && currentChild is Button btn && (string)btn.Tag == $"Stop_{searchDistroName}")
             {
-                var btn = (Button)currentChild;
-                if ((string)btn.Tag == $"Stop_{searchDistroName}")
-                {
-                    _distroStopButton = btn;
-                }
+                _distroStopButton = btn;
             }
             FindDistroStopButton(currentChild, searchDistroName);
         }

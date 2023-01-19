@@ -16,6 +16,10 @@ using WSLStudio.Services;
 using Microsoft.UI.Xaml.Input;
 using Timer = System.Timers.Timer;
 using System.Xml.Linq;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using WSLStudio.Views;
+using Microsoft.UI.Xaml.Media;
+using WSLStudio.Helpers;
 
 namespace WSLStudio.ViewModels;
 
@@ -35,7 +39,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionViewModel);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -245,6 +249,45 @@ public class DistrosListDetailsViewModel : ObservableObject
         Debug.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
         this._distributionService.OpenDistributionFileSystem(distribution);
+    }
+
+    /*private async Task CreateDistributionDialog()
+    {
+        var appFrame = App.MainWindow.Content as Frame;
+        var appPage = appFrame.Content as Page;
+        var appGrid = appPage.Content as Grid;
+        var dialog = appGrid.FindName("CreateDistroDialog") as ContentDialog;
+        await dialog.ShowAsync();
+    }*/
+
+    private async Task CreateDistributionDialog()
+    {
+        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+        CreateDistroDialog createDistroDialog = new CreateDistroDialog();
+
+
+        var combo = new ComboBox()
+        {
+            Items = { "Test", "test2" }
+        };
+
+        var contentDialog = dialogService.SetTitle("Add distribution :")
+            .AddContent(createDistroDialog)
+            .SetPrimaryButtonText("Create")
+            .SetCloseButtonText("Cancel")
+            .SetDefaultButton(ContentDialogButton.Primary)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .Build();
+
+        var buttonClicked = await contentDialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            await CreateDistributionViewModel();
+        }
     }
 
     private async Task CreateDistributionViewModel()

@@ -40,7 +40,6 @@
         </StackPanel>
 
 
-
         <controls:ListDetailsView
                 Margin="0 10 0 0"
                 Grid.Row="1"
@@ -159,6 +158,5 @@
                      IsOpen="False"
                      Height="100"
                      Width="450"/>
-
     </Grid>
 </Page>
