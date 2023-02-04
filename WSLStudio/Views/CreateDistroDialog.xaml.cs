@@ -69,7 +69,7 @@ namespace WSLStudio.Views
             folderPicker.FileTypeFilter.Add("*");
 
 
-            StorageFolder folder = await folderPicker.PickSingleFolderAsync();
+            var folder = await folderPicker.PickSingleFolderAsync();
             if (folder != null)
             {
                 DockerfileInput.Text = folder.Path;
@@ -89,10 +89,10 @@ namespace WSLStudio.Views
             filePicker.FileTypeFilter.Add(".tar");
             filePicker.FileTypeFilter.Add(".gz");
 
-            StorageFile archive = await filePicker.PickSingleFileAsync();
-            if (archive != null)
+            var archiveFile = await filePicker.PickSingleFileAsync();
+            if (archiveFile != null)
             {
-                ArchiveInput.Text = archive.Path;
+                ArchiveInput.Text = archiveFile.Path;
             }
         }
     }

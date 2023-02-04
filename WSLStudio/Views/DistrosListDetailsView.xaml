@@ -81,10 +81,6 @@
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
-                                <MenuFlyoutItem Text="Docker Test"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.CreateDistroCommand}"/>
-
                             </MenuFlyout>
                         </StackPanel.Resources>
 

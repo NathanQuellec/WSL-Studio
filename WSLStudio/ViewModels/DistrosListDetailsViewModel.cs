@@ -125,13 +125,25 @@ public class DistrosListDetailsViewModel : ObservableObject
     private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var dialogContent = sender.Content as StackPanel;
+        var contentForm = new StackPanel();
 
-        var newDistroNameInput = dialogContent?.Children.First() as TextBox;
+        if (dialogContent?.Children.First() is UserControl)
+        {
+            var contentContainer = dialogContent.Children.First() as UserControl;
+            contentForm = contentContainer?.Content as StackPanel;
+        }
+
+        else
+        {
+            contentForm = dialogContent;
+        }
+
+        var newDistroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
         var newDistroName = newDistroNameInput?.Text;
 
         var namesList = this.Distros.Select(distro => distro.Name).ToList();
 
-        var renameDistroErrorInfoBar = dialogContent?.Children.Last() as InfoBar;
+        var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
 
         if (renameDistroErrorInfoBar != null)
         {
@@ -181,17 +193,18 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var newDistroNameInput = new TextBox()
         {
+            Name = "distroNameInput",
             Margin = new Thickness(0 ,20, 0, 15),
             Height = 32,
         };
 
         var renameDistroErrorInfoBar = new InfoBar()
         {
+            Name = "DistroNameErrorInfoBar",
             Severity = InfoBarSeverity.Error,
             Title = "Invalid Distribution Name",
             IsOpen = false,
             IsClosable = false,
-            Visibility = Visibility.Visible,
         };
 
 
@@ -251,15 +264,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService.OpenDistributionFileSystem(distribution);
     }
 
-    /*private async Task CreateDistributionDialog()
-    {
-        var appFrame = App.MainWindow.Content as Frame;
-        var appPage = appFrame.Content as Page;
-        var appGrid = appPage.Content as Grid;
-        var dialog = appGrid.FindName("CreateDistroDialog") as ContentDialog;
-        await dialog.ShowAsync();
-    }*/
-
     private async Task CreateDistributionDialog()
     {
         Debug.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
@@ -267,30 +271,65 @@ public class DistrosListDetailsViewModel : ObservableObject
         var dialogService = App.GetService<IDialogBuilderService>();
 
         // contentdialog content set in CreateDistroDialog.xaml
-        CreateDistroDialog createDistroDialog = new CreateDistroDialog();
+        var createDistroDialog = new CreateDistroDialog();
 
         var contentDialog = dialogService.SetTitle("Add distribution :")
             .AddContent(createDistroDialog)
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
+            .SetPrimaryButtonClick(CreateDistribution)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
 
         var buttonClicked = await contentDialog.ShowAsync();
 
-        if (buttonClicked == ContentDialogResult.Primary)
+    }
+
+    private async void CreateDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+
+        this.ValidateDistributionName(sender, args);
+
+        var resourceOrigin = "";
+
+        var dialogContent = sender.Content as StackPanel;
+        var contentContainer = dialogContent.Children.First() as UserControl;
+        var contentForm = contentContainer.Content as StackPanel;
+
+        if (contentForm != null)
         {
-            await CreateDistributionViewModel();
+            var creationMode = contentForm.FindName("CreationMode") as ComboBox;
+
+            TextBox inputTextBox;
+            switch (creationMode?.SelectedItem.ToString())
+            {
+                case "Dockerfile":
+                    inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
+                    resourceOrigin = inputTextBox?.Text;
+                    break;
+                case "Docker Hub":
+                    inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
+                    resourceOrigin = inputTextBox?.Text;
+                    break;
+                case "Archive":
+                    inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
+                    resourceOrigin = inputTextBox?.Text;
+                    break;
+            }
+
+            if (resourceOrigin != null)
+            {
+                await this.CreateDistributionViewModel("wslstudio123", resourceOrigin);
+            }
         }
     }
 
-    private async Task CreateDistributionViewModel()
+    private async Task CreateDistributionViewModel(string distroName, string resourceOrigin)
     {
-        var distroName = "NewDistro";
         var memoryLimit = 4.0;
         var processorLimit = 2;
-        var resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
+        //var resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
 
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
         this.Distros.Add(newDistro);

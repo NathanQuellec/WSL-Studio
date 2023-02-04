@@ -39,7 +39,14 @@ public class DockerfileDistributionFactory : IDistributionFactory
             Directory.CreateDirectory(this._appPath);
         }
 
-        this._tarLocation = Path.Combine(this._appPath, distroTarFile);
+        var tarFolder = Path.Combine(this._appPath, distroName);
+
+        if (!Directory.Exists(tarFolder))
+        {
+            Directory.CreateDirectory(tarFolder);
+        }
+
+        this._tarLocation = Path.Combine(tarFolder, distroTarFile);
 
         await this.BuildDockerImage(resourceOrigin);
         await this.CreateDockerContainer();
@@ -197,7 +204,7 @@ public class DockerfileDistributionFactory : IDistributionFactory
         try
         {
 
-            var installDir = Path.Combine(this._appPath, "installDir");
+            var installDir = Path.Combine(this._appPath, distroName,"installDir");
             var process = new ProcessBuilderHelper("cmd.exe")
                 .SetArguments($"/c wsl --import {distroName} {installDir} {this._tarLocation}")
                 .SetRedirectStandardOutput(true)

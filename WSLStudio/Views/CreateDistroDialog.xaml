@@ -13,10 +13,12 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <StackPanel>
-        <TextBox Header="Distribution name :"
-                 Margin="0 10 0 15"
+        <TextBox x:Name="distroNameInput" 
+                 Header="Distribution name :"
+                 Margin="0 12 0 16"
                  Height="64"/>
-        <ComboBox Header="Creation Mode :" 
+        <ComboBox x:Name="CreationMode"
+                  Header="Creation Mode :" 
                   PlaceholderText="Select a mode"
                   SelectionChanged="CreateDistro_SelectionMode">
             <x:String>Dockerfile</x:String>
@@ -26,12 +28,11 @@
 
         <Grid x:Name="DockerfileInputContainer"
               Height="96"
-              Width="280"
               Visibility="Collapsed">
             <TextBox Header="Dockerfile folder path :"
                      x:Name="DockerfileInput"
                      Height="64"
-                     Margin="0 10 0 15"/>
+                     Margin="0 12 0 16"/>
             <Button HorizontalAlignment="Right"
                     Margin="0 24 0 0 "
                     Click="PickDockerFileFolder">
@@ -41,28 +42,33 @@
 
         <Grid x:Name="DockerHubInputContainer" 
               Height="96"
-              Width="280"
               Visibility="Collapsed">
             <TextBox Header="Docker Hub link :"
                      x:Name="DockerHubInput"
                      Height="64"
-                     Margin="0 10 0 15"/>
+                     Margin="0 12 0 16"/>
         </Grid>
 
         <Grid x:Name="ArchiveInputContainer"
               Height="96"
-              Width="280"
               Visibility="Collapsed">
             <TextBox Header="Archive file path :"
                      x:Name="ArchiveInput"
                      Height="64"
-                     Margin="0 10 0 15"/>
+                     Margin="0 12 0 16"/>
             <Button HorizontalAlignment="Right"
                     Margin="0 24 0 0 "
                     Click="PickArchiveFile">
                 <FontIcon Glyph="&#xED25;" />
             </Button>
         </Grid>
+
+        <InfoBar x:Name="DistroNameErrorInfoBar"
+                 Severity="Error"
+                 Title="Invalid Distribution Name"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Margin="0 12 0 16"/>
 
     </StackPanel>
 </UserControl>
