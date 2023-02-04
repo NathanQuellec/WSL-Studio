@@ -26,26 +26,45 @@ namespace WSLStudio.Views
     public sealed partial class CreateDistroDialog : UserControl
     {
 
+        
+
         public CreateDistroDialog()
         {
             this.InitializeComponent();
-            this.DataContext = this;
+
         }
 
         private void CreateDistro_SelectionMode(object sender, SelectionChangedEventArgs e)
         {
 
+            DockerfileInputContainer.Visibility = Visibility.Collapsed;
+            DockerHubInputContainer.Visibility = Visibility.Collapsed;
+            ArchiveInputContainer.Visibility = Visibility.Collapsed;
 
-            string creationMode = e.AddedItems[0].ToString();
+            var creationMode = e.AddedItems[0].ToString();
+
+            switch (creationMode)
+            {
+                case "Dockerfile":
+                    DockerfileInputContainer.Visibility = Visibility.Visible;
+                    break;
+                case "Docker Hub":
+                    DockerHubInputContainer.Visibility = Visibility.Visible;
+                    break;
+                case "Archive":
+                    ArchiveInputContainer.Visibility = Visibility.Visible;
+                    break;
+            }
 
         }
 
-        public async void OpenExplorer(object sender, RoutedEventArgs args)
+        public async void PickDockerFileFolder(object sender, RoutedEventArgs args)
         {
-
             var hwnd = App.MainWindow.GetWindowHandle();
             FolderPicker folderPicker = new();
+
             WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
             folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             folderPicker.FileTypeFilter.Add("*");
 
@@ -53,8 +72,27 @@ namespace WSLStudio.Views
             StorageFolder folder = await folderPicker.PickSingleFolderAsync();
             if (folder != null)
             {
-                string folderName = folder.Name;
-                string folderPath = folder.Path;
+                DockerfileInput.Text = folder.Path;
+            }
+        }
+
+
+        public async void PickArchiveFile(object sender, RoutedEventArgs args)
+        {
+
+            var hwnd = App.MainWindow.GetWindowHandle();
+            FileOpenPicker filePicker = new();
+
+            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
+
+            filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+            filePicker.FileTypeFilter.Add(".tar");
+            filePicker.FileTypeFilter.Add(".gz");
+
+            StorageFile archive = await filePicker.PickSingleFileAsync();
+            if (archive != null)
+            {
+                ArchiveInput.Text = archive.Path;
             }
         }
     }

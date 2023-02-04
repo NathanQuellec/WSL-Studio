@@ -266,13 +266,8 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
+        // contentdialog content set in CreateDistroDialog.xaml
         CreateDistroDialog createDistroDialog = new CreateDistroDialog();
-
-
-        var combo = new ComboBox()
-        {
-            Items = { "Test", "test2" }
-        };
 
         var contentDialog = dialogService.SetTitle("Add distribution :")
             .AddContent(createDistroDialog)
