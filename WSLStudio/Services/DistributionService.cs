@@ -8,20 +8,39 @@ using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
 using Docker.DotNet;
+using Docker.DotNet.Models;
 using WSLStudio.Helpers;
 using Microsoft.UI.Xaml;
 using Microsoft.Win32;
+using ICSharpCode.SharpZipLib.Tar;
+using WSLStudio.Services.Factories;
 
 namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl.localhost";
+    private const string DOCKER_PIPE_URI = @"npipe://./pipe/docker_engine";
 
-    private IList<Distribution> _distros = new List<Distribution>();
+    private readonly IList<Distribution> _distros = new List<Distribution>();
     private readonly WslApi _wslApi = new();
+
+    private DockerfileDistributionFactory _factory;
+
+    public DistributionService()
+    {
+        _factory = new DockerfileDistributionFactory();
+    }
+
+    public async Task<Distribution> CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
+    {
+        var newDistro = await _factory.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        this._distros.Add(newDistro);
+        return newDistro;
+    }
 
     public void InitDistributionsList()
     {
@@ -58,21 +77,10 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    public void CreateDistribution()
-    {
-        DockerClient client = new DockerClientConfiguration(
-                new Uri("npipe//./pipe/docker_engine"))
-            .CreateClient();
-
-
-    }
-
     public void RemoveDistribution(Distribution? distribution)
     {
         var process =  new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
-            .SetRedirectStandardOutput(false)
-            .SetUseShellExecute(false)
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
@@ -185,5 +193,6 @@ public class DistributionService : IDistributionService
             .Build();
         processBuilder.Start();
     }
+
 
 }
