@@ -292,47 +292,63 @@ public class DistrosListDetailsViewModel : ObservableObject
         this.ValidateDistributionName(sender, args);
 
         var resourceOrigin = "";
-
         var dialogContent = sender.Content as StackPanel;
-        var contentContainer = dialogContent.Children.First() as UserControl;
-        var contentForm = contentContainer.Content as StackPanel;
+        var contentContainer = dialogContent!.Children.First() as UserControl;
+        var contentForm = contentContainer!.Content as StackPanel;
+        var renameDistroErrorInfoBar = contentForm!.FindName("DistroNameErrorInfoBar") as InfoBar;
 
-        if (contentForm != null)
+        if (contentForm == null)
         {
-            var creationMode = contentForm.FindName("CreationMode") as ComboBox;
-
-            TextBox inputTextBox;
-            switch (creationMode?.SelectedItem.ToString())
-            {
-                case "Dockerfile":
-                    inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-                case "Docker Hub":
-                    inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-                case "Archive":
-                    inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-            }
-
-            if (resourceOrigin != null)
-            {
-                await this.CreateDistributionViewModel("wslstudio123", resourceOrigin);
-            }
+            return;
         }
+
+        var creationMode = contentForm.FindName("CreationMode") as ComboBox;
+
+        if (creationMode?.SelectedItem == null)
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
+            return;
+        }
+
+        TextBox? inputTextBox;
+        switch (creationMode?.SelectedItem.ToString())
+        {
+            case "Dockerfile":
+                inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+            case "Docker Hub":
+                inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+            case "Archive":
+                inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+        }
+
+        if (resourceOrigin == "")
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar!.Message = "No file/folder has been selected.";
+            return;
+        }
+
+        var distroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
+        var distroName = distroNameInput.Text;
+        await this.CreateDistributionViewModel(distroName, resourceOrigin);
     }
 
     private async Task CreateDistributionViewModel(string distroName, string resourceOrigin)
     {
         var memoryLimit = 4.0;
         var processorLimit = 2;
-        //var resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
 
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
-        this.Distros.Add(newDistro);
-
+        if (newDistro != null)
+        {
+            this.Distros.Add(newDistro);
+        }
     }
 }

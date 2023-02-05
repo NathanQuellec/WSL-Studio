@@ -12,6 +12,7 @@ public class DockerfileDistributionFactory : IDistributionFactory
 {
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
 
+    private string _distroName;
     private string _tarLocation;
     private string _appPath;
     private string _imageTag;
@@ -20,17 +21,20 @@ public class DockerfileDistributionFactory : IDistributionFactory
     private readonly DockerClient _dockerClient;
 
     public DockerfileDistributionFactory()
-    { 
+    {
         this._dockerClient = new DockerClientConfiguration(new Uri(uriString: DOCKER_NAMED_PIPE)).CreateClient();
     }
 
-    public async Task<Distribution> CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
+    public async Task<Distribution?> CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
     {
-        this._imageTag = $"wsl-studio-{distroName.ToLower()}";
-        var distroTarFile = $"{distroName}.tar.gz";
 
+
+        this._imageTag = $"wsl-studio-{distroName.ToLower()}";
+        this._distroName = distroName;
+
+        var distroTarFile = $"{distroName}.tar.gz";
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        
+
 
         this._appPath = Path.Combine(roamingPath, "WslStudio");
 
@@ -48,18 +52,30 @@ public class DockerfileDistributionFactory : IDistributionFactory
 
         this._tarLocation = Path.Combine(tarFolder, distroTarFile);
 
-        await this.BuildDockerImage(resourceOrigin);
-        await this.CreateDockerContainer();
-        await this.ExportDockerContainer();
-        this.ImportDistribution(distroName);
-        await this.RemoveImageAndContainer();
-
-        return new Distribution()
+        try
         {
-            Name = distroName,
-            MemoryLimit = memoryLimit,
-            ProcessorLimit = processorLimit,
-        };
+            await this.BuildDockerImage(resourceOrigin);
+            await this.CreateDockerContainer();
+            await this.ExportDockerContainer();
+            await this.ImportDistribution();
+
+            return new Distribution()
+            {
+                Name = distroName,
+                MemoryLimit = memoryLimit,
+                ProcessorLimit = processorLimit,
+            };
+        }
+        catch (DockerApiException ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return null;
+        }
     }
 
     private static Stream CreateTarballForDockerfileDirectory(string directory)
@@ -118,42 +134,21 @@ public class DockerfileDistributionFactory : IDistributionFactory
                 Tags = new List<string> { this._imageTag },
 
             };
-            //C# 8.0 using syntax
+
             var progress = new Progress<JSONMessage>();
 
             await this._dockerClient.Images.BuildImageFromDockerfileAsync(imageBuildParameters, tarball, null, null, progress);
-
-            /*var filter = new ImagesListParameters
-            {
-                Filters = new Dictionary<string, IDictionary<string, bool>>
-                {
-                    {
-                        "reference", 
-                        new Dictionary<string, bool>
-                        {
-                            {
-                                this._imageTag, 
-                                true
-                            }
-                        }
-                    }
-                }
-            };
-            var images = await this._dockerClient.Images.ListImagesAsync(filter);
-
-            while (true)
-            {
-                if(images.ToString().Equals(this._imageTag))
-                {
-                    break;
-                }
-                images = await this._dockerClient.Images.ListImagesAsync(filter);
-            }*/
-            
         }
+        catch (DockerApiException ex)
+        {
+            Console.WriteLine("[ERROR] Failed to build image, reason: " + ex.Message);
+            throw;
+        }
+
         catch (Exception ex)
         {
-            Debug.WriteLine("[ERROR] BuildDockerImage failed");
+            Console.WriteLine("[ERROR] Failed to build image, reason: " + ex.Message);
+            throw;
         }
     }
 
@@ -169,11 +164,18 @@ public class DockerfileDistributionFactory : IDistributionFactory
             });
 
             this._containerId = container.ID;
-            
+
         }
+        catch (DockerApiException ex)
+        {
+            Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            throw;
+        }
+
         catch (Exception ex)
         {
-            Debug.WriteLine("[ERROR]CreateDockerContainer failed");
+            Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            throw;
         }
     }
 
@@ -190,37 +192,40 @@ public class DockerfileDistributionFactory : IDistributionFactory
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine("Error: Failed to export container, reason: " + ex.Message);
+            Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
+            await this.RemoveImageAndContainer();
+            throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: Failed to export container, reason: " + ex.Message);
+            Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
+            await this.RemoveImageAndContainer();
+            throw;
         }
 
     }
 
-    private void ImportDistribution(string distroName)
+    private async Task ImportDistribution()
     {
         try
         {
 
-            var installDir = Path.Combine(this._appPath, distroName,"installDir");
+            var installDir = Path.Combine(this._appPath, this._distroName, "installDir");
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl --import {distroName} {installDir} {this._tarLocation}")
+                .SetArguments($"/c wsl --import {this._distroName} {installDir} {this._tarLocation}")
                 .SetRedirectStandardOutput(true)
                 .SetUseShellExecute(false)
                 .SetCreateNoWindow(true)
                 .Build();
 
             process.Start();
-
-
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: Failed to import distribution, reason: " + ex.Message);
+            Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
+            await this.RemoveImageAndContainer();
+            throw;
         }
-
     }
 
     private async Task RemoveImageAndContainer()
@@ -239,11 +244,11 @@ public class DockerfileDistributionFactory : IDistributionFactory
         }
         catch (DockerApiException ex)
         {
-            Debug.WriteLine(ex);
+            Console.WriteLine(ex);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
+            Console.WriteLine(ex);
         }
     }
 }
