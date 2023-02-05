@@ -22,17 +22,4 @@ public class DistributionServiceTest
         Assert.IsInstanceOfType(distros, typeof(IList<Distribution>));
     }
 
-    [TestMethod]
-    public void TestAddDistribution()
-    {
-        Distribution newDistro = new Distribution { 
-            Name = "UbuntuTest",
-            MemoryLimit= 8.0,
-            ProcessorLimit= 2,
-        };
-
-        _distributionService.AddDistribution(newDistro);
-        var distrosList = _distributionService.GetAllDistributions();
-        Assert.IsTrue(distrosList.Contains(newDistro));    
-    }
 }

@@ -299,41 +299,45 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
 
-        if (contentForm != null)
+        if (contentForm == null)
         {
-            var creationMode = contentForm.FindName("CreationMode") as ComboBox;
-
-            if (creationMode?.SelectedItem == null)
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "No creation mode has been selected.";
-                return;
-            }
-
-            TextBox? inputTextBox;
-            switch (creationMode?.SelectedItem.ToString())
-            {
-                case "Dockerfile":
-                    inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-                case "Docker Hub":
-                    inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-                case "Archive":
-                    inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
-                    resourceOrigin = inputTextBox?.Text;
-                    break;
-            }
-
-            if (resourceOrigin != null)
-            {
-                var distroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
-                var distroName = distroNameInput.Text;
-                await this.CreateDistributionViewModel(distroName, resourceOrigin);
-            }
+            return;
         }
+
+        var creationMode = contentForm.FindName("CreationMode") as ComboBox;
+
+        if (creationMode?.SelectedItem == null)
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "No creation mode has been selected.";
+            return;
+        }
+
+        TextBox? inputTextBox;
+        switch (creationMode?.SelectedItem.ToString())
+        {
+            case "Dockerfile":
+                inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+            case "Docker Hub":
+                inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+            case "Archive":
+                inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
+                resourceOrigin = inputTextBox?.Text;
+                break;
+        }
+
+        if (resourceOrigin == null)
+        {
+            return;
+        }
+
+        var distroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
+        var distroName = distroNameInput.Text;
+        await this.CreateDistributionViewModel(distroName, resourceOrigin);
     }
 
     private async Task CreateDistributionViewModel(string distroName, string resourceOrigin)
