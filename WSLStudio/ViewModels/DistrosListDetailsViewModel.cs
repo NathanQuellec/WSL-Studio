@@ -292,12 +292,10 @@ public class DistrosListDetailsViewModel : ObservableObject
         this.ValidateDistributionName(sender, args);
 
         var resourceOrigin = "";
-
         var dialogContent = sender.Content as StackPanel;
         var contentContainer = dialogContent!.Children.First() as UserControl;
         var contentForm = contentContainer!.Content as StackPanel;
-
-        var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
+        var renameDistroErrorInfoBar = contentForm!.FindName("DistroNameErrorInfoBar") as InfoBar;
 
         if (contentForm == null)
         {
@@ -309,7 +307,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         if (creationMode?.SelectedItem == null)
         {
             args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "No creation mode has been selected.";
+            renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
             return;
         }
 
@@ -330,8 +328,10 @@ public class DistrosListDetailsViewModel : ObservableObject
                 break;
         }
 
-        if (resourceOrigin == null)
+        if (resourceOrigin == "")
         {
+            args.Cancel = true;
+            renameDistroErrorInfoBar!.Message = "No file/folder has been selected.";
             return;
         }
 
@@ -344,10 +344,11 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         var memoryLimit = 4.0;
         var processorLimit = 2;
-        //var resourceOrigin = "C:\\Users\\nathan\\Documents\\wsl-studioDEV\\";
 
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
-        this.Distros.Add(newDistro);
-
+        if (newDistro != null)
+        {
+            this.Distros.Add(newDistro);
+        }
     }
 }
