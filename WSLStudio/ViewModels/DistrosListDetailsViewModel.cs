@@ -294,14 +294,23 @@ public class DistrosListDetailsViewModel : ObservableObject
         var resourceOrigin = "";
 
         var dialogContent = sender.Content as StackPanel;
-        var contentContainer = dialogContent.Children.First() as UserControl;
-        var contentForm = contentContainer.Content as StackPanel;
+        var contentContainer = dialogContent!.Children.First() as UserControl;
+        var contentForm = contentContainer!.Content as StackPanel;
+
+        var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
 
         if (contentForm != null)
         {
             var creationMode = contentForm.FindName("CreationMode") as ComboBox;
 
-            TextBox inputTextBox;
+            if (creationMode?.SelectedItem == null)
+            {
+                args.Cancel = true;
+                renameDistroErrorInfoBar.Message = "No creation mode has been selected.";
+                return;
+            }
+
+            TextBox? inputTextBox;
             switch (creationMode?.SelectedItem.ToString())
             {
                 case "Dockerfile":
@@ -320,7 +329,9 @@ public class DistrosListDetailsViewModel : ObservableObject
 
             if (resourceOrigin != null)
             {
-                await this.CreateDistributionViewModel("wslstudio123", resourceOrigin);
+                var distroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
+                var distroName = distroNameInput.Text;
+                await this.CreateDistributionViewModel(distroName, resourceOrigin);
             }
         }
     }

@@ -34,7 +34,7 @@ namespace WSLStudio.Views
 
         }
 
-        private void CreateDistro_SelectionMode(object sender, SelectionChangedEventArgs e)
+        private async void CreateDistro_SelectionMode(object sender, SelectionChangedEventArgs e)
         {
 
             DockerfileInputContainer.Visibility = Visibility.Collapsed;
