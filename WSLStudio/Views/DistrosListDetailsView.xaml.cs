@@ -32,7 +32,7 @@ public sealed partial class DistrosListDetailsView : Page
 
         WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
         {
-            var distro = message.distribution;
+            var distro = message.Distribution;
             FindDistroStopButton(this, distro.Name);
             if (_distroStopButton != null)
             {
@@ -42,7 +42,7 @@ public sealed partial class DistrosListDetailsView : Page
 
         WeakReferenceMessenger.Default.Register<HideDistroStopButtonMessage>(this, (recipient, message) =>
         {
-            var distro = message.distribution;
+            var distro = message.Distribution;
             FindDistroStopButton(this, distro.Name);
             if (_distroStopButton != null)
             {
@@ -50,10 +50,11 @@ public sealed partial class DistrosListDetailsView : Page
             }
         });
 
-        //Close InfoBar after timer set in DistroListDetailsViewModel.cs:RemoveSuccessInfoBar()
+        //Close InfoBar after timer set in DistroListDetailsViewModel.cs
         WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
         {
-            DispatcherQueue.TryEnqueue(() => RemoveDistroInfoSuccess.IsOpen = false);
+            var infoBar = message.InfoBar;
+            DispatcherQueue.TryEnqueue(() => infoBar.IsOpen = false);
         });
     }
 

@@ -4,6 +4,11 @@ namespace WSLStudio.Messages;
 
 public class ShowDistroStopButtonMessage
 {
-    public Distribution distribution { get; }
-    public ShowDistroStopButtonMessage(Distribution distribution) { this.distribution = distribution; }
+    public Distribution Distribution { get; }
+
+    public ShowDistroStopButtonMessage(Distribution distribution)
+    {
+        this.Distribution = distribution; 
+
+    }
 }

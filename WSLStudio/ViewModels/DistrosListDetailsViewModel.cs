@@ -25,14 +25,14 @@ namespace WSLStudio.ViewModels;
 
 public class DistrosListDetailsViewModel : ObservableObject
 {
-    private static InfoBar? _infoBar;
-    private static Timer? _timer;
 
     private readonly IDistributionService _distributionService;
+    private readonly IInfoBarService _infoBarService;
 
-    public DistrosListDetailsViewModel ( IDistributionService distributionService )
+    public DistrosListDetailsViewModel ( IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
+        this._infoBarService = infoBarService;
 
         RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
@@ -77,36 +77,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
-    // Send a message to the view to close the InfoBar
-    private static void CloseInfoBar(object sender, ElapsedEventArgs e)
-    {
-        lock (_infoBar)
-        {
-            WeakReferenceMessenger.Default.Send(new CloseInfoBarMessage());
-            _timer.Stop();
-        }
-    }
-
-    // Open an InfoBar that closes after 2 seconds
-    private static void OpenInfoBar(string infoBarName)
-    {
-        if (_infoBar == null)
-        {
-            var appFrame = App.MainWindow.Content as Frame;
-            var appPage = appFrame.Content as Page;
-            var appGrid = appPage.Content as Grid;
-            _infoBar = appGrid.FindName(infoBarName) as InfoBar;
-
-            _timer = new Timer(2000); // 2000 milliseconds = 2 seconds
-            _timer.Elapsed += CloseInfoBar;
-        }
-
-        lock (_infoBar)
-        {
-            _infoBar.IsOpen = true;
-            _timer.Start();
-        }
-    }
 
     private void RemoveDistributionViewModel(Distribution distribution)
     {
@@ -117,7 +87,8 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (!Distros.Contains(distribution))
         {
-            OpenInfoBar("RemoveDistroInfoSuccess");
+            var removeDistroInfoBar = this._infoBarService.FindInfoBar("RemoveDistroInfoSuccess");
+            this._infoBarService.OpenInfoBar(removeDistroInfoBar, 2000);
         }
     }
 
@@ -145,42 +116,44 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
 
-        if (renameDistroErrorInfoBar != null)
+        if (renameDistroErrorInfoBar == null)
         {
-            renameDistroErrorInfoBar.IsOpen = true;
+            return;
+        }
 
-            var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
+        renameDistroErrorInfoBar.IsOpen = true;
 
-            if (string.IsNullOrWhiteSpace(newDistroName))
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
-            }
+        var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
 
-            else if (newDistroName.Any(char.IsWhiteSpace))
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
-            }
+        if (string.IsNullOrWhiteSpace(newDistroName))
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
+        }
 
-            else if (newDistroName.Length is <= 2 or > 30)
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
-                                                   " with a length shorter than 2 characters or longer than 30 characters.";
-            }
+        else if (newDistroName.Any(char.IsWhiteSpace))
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
+        }
 
-            else if (!regexItem.IsMatch(newDistroName))
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
-            }
+        else if (newDistroName.Length is <= 2 or > 30)
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
+                                               " with a length shorter than 2 characters or longer than 30 characters.";
+        }
 
-            else if (namesList.Contains(newDistroName))
-            {
-                args.Cancel = true;
-                renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
-            }
+        else if (!regexItem.IsMatch(newDistroName))
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
+        }
+
+        else if (namesList.Contains(newDistroName))
+        {
+            args.Cancel = true;
+            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
         }
 
     }
@@ -208,7 +181,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         };
 
 
-        var contentDialog = dialogService.SetTitle($"Rename \"{distribution.Name}\" :")
+        var dialog = dialogService.SetTitle($"Rename \"{distribution.Name}\" :")
             .AddContent(newDistroNameInput)
             .AddContent(renameDistroErrorInfoBar)
             .SetPrimaryButtonText("Rename")
@@ -218,7 +191,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             .SetPrimaryButtonClick(ValidateDistributionName)
             .Build();
 
-        var buttonClicked = await contentDialog.ShowAsync();
+        var buttonClicked = await dialog.ShowAsync();
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
@@ -273,82 +246,105 @@ public class DistrosListDetailsViewModel : ObservableObject
         // contentdialog content set in CreateDistroDialog.xaml
         var createDistroDialog = new CreateDistroDialog();
 
-        var contentDialog = dialogService.SetTitle("Add distribution :")
+        var dialog = dialogService.SetTitle("Add distribution :")
             .AddContent(createDistroDialog)
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(CreateDistribution)
+            .SetPrimaryButtonClick(ValidateCreationMode)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
 
-        var buttonClicked = await contentDialog.ShowAsync();
+        var buttonClicked = await dialog.ShowAsync();
 
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            var distroCreationInfos =  this.GetDistributionCreationInfos(dialog);
+            var distroName = distroCreationInfos.Item1;
+            var resourceOrigin = distroCreationInfos.Item2;
+
+            await CreateDistributionViewModel(distroName, resourceOrigin);
+        }
     }
 
-    private async void CreateDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-
         this.ValidateDistributionName(sender, args);
 
-        var resourceOrigin = "";
         var dialogContent = sender.Content as StackPanel;
         var contentContainer = dialogContent!.Children.First() as UserControl;
-        var contentForm = contentContainer!.Content as StackPanel;
-        var renameDistroErrorInfoBar = contentForm!.FindName("DistroNameErrorInfoBar") as InfoBar;
+        var form = contentContainer!.Content as StackPanel;
 
-        if (contentForm == null)
+        var renameDistroErrorInfoBar = form!.FindName("DistroNameErrorInfoBar") as InfoBar;
+
+        var creationMode = form.FindName("CreationMode") as ComboBox;
+
+        if (creationMode?.SelectedItem != null)
         {
             return;
         }
 
-        var creationMode = contentForm.FindName("CreationMode") as ComboBox;
+        args.Cancel = true;
+        renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
+    }
 
-        if (creationMode?.SelectedItem == null)
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
-            return;
-        }
+    private Tuple<string, string> GetDistributionCreationInfos(ContentDialog dialog)
+    {
 
+        var dialogContent = dialog.Content as StackPanel;
+        var contentContainer = dialogContent!.Children.First() as UserControl;
+        var form = contentContainer!.Content as StackPanel;
+
+        var resourceOrigin = "";
+
+        var creationMode = form.FindName("CreationMode") as ComboBox;
         TextBox? inputTextBox;
         switch (creationMode?.SelectedItem.ToString())
         {
             case "Dockerfile":
-                inputTextBox = contentForm.FindName("DockerfileInput") as TextBox;
-                resourceOrigin = inputTextBox?.Text;
+                inputTextBox = form.FindName("DockerfileInput") as TextBox;
+                resourceOrigin = inputTextBox!.Text;
                 break;
             case "Docker Hub":
-                inputTextBox = contentForm.FindName("DockerHubInput") as TextBox;
-                resourceOrigin = inputTextBox?.Text;
+                inputTextBox = form.FindName("DockerHubInput") as TextBox;
+                resourceOrigin = inputTextBox!.Text;
                 break;
             case "Archive":
-                inputTextBox = contentForm.FindName("ArchiveInput") as TextBox;
-                resourceOrigin = inputTextBox?.Text;
+                inputTextBox = form.FindName("ArchiveInput") as TextBox;
+                resourceOrigin = inputTextBox!.Text;
                 break;
         }
 
-        if (resourceOrigin == "")
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar!.Message = "No file/folder has been selected.";
-            return;
-        }
+        var distroNameInput = form?.FindName("distroNameInput") as TextBox;
+        var distroName = distroNameInput!.Text;
 
-        var distroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
-        var distroName = distroNameInput.Text;
-        await this.CreateDistributionViewModel(distroName, resourceOrigin);
+        return Tuple.Create(distroName, resourceOrigin);
     }
 
     private async Task CreateDistributionViewModel(string distroName, string resourceOrigin)
     {
-        var memoryLimit = 4.0;
-        var processorLimit = 2;
+        const double memoryLimit = 4.0;
+        const int processorLimit = 2;
+
+        var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
+        this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
 
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
         if (newDistro != null)
         {
+            this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
+
+            var createNewDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateNewDistroInfoSuccess");
+            this._infoBarService.OpenInfoBar(createNewDistroInfoSuccess, 2000);
+
             this.Distros.Add(newDistro);
+        }
+        else
+        {
+            this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
+
+            var createNewDistroInfoError = this._infoBarService.FindInfoBar("CreateNewDistroInfoError");
+            this._infoBarService.OpenInfoBar(createNewDistroInfoError, 5000);
         }
     }
 }

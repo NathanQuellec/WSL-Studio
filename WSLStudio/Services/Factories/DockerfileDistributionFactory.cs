@@ -58,6 +58,8 @@ public class DockerfileDistributionFactory : IDistributionFactory
             await this.CreateDockerContainer();
             await this.ExportDockerContainer();
             await this.ImportDistribution();
+            await this.RemoveDockerImage();
+            await this.RemoveDockerContainer();
 
             return new Distribution()
             {
@@ -169,12 +171,14 @@ public class DockerfileDistributionFactory : IDistributionFactory
         catch (DockerApiException ex)
         {
             Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            await this.RemoveDockerImage();
             throw;
         }
 
         catch (Exception ex)
         {
             Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            await this.RemoveDockerImage();
             throw;
         }
     }
@@ -193,13 +197,15 @@ public class DockerfileDistributionFactory : IDistributionFactory
         catch (DockerApiException ex)
         {
             Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
-            await this.RemoveImageAndContainer();
+            await this.RemoveDockerImage();
+            await this.RemoveDockerContainer();
             throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
-            await this.RemoveImageAndContainer();
+            await this.RemoveDockerImage();
+            await this.RemoveDockerContainer();
             throw;
         }
 
@@ -223,12 +229,13 @@ public class DockerfileDistributionFactory : IDistributionFactory
         catch (Exception ex)
         {
             Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
-            await this.RemoveImageAndContainer();
+            await this.RemoveDockerImage();
+            await this.RemoveDockerContainer();
             throw;
         }
     }
 
-    private async Task RemoveImageAndContainer()
+    private async Task RemoveDockerImage()
     {
         try
         {
@@ -237,6 +244,25 @@ public class DockerfileDistributionFactory : IDistributionFactory
                 Force = true,
             });
 
+            await this._dockerClient.Containers.RemoveContainerAsync(this._containerId, new ContainerRemoveParameters()
+            {
+                Force = true,
+            });
+        }
+        catch (DockerApiException ex)
+        {
+            Console.WriteLine(ex);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task RemoveDockerContainer()
+    {
+        try
+        {
             await this._dockerClient.Containers.RemoveContainerAsync(this._containerId, new ContainerRemoveParameters()
             {
                 Force = true,
