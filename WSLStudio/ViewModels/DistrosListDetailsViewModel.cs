@@ -236,14 +236,17 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
+        var isDistroRenamed = this._distributionService.RenameDistribution(distribution, newDistroName);
+        if (!isDistroRenamed)
+        {
+            return;
+        }
+
         var index = this.Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
         if (index != -1)
         {
             this.Distros.ElementAt(index).Name = newDistroName;
         }
-
-        this._distributionService.RenameDistribution(distribution);
-        
     }
 
     private void LaunchDistributionViewModel(Distribution distribution)

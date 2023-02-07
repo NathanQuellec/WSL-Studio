@@ -23,7 +23,7 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl.localhost";
-    private const string DOCKER_PIPE_URI = @"npipe://./pipe/docker_engine";
+    private const string APP_FOLDER = "WslStudio";
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
@@ -96,7 +96,7 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    public void RemoveDistribution(Distribution? distribution)
+    public void RemoveDistribution(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
@@ -120,29 +120,59 @@ public class DistributionService : IDistributionService
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
-    public void RenameDistribution(Distribution? distribution)
+    public bool RenameDistribution(Distribution distribution, string newDistroName)
     {
-        Debug.WriteLine(this._distros);
         Debug.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
         var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
         foreach (var subKey in lxsSubKeys.GetSubKeyNames())
         {
-            if (subKey == $"{{{distribution?.Id.ToString()}}}")
+            if (subKey != $"{{{distribution.Id.ToString()}}}")
             {
-                var distroRegPath = Path.Combine(lxssRegPath, subKey);
-                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-                Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
-                distroSubkeys.SetValue("DistributionName", distribution.Name);
-                Debug.WriteLine($"OK {subKey}");
-                distroSubkeys.Close();
+                continue;
             }
+
+            var distroRegPath = Path.Combine(lxssRegPath, subKey);
+            var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
+            Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
+            distroSubkeys.SetValue("DistributionName", newDistroName);
+            Debug.WriteLine($"OK {subKey}");
+            distroSubkeys.Close();
+            lxsSubKeys.Close();
+            //this.RenameDistributionFolder(distribution.Name, newDistroName);
+            return true;
         }
         lxsSubKeys.Close();
+        return false;
     }
 
-    public void LaunchDistribution(Distribution? distribution)
+    // TODO : Rename distro folder
+    /*public void RenameDistributionFolder(string distroName, string newDistroName)
+    {
+        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var distroPath = Path.Combine(roamingPath, APP_FOLDER, distroName);
+        var newDistroPath = Path.Combine(roamingPath, APP_FOLDER, newDistroName);
+
+        try
+        {
+            if (Directory.Exists(distroPath))
+            {
+                Directory.Move(distroPath, newDistroPath);
+                Console.WriteLine("Directory renamed successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Source directory does not exist.");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error renaming directory: " + e.Message);
+        }
+    }*/
+
+    public void LaunchDistribution(Distribution distribution)
     {
         try
         {
@@ -172,17 +202,17 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}");
+            Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
         }
 
     }
 
-    public void StopDistribution(Distribution? distribution)
+    public void StopDistribution(Distribution distribution)
     {
         if (distribution?.RunningProcesses == null)
         {
             Debug.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
-                            $"they are no processes running for {distribution.Name}");
+                            $"they are no processes running for {distribution!.Name}");
         }
         else
         {
@@ -203,7 +233,7 @@ public class DistributionService : IDistributionService
 
     // TODO: Check why opening distro file system invoke sometimes an error. 
 
-    public void OpenDistributionFileSystem(Distribution? distribution)
+    public void OpenDistributionFileSystem(Distribution distribution)
     {
         string distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
 
