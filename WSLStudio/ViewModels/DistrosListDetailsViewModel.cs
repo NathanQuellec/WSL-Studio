@@ -29,17 +29,21 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IDistributionService _distributionService;
     private readonly IInfoBarService _infoBarService;
 
+    private bool isDistroCreationProcessing;
+
     public DistrosListDetailsViewModel ( IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
         this._infoBarService = infoBarService;
+
+        isDistroCreationProcessing = false;
 
         RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -288,6 +292,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
     }
 
+    // return a tuple composed of the distro name and the resource origin (file/folder path or docker hub link)
     private Tuple<string, string> GetDistributionCreationInfos(ContentDialog dialog)
     {
 
@@ -326,12 +331,16 @@ public class DistrosListDetailsViewModel : ObservableObject
         const double memoryLimit = 4.0;
         const int processorLimit = 2;
 
+        isDistroCreationProcessing = true;
+
         var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
 
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
         if (newDistro != null)
         {
+            isDistroCreationProcessing = false;
+
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 
             var createNewDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateNewDistroInfoSuccess");
@@ -341,6 +350,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
         else
         {
+            isDistroCreationProcessing = false;
+
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 
             var createNewDistroInfoError = this._infoBarService.FindInfoBar("CreateNewDistroInfoError");
