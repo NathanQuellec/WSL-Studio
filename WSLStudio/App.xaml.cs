@@ -108,8 +108,10 @@ public partial class App : Application
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<IDialogBuilderService, DialogBuilderService>();
+            services.AddTransient<IInfoBarService, InfoBarService>();
             services.AddSingleton<IDistributionService, DistributionService>();
             services.AddSingleton<IWslService, WslService>();
+            
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

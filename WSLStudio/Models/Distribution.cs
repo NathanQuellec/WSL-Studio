@@ -13,7 +13,7 @@ namespace WSLStudio.Models;
 
 public class Distribution : INotifyPropertyChanged
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     public string Path { get; set; }
     public bool IsDefault { get; set; }
     public int WslVersion { get; set; }

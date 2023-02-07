@@ -154,5 +154,41 @@
                      IsOpen="False"
                      Height="100"
                      Width="450"/>
+
+        <InfoBar x:Name="CreateNewDistroInfoProgress"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Informational"
+                 Title="WSL Studio is currently creating your distribution"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Height="100"
+                 Width="450">
+            <InfoBar.Content>
+                <ProgressBar IsIndeterminate="True" 
+                             Margin="0,0,20,6" 
+                             MaxWidth="200"/>
+            </InfoBar.Content>
+        </InfoBar>
+
+            <InfoBar x:Name="CreateNewDistroInfoError"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Error"
+                 Title="WSL Studio has failed to create your distribution"
+                 Message="Docker is either not running or has failed to build the image."
+                 IsOpen="False"
+                 Height="100"
+                 Width="600"/>
+
+        <InfoBar x:Name="CreateNewDistroInfoSuccess"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Success"
+                 Title="WSL Studio has successfully create your distribution"
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
+
     </Grid>
 </Page>
