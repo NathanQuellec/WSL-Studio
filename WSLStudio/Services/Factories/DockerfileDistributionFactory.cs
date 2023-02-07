@@ -11,6 +11,7 @@ namespace WSLStudio.Services.Factories;
 public class DockerfileDistributionFactory : IDistributionFactory
 {
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
+    private const string APP_FOLDER = "WslStudio";
 
     private string _distroName;
     private string _tarLocation;
@@ -36,21 +37,21 @@ public class DockerfileDistributionFactory : IDistributionFactory
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
 
-        this._appPath = Path.Combine(roamingPath, "WslStudio");
+        this._appPath = Path.Combine(roamingPath, APP_FOLDER);
 
         if (!Directory.Exists(this._appPath))
         {
             Directory.CreateDirectory(this._appPath);
         }
 
-        var tarFolder = Path.Combine(this._appPath, distroName);
+        var distroFolder = Path.Combine(this._appPath, distroName);
 
-        if (!Directory.Exists(tarFolder))
+        if (!Directory.Exists(distroFolder))
         {
-            Directory.CreateDirectory(tarFolder);
+            Directory.CreateDirectory(distroFolder);
         }
 
-        this._tarLocation = Path.Combine(tarFolder, distroTarFile);
+        this._tarLocation = Path.Combine(distroFolder, distroTarFile);
 
         try
         {
