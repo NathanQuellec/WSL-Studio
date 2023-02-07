@@ -13,9 +13,6 @@ public class DockerfileDistributionFactory : IDistributionFactory
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
     private const string APP_FOLDER = "WslStudio";
 
-    private string _distroName;
-    private string _tarLocation;
-    private string _appPath;
     private string _imageTag;
     private string _containerId;
 
@@ -26,47 +23,45 @@ public class DockerfileDistributionFactory : IDistributionFactory
         this._dockerClient = new DockerClientConfiguration(new Uri(uriString: DOCKER_NAMED_PIPE)).CreateClient();
     }
 
-    public async Task<Distribution?> CreateDistribution(string distroName, double memoryLimit, int processorLimit, string resourceOrigin)
+    public async Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin)
     {
 
 
         this._imageTag = $"wsl-studio-{distroName.ToLower()}";
-        this._distroName = distroName;
 
         var distroTarFile = $"{distroName}.tar.gz";
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
 
-        this._appPath = Path.Combine(roamingPath, APP_FOLDER);
+        var appPath = Path.Combine(roamingPath, APP_FOLDER);
 
-        if (!Directory.Exists(this._appPath))
+        if (!Directory.Exists(appPath))
         {
-            Directory.CreateDirectory(this._appPath);
+            Directory.CreateDirectory(appPath);
         }
 
-        var distroFolder = Path.Combine(this._appPath, distroName);
+        var distroFolder = Path.Combine(appPath, distroName);
 
         if (!Directory.Exists(distroFolder))
         {
             Directory.CreateDirectory(distroFolder);
         }
 
-        this._tarLocation = Path.Combine(distroFolder, distroTarFile);
+        var tarLocation = Path.Combine(distroFolder, distroTarFile);
 
         try
         {
             await this.BuildDockerImage(resourceOrigin);
             await this.CreateDockerContainer();
-            await this.ExportDockerContainer();
-            await this.ImportDistribution();
+            await this.ExportDockerContainer(tarLocation);
+            await this.ImportDistribution(distroName, appPath, tarLocation);
             await this.RemoveDockerImage();
             await this.RemoveDockerContainer();
 
             return new Distribution()
             {
                 Name = distroName,
-                MemoryLimit = memoryLimit,
-                ProcessorLimit = processorLimit,
+                
             };
         }
         catch (DockerApiException ex)
@@ -184,14 +179,14 @@ public class DockerfileDistributionFactory : IDistributionFactory
         }
     }
 
-    private async Task ExportDockerContainer()
+    private async Task ExportDockerContainer(string tarLocation)
     {
         try
         {
 
             await using var exportStream = await this._dockerClient.Containers.ExportContainerAsync(this._imageTag);
 
-            await using var fileStream = new FileStream(this._tarLocation, FileMode.Create);
+            await using var fileStream = new FileStream(tarLocation, FileMode.Create);
             await exportStream.CopyToAsync(fileStream);
 
         }
@@ -212,14 +207,14 @@ public class DockerfileDistributionFactory : IDistributionFactory
 
     }
 
-    private async Task ImportDistribution()
+    private async Task ImportDistribution(string distroName, string appPath, string tarLocation)
     {
         try
         {
 
-            var installDir = Path.Combine(this._appPath, this._distroName, "installDir");
+            var installDir = Path.Combine(appPath, distroName, "installDir");
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl --import {this._distroName} {installDir} {this._tarLocation}")
+                .SetArguments($"/c wsl --import {distroName} {installDir} {tarLocation}")
                 .SetRedirectStandardOutput(true)
                 .SetUseShellExecute(false)
                 .SetCreateNoWindow(true)
