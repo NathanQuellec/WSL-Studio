@@ -54,15 +54,6 @@
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
-                                <MenuFlyoutItem Text="Remove" 
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RemoveDistroCommand}"
-                                                CommandParameter="{x:Bind}">
-                                    <MenuFlyoutItem.Icon>
-                                        <FontIcon Glyph="&#xE74D;"/>
-                                    </MenuFlyoutItem.Icon>
-                                </MenuFlyoutItem>
-
                                 <MenuFlyoutItem Text="Rename"
                                                 Command="{Binding ElementName=Page, 
                                                                   Path=ViewModel.RenameDistroCommand}"
@@ -78,6 +69,15 @@
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xEC50;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+
+                                <MenuFlyoutItem Text="Remove" 
+                                                Command="{Binding ElementName=Page, 
+                                                                  Path=ViewModel.RemoveDistroCommand}"
+                                                CommandParameter="{x:Bind}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE74D;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 

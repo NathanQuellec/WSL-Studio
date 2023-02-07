@@ -29,27 +29,27 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IDistributionService _distributionService;
     private readonly IInfoBarService _infoBarService;
 
-    private bool isDistroCreationProcessing;
+    private bool _isDistroCreationProcessing;
 
     public DistrosListDetailsViewModel ( IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
         this._infoBarService = infoBarService;
 
-        isDistroCreationProcessing = false;
+        this._isDistroCreationProcessing = false;
 
-        RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
+        RemoveDistroCommand = new AsyncRelayCommand<Distribution>(RemoveDistributionDialog);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !isDistroCreationProcessing);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
     }
 
-    public RelayCommand<Distribution> RemoveDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
     public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
 
@@ -81,6 +81,28 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
+    private async Task RemoveDistributionDialog(Distribution distribution)
+    {
+        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to remove {distribution.Name} ...");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+
+        var dialog = dialogService.SetTitle($"Are you sure to remove \"{distribution.Name}\" ?")
+            .SetPrimaryButtonText("Remove")
+            .SetCloseButtonText("Cancel")
+            .SetDefaultButton(ContentDialogButton.Primary)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .SetPrimaryButtonClick(ValidateDistributionName)
+            .Build();
+
+        var buttonClicked = await dialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            RemoveDistributionViewModel(distribution);
+        }
+    }
 
     private void RemoveDistributionViewModel(Distribution distribution)
     {
@@ -337,7 +359,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         const double memoryLimit = 4.0;
         const int processorLimit = 2;
 
-        isDistroCreationProcessing = true;
+        this._isDistroCreationProcessing = true;
 
         var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
@@ -345,7 +367,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
         if (newDistro != null)
         {
-            isDistroCreationProcessing = false;
+            this._isDistroCreationProcessing = false;
 
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 
@@ -356,7 +378,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
         else
         {
-            isDistroCreationProcessing = false;
+            this._isDistroCreationProcessing = false;
 
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 
