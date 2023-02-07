@@ -29,27 +29,27 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IDistributionService _distributionService;
     private readonly IInfoBarService _infoBarService;
 
-    private bool isDistroCreationProcessing;
+    private bool _isDistroCreationProcessing;
 
     public DistrosListDetailsViewModel ( IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
         this._infoBarService = infoBarService;
 
-        isDistroCreationProcessing = false;
+        this._isDistroCreationProcessing = false;
 
-        RemoveDistroCommand = new RelayCommand<Distribution>(RemoveDistributionViewModel);
+        RemoveDistroCommand = new AsyncRelayCommand<Distribution>(RemoveDistributionDialog);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !isDistroCreationProcessing);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
     }
 
-    public RelayCommand<Distribution> RemoveDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
     public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
 
@@ -81,6 +81,28 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
+    private async Task RemoveDistributionDialog(Distribution distribution)
+    {
+        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to remove {distribution.Name} ...");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+
+        var dialog = dialogService.SetTitle($"Are you sure to remove \"{distribution.Name}\" ?")
+            .SetPrimaryButtonText("Remove")
+            .SetCloseButtonText("Cancel")
+            .SetDefaultButton(ContentDialogButton.Primary)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .SetPrimaryButtonClick(ValidateDistributionName)
+            .Build();
+
+        var buttonClicked = await dialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            RemoveDistributionViewModel(distribution);
+        }
+    }
 
     private void RemoveDistributionViewModel(Distribution distribution)
     {
@@ -125,20 +147,20 @@ public class DistrosListDetailsViewModel : ObservableObject
             return;
         }
 
-        renameDistroErrorInfoBar.IsOpen = true;
-
         var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
 
         if (string.IsNullOrWhiteSpace(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (newDistroName.Any(char.IsWhiteSpace))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (newDistroName.Length is <= 2 or > 30)
@@ -146,18 +168,25 @@ public class DistrosListDetailsViewModel : ObservableObject
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
                                                " with a length shorter than 2 characters or longer than 30 characters.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (!regexItem.IsMatch(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (namesList.Contains(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
+            renameDistroErrorInfoBar.IsOpen = true;
+        }
+        else
+        {
+            renameDistroErrorInfoBar.IsOpen = false;
         }
 
     }
@@ -250,7 +279,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         // contentdialog content set in CreateDistroDialog.xaml
         var createDistroDialog = new CreateDistroDialog();
 
-        var dialog = dialogService.SetTitle("Add distribution :")
+        var dialog = dialogService.SetTitle("Create distribution :")
             .AddContent(createDistroDialog)
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
@@ -263,9 +292,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var distroCreationInfos =  this.GetDistributionCreationInfos(dialog);
-            var distroName = distroCreationInfos.Item1;
-            var resourceOrigin = distroCreationInfos.Item2;
+            var (distroName, resourceOrigin) = this.GetDistributionCreationInfos(dialog);
 
             await CreateDistributionViewModel(distroName, resourceOrigin);
         }
@@ -279,17 +306,18 @@ public class DistrosListDetailsViewModel : ObservableObject
         var contentContainer = dialogContent!.Children.First() as UserControl;
         var form = contentContainer!.Content as StackPanel;
 
-        var renameDistroErrorInfoBar = form!.FindName("DistroNameErrorInfoBar") as InfoBar;
+        var creationModeErrorInfoBar = form!.FindName("CreationModeErrorInfoBar") as InfoBar;
 
         var creationMode = form.FindName("CreationMode") as ComboBox;
 
         if (creationMode?.SelectedItem != null)
         {
+            creationModeErrorInfoBar!.IsOpen = false;
             return;
         }
 
         args.Cancel = true;
-        renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
+        creationModeErrorInfoBar!.IsOpen = true;
     }
 
     // return a tuple composed of the distro name and the resource origin (file/folder path or docker hub link)
@@ -331,7 +359,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         const double memoryLimit = 4.0;
         const int processorLimit = 2;
 
-        isDistroCreationProcessing = true;
+        this._isDistroCreationProcessing = true;
 
         var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
@@ -339,7 +367,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
         if (newDistro != null)
         {
-            isDistroCreationProcessing = false;
+            this._isDistroCreationProcessing = false;
 
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 
@@ -350,7 +378,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
         else
         {
-            isDistroCreationProcessing = false;
+            this._isDistroCreationProcessing = false;
 
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
 

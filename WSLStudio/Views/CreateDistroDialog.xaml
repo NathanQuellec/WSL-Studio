@@ -70,5 +70,12 @@
                  IsClosable="False"
                  Margin="0 12 0 16"/>
 
+        <InfoBar x:Name="CreationModeErrorInfoBar"
+                 Severity="Error"
+                 Title="No creation mode selected"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Margin="0 12 0 16"/>
+
     </StackPanel>
 </UserControl>
