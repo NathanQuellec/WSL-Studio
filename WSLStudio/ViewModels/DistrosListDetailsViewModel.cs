@@ -295,9 +295,9 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var (distroName, resourceOrigin) = this.GetDistributionCreationInfos(dialog);
+            var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
 
-            await CreateDistributionViewModel(distroName, resourceOrigin);
+            await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
         }
     }
 
@@ -324,7 +324,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     }
 
     // return a tuple composed of the distro name and the resource origin (file/folder path or docker hub link)
-    private Tuple<string, string> GetDistributionCreationInfos(ContentDialog dialog)
+    private Tuple<string, string, string> GetDistributionCreationInfos(ContentDialog dialog)
     {
 
         var dialogContent = dialog.Content as StackPanel;
@@ -333,9 +333,10 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var resourceOrigin = "";
 
-        var creationMode = form.FindName("CreationMode") as ComboBox;
+        var creationModeComboBox = form.FindName("CreationMode") as ComboBox;
+        var creationMode = creationModeComboBox!.SelectedItem.ToString();
         TextBox? inputTextBox;
-        switch (creationMode?.SelectedItem.ToString())
+        switch (creationMode)
         {
             case "Dockerfile":
                 inputTextBox = form.FindName("DockerfileInput") as TextBox;
@@ -351,23 +352,20 @@ public class DistrosListDetailsViewModel : ObservableObject
                 break;
         }
 
-        var distroNameInput = form?.FindName("distroNameInput") as TextBox;
+        var distroNameInput = form.FindName("distroNameInput") as TextBox;
         var distroName = distroNameInput!.Text;
 
-        return Tuple.Create(distroName, resourceOrigin);
+        return Tuple.Create(distroName, resourceOrigin, creationMode);
     }
 
-    private async Task CreateDistributionViewModel(string distroName, string resourceOrigin)
+    private async Task CreateDistributionViewModel(string creationMode, string distroName, string resourceOrigin)
     {
-        const double memoryLimit = 4.0;
-        const int processorLimit = 2;
-
         this._isDistroCreationProcessing = true;
 
         var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
 
-        var newDistro = await this._distributionService.CreateDistribution(distroName, memoryLimit, processorLimit, resourceOrigin);
+        var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
         if (newDistro != null)
         {
             this._isDistroCreationProcessing = false;
