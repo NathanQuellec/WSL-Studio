@@ -125,20 +125,20 @@ public class DistrosListDetailsViewModel : ObservableObject
             return;
         }
 
-        renameDistroErrorInfoBar.IsOpen = true;
-
         var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
 
         if (string.IsNullOrWhiteSpace(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (newDistroName.Any(char.IsWhiteSpace))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (newDistroName.Length is <= 2 or > 30)
@@ -146,18 +146,25 @@ public class DistrosListDetailsViewModel : ObservableObject
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
                                                " with a length shorter than 2 characters or longer than 30 characters.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (!regexItem.IsMatch(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
+            renameDistroErrorInfoBar.IsOpen = true;
         }
 
         else if (namesList.Contains(newDistroName))
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
+            renameDistroErrorInfoBar.IsOpen = true;
+        }
+        else
+        {
+            renameDistroErrorInfoBar.IsOpen = false;
         }
 
     }
@@ -250,7 +257,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         // contentdialog content set in CreateDistroDialog.xaml
         var createDistroDialog = new CreateDistroDialog();
 
-        var dialog = dialogService.SetTitle("Add distribution :")
+        var dialog = dialogService.SetTitle("Create distribution :")
             .AddContent(createDistroDialog)
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
@@ -263,9 +270,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var distroCreationInfos =  this.GetDistributionCreationInfos(dialog);
-            var distroName = distroCreationInfos.Item1;
-            var resourceOrigin = distroCreationInfos.Item2;
+            var (distroName, resourceOrigin) = this.GetDistributionCreationInfos(dialog);
 
             await CreateDistributionViewModel(distroName, resourceOrigin);
         }
@@ -279,17 +284,18 @@ public class DistrosListDetailsViewModel : ObservableObject
         var contentContainer = dialogContent!.Children.First() as UserControl;
         var form = contentContainer!.Content as StackPanel;
 
-        var renameDistroErrorInfoBar = form!.FindName("DistroNameErrorInfoBar") as InfoBar;
+        var creationModeErrorInfoBar = form!.FindName("CreationModeErrorInfoBar") as InfoBar;
 
         var creationMode = form.FindName("CreationMode") as ComboBox;
 
         if (creationMode?.SelectedItem != null)
         {
+            creationModeErrorInfoBar!.IsOpen = false;
             return;
         }
 
         args.Cancel = true;
-        renameDistroErrorInfoBar!.Message = "No creation mode has been selected.";
+        creationModeErrorInfoBar!.IsOpen = true;
     }
 
     // return a tuple composed of the distro name and the resource origin (file/folder path or docker hub link)
