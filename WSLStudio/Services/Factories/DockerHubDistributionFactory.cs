@@ -78,6 +78,7 @@ public class DockerHubDistributionFactory : IDistributionFactory
             var imageCreateParameters = new ImagesCreateParameters()
             {
                 FromImage = _imageTag,
+                Tag = "latest"
             };
 
             var progress = new Progress<JSONMessage>();
