@@ -21,8 +21,8 @@
                   Header="Creation Mode :" 
                   PlaceholderText="Select a mode"
                   SelectionChanged="CreateDistro_SelectionMode">
-            <x:String>Dockerfile</x:String>
             <x:String>Docker Hub</x:String>
+            <x:String>Dockerfile</x:String>
             <x:String>Archive</x:String>
         </ComboBox>
 
@@ -43,7 +43,7 @@
         <Grid x:Name="DockerHubInputContainer" 
               Height="96"
               Visibility="Collapsed">
-            <TextBox Header="Docker Hub link :"
+            <TextBox Header="Docker Hub repository :"
                      x:Name="DockerHubInput"
                      Height="64"
                      Margin="0 12 0 16"/>
