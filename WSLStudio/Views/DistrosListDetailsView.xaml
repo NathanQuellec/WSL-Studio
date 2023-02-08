@@ -122,15 +122,7 @@
             <controls:ListDetailsView.DetailsTemplate>
                 <DataTemplate x:DataType="model:Distribution">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Memory Limit :"/>
-                            <TextBlock Text="{x:Bind Path=MemoryLimit, Mode=OneWay}"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Processor Limit : "/>
-                            <TextBlock Text="{x:Bind Path=ProcessorLimit, Mode=OneWay}"/>
-                        </StackPanel>
+                       
 
                     </StackPanel>
                 </DataTemplate>
