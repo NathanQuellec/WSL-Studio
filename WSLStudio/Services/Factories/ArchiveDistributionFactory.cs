@@ -1,4 +1,5 @@
 ﻿using Docker.DotNet;
+using WSLStudio.Contracts.Services;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
@@ -7,64 +8,27 @@ namespace WSLStudio.Services.Factories;
 
 public class ArchiveDistributionFactory : IDistributionFactory
 {
-    private const string APP_FOLDER = "WslStudio";
+    private readonly IWslService _wslService = new WslService();
 
-    public Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin)
+    public async Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
-        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-        var appPath = Path.Combine(roamingPath, APP_FOLDER);
-
-        if (!Directory.Exists(appPath))
-        {
-            Directory.CreateDirectory(appPath);
-        }
-
-        var distroFolder = Path.Combine(appPath, distroName);
-
-        if (!Directory.Exists(distroFolder))
-        {
-            Directory.CreateDirectory(distroFolder);
-        }
+        var installDir = Path.Combine(targetFolder, "installDir");
 
         try
         {
-            ImportDistribution(distroName, appPath, resourceOrigin);
+           await this._wslService.ImportDistribution(distroName, installDir, resourceOrigin);
 
-            Console.WriteLine("[INFO] Distribution creation from Archive file succeed.");
+           Console.WriteLine("[INFO] Distribution creation from Archive file succeed.");
 
-            return Task.FromResult(new Distribution()
+            return new Distribution()
             {
                 Name = distroName,
-            })!;
+            };
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return Task.FromResult<Distribution?>(null);
+            return null;
         }
     }
-
-    private static void ImportDistribution(string distroName, string appPath, string archivePath)
-    {
-        try
-        {
-
-            var installDir = Path.Combine(appPath, distroName, "installDir");
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl --import {distroName} {installDir} {archivePath}")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-
-            process.Start();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
-            throw;
-        }
-    }
-
 }

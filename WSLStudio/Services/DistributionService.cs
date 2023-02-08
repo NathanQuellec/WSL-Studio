@@ -73,8 +73,31 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
+    private static Task<string> CreateDistributionFolder(string distroName)
+    {
+        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        var appPath = Path.Combine(roamingPath, APP_FOLDER);
+
+        if (!Directory.Exists(appPath))
+        {
+            Directory.CreateDirectory(appPath);
+        }
+
+        var distroFolder = Path.Combine(appPath, distroName);
+
+        if (!Directory.Exists(distroFolder))
+        {
+            Directory.CreateDirectory(distroFolder);
+        }
+
+        return Task.FromResult(distroFolder);
+    }
+
     public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
     {
+
+        var distroFolder = await CreateDistributionFolder(distroName);
 
         switch (creationMode)
         {
@@ -90,7 +113,7 @@ public class DistributionService : IDistributionService
         }
 
 
-        var newDistro = await _factory.CreateDistribution(distroName, resourceOrigin);
+        var newDistro = await _factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
 
         if (newDistro == null)
         {
