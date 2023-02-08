@@ -34,27 +34,4 @@ public class WslService : IWslService
         
         return virtualizationEnabled;
     }
-
-    public Task ImportDistribution(string distroName, string installDir, string tarLocation)
-    {
-        try
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl --import {distroName} {installDir} {tarLocation}")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-
-            process.Start();
-            process.WaitForExit();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
-            throw;
-        }
-
-        return Task.CompletedTask;
-    }
 }

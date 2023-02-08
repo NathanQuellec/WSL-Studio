@@ -3,25 +3,39 @@
 
 !theme vibrant
 IDistributionService <|-- DistributionService
-IDialogBuilderService <|-- DialogBuilderService
+DistributionService --> DistributionFactory
 IWslService <|-- WslService
+
+IDialogBuilderService <|-- DialogBuilderService
+IInfoBarService <|-- InfoBarService
+
+DistributionFactory <|-- ArchiveDistributionFactory
+DistributionFactory <|-- DockerfileDistributionFactory
+DistributionFactory --> ProcessBuilderHelper
+DockerfileDistributionFactory --> DockerHelper
+DistributionFactory <|-- DockerHubDistributionFactory
+DockerHubDistributionFactory --> DockerHelper
+
 DistributionService o-- Distribution
 DistributionService --> ProcessBuilderHelper
+
 DistrosListDetailsViewModel ..> IDialogBuilderService
+DistrosListDetailsViewModel ..> IInfoBarService
 DistrosListDetailsViewModel ..> IDistributionService
 DistrosListDetailsView ..> DistrosListDetailsViewModel
 DistrosListDetailsViewModel --> App
+DistrosListDetailsViewModel --> CreateDistroDialogView
+
 App ..> IWslService
 App ..> IDialogBuilderService
 App --> MainWindow
+
 class Distribution
 {
     + <<property>> Id: Guid
     + <<property>> Path: string
     + <<property>> IsDefault: bool
     + <<property>> WslVersion: int
-    + <<property>> MemoryLimit: double
-    + <<property>> ProcessorLimit: int
     + <<property>> Name: string
     + <<event>> PropertyChanged: PropertyChangedEventHandler?
     # <<virtual>> OnPropertyChanged(propertyName: string?)
@@ -39,32 +53,46 @@ class ProcessBuilderHelper
     + Build(): Process
 }
 
+class DockerHelper {
+  - _dockerClient: DockerClient
+  + DockerHelper()
+  + {static} CreateTarballForDockerfileDirectory(directory: string): Stream
+  + BuildDockerImage(workingDirectory: string, imageName: string): Task
+  + PullImageFromDockerHub(imageName: string): Task
+  + CreateDockerContainer(imageName: string, containerName: string): Task<CreateContainerResponse?>
+  + ExportDockerContainer(containerName: string, targetPath: string): Task
+  + RemoveDockerImage(imageName: string): Task
+}
+
 
 interface IDistributionService 
 {
 	+ InitDistributionsList()
 	+ GetAllDistributions() : IEnumerable<Distribution>
-	+ AddDistribution(distribution: Distribution?)
-	+ RemoveDistribution(distribution: Distribution?)
-	+ RenameDistribution(distribution: Distribution?)
-	+ LaunchDistribution(distribution: Distribution?)
-	+ StopDistribution(distribution: Distribution?)
-	+ OpenDistributionFileSystem(distribution: Distribution?)
+	+ CreateDistribution(creationMode: string, distroName: string, resourceOrigin: string): Task<Distribution?>
+	+ RemoveDistribution(distribution: Distribution)
+	+ RenameDistribution(distribution: Distribution): bool
+	+ LaunchDistribution(distribution: Distribution)
+	+ StopDistribution(distribution: Distribution)
+	+ OpenDistributionFileSystem(distribution: Distribution)
 }
 
 class DistributionService 
 {
 	- WSL_UNC_PATH: string
+	- APP_FOLDER: string
 	- _distros: IList<Distribution>
 	- _wslApi: WslApi
+	- _factory: DistributionFactory?
 	+ InitDistributionsList()
 	+ GetAllDistributions() : IEnumerable<Distribution>
-	+ AddDistribution(distribution: Distribution?)
-	+ RemoveDistribution(distribution: Distribution?)
-	+ RenameDistribution(distribution: Distribution?)
-	+ LaunchDistribution(distribution: Distribution?)
-	+ StopDistribution(distribution: Distribution?)
-	+ OpenDistributionFileSystem(distribution: Distribution?)
+	- {static} CreateDistributionFolder(distroName: string) : Task<string>
+	+ CreateDistribution(creationMode: string, distroName: string, resourceOrigin: string): Task<Distribution?>
+	+ RemoveDistribution(distribution: Distribution): bool
+	+ RenameDistribution(distribution: Distribution, newDistroName: string)
+	+ LaunchDistribution(distribution: Distribution)
+	+ StopDistribution(distribution: Distribution)
+	+ OpenDistributionFileSystem(distribution: Distribution)
 }
 
 interface IWslService
@@ -80,6 +108,40 @@ class WslService
 	+ CheckHypervisor(): bool
 }
 
+abstract class DistributionFactory
+{
+    + {abstract} CreateDistribution(distroName: string, resourceOrigin: string, targetFolder: string): Task<Distribution?>
+    + {static} ImportDistribution(string distroName, string installDir, string tarLocation) : Task
+}
+
+class ArchiveDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+}
+
+class DockerfileDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+}
+
+class DockerHubDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+}
+
+interface IInfoBarService 
+{
+  + FindInfoBar(infoBarName: string): InfoBar
+  + OpenInfoBar(infoBar: InfoBar, time: double): void
+  + OpenInfoBar(infoBar: InfoBar): void
+  + CloseInfoBar(infoBar: InfoBar): void
+}
+
+class InfoBarService 
+{
+  + FindInfoBar(infoBarName: string): InfoBar
+  + OpenInfoBar(infoBar: InfoBar, time: double): void
+  + OpenInfoBar(infoBar: InfoBar): void
+  + CloseInfoBar(infoBar: InfoBar): void
+}
+
 interface IDialogBuilderService 
 {
   + SetTitle(title: object) : IDialogBuilderService
@@ -92,12 +154,14 @@ interface IDialogBuilderService
   + SetCloseButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
   + SetDefaultButton(button: ContentDialogButton) : IDialogBuilderService
   + SetXamlRoot(xamlRoot: XamlRoot) : IDialogBuilderService
+  + AddContent(element: FrameworkElement) : IDialogBuilderService
   + Build() : ContentDialog
 }
 
 class DialogBuilderService 
 {
-  - _contentDialog: ContentDialog
+  - _contentDialog : ContentDialog
+  - _stackPanel : StackPanel
   + SetTitle(title: object) : IDialogBuilderService
   + SetContent(content: object) : IDialogBuilderService
   + SetPrimaryButtonText(primaryButtonText: string) : IDialogBuilderService
@@ -113,11 +177,10 @@ class DialogBuilderService
 
 class DistrosListDetailsViewModel 
 {
-  - _dialogStackPanel : StackPanel?
-  - _infoBar : InfoBar?
-  - _timer : Timer?
   - _distributionService : IDistributionService
   - _dialogBuilderService : IDialogBuilderService
+  - _isDistroCreationProcessing: bool
+  
   + <<property>> RemoveDistroCommand : RelayCommand<Distribution>
   + <<property>> RenameDistroCommand : AsyncRelayCommand<Distribution>
   + <<property>> LaunchDistroCommand : RelayCommand<Distribution>
@@ -125,16 +188,20 @@ class DistrosListDetailsViewModel
   + <<property>> OpenDistroFileSystemCommand : RelayCommand<Distribution>
   + <<property>> Distros : ObservableCollection<Distribution>
   
-  + DistrosListDetailsViewModel(distributionService: IDistributionService, dialogBuilderService: IDialogBuilderService)
-  + {static} CloseInfoBar(sender: object, e: ElapsedEventArgs)
-  + {static} OpenInfoBar(infoBarName: string)
-  + RemoveDistributionViewModel(distribution: Distribution?)
-  + ValidateDistributionName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
-  + RenameDistributionDialog(distribution: Distribution?) : Task
-  + LaunchDistributionViewModel(distribution: Distribution?)
-  + StopDistributionViewModel(distribution: Distribution?)
-  + OpenDistributionFileSystemViewModel(distribution: Distribution?)
-  + PopulateDistributionsCollection()
+  + DistrosListDetailsViewModel(distributionService: IDistributionService, infoBarService: IInfoBarService)
+  - PopulateDistributionsCollection()
+  - RemoveDistributionDialog(distribution: Distribution): Task
+  - RemoveDistributionViewModel(distribution: Distribution?)
+  - ValidateDistributionName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - RenameDistributionDialog(distribution: Distribution) : Task
+  - RenameDistributionViewModel(distribution: Distribution, newDistroName: string)
+  - LaunchDistributionViewModel(distribution: Distribution)
+  - StopDistributionViewModel(distribution: Distribution)
+  - OpenDistributionFileSystemViewModel(distribution: Distribution)
+  - ValidateCreationMode(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - GetDistributionCreationInfos(dialog: ContentDialog): Tuple<string, string, string>
+  - CreateDistributionDialog(): Task
+  - CreateDistributionViewModel(creationMode: string, distroName: string, resourceOrigin: string): Task
 }
 
 class DistrosListDetailsView
@@ -142,8 +209,14 @@ class DistrosListDetailsView
     - _distroStopButton: Button
     + <<property>> ViewModel: DistrosListDetailsViewModel
     + DistrosListDetailsView()
-    + FindDistroStopButton(parent: DependencyObject, findDistroName: string)
+    - FindDistroStopButton(parent: DependencyObject, findDistroName: string)
+}
 
+class CreateDistroDialogView
+{
+    - CreateDistro_SelectionMode(sender: object, e: SelectionChangedEventArgs)
+    - PickDockerFileFolder(sender: object, args: RoutedEventArgs)
+    - PickArchiveFile(sender: object, args: RoutedEventArgs)
 }
 
 class App

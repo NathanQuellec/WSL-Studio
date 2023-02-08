@@ -6,17 +6,15 @@ using WSLStudio.Models;
 
 namespace WSLStudio.Services.Factories;
 
-public class ArchiveDistributionFactory : IDistributionFactory
+public class ArchiveDistributionFactory : DistributionFactory
 {
-    private readonly IWslService _wslService = new WslService();
-
-    public async Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
+    public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
         var installDir = Path.Combine(targetFolder, "installDir");
 
         try
         {
-           await this._wslService.ImportDistribution(distroName, installDir, resourceOrigin);
+           await ImportDistribution(distroName, installDir, resourceOrigin);
 
            Console.WriteLine("[INFO] Distribution creation from Archive file succeed.");
 
