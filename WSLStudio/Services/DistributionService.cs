@@ -28,10 +28,9 @@ public class DistributionService : IDistributionService
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
-    private readonly object _distrosListLock = new object();
 
 
-    private IDistributionFactory _factory;
+    private static IDistributionFactory _factory;
 
     public DistributionService()
     {
@@ -80,15 +79,18 @@ public class DistributionService : IDistributionService
         switch (creationMode)
         {
             case "Dockerfile":
-                this._factory = new DockerfileDistributionFactory();
+                _factory = new DockerfileDistributionFactory();
                 break;
             case "Archive":
-                this._factory = new ArchiveDistributionFactory();
+                _factory = new ArchiveDistributionFactory();
+                break;
+            case "Docker Hub":
+                _factory = new DockerHubDistributionFactory();
                 break;
         }
 
 
-        var newDistro = await this._factory.CreateDistribution(distroName, resourceOrigin);
+        var newDistro = await _factory.CreateDistribution(distroName, resourceOrigin);
 
         if (newDistro == null)
         {

@@ -366,6 +366,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
 
         var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
+
         if (newDistro != null)
         {
             this._isDistroCreationProcessing = false;

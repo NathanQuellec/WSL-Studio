@@ -31,6 +31,8 @@ public class ArchiveDistributionFactory : IDistributionFactory
         {
             ImportDistribution(distroName, appPath, resourceOrigin);
 
+            Console.WriteLine("[INFO] Distribution creation from Archive file succeed.");
+
             return Task.FromResult(new Distribution()
             {
                 Name = distroName,
