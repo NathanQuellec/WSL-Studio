@@ -62,7 +62,7 @@ public sealed partial class DistrosListDetailsView : Page
      * We need to go through the Visual Tree recursively to find the Tag that matches the Distro Name received,
      * as we cannot set a dynamic x:Name property for the Stop button.
      */
-    public void FindDistroStopButton(DependencyObject parent, string searchDistroName)
+    private void FindDistroStopButton(DependencyObject parent, string searchDistroName)
     {
         for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
         {

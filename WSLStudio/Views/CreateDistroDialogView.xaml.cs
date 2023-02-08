@@ -23,12 +23,9 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace WSLStudio.Views
 {
-    public sealed partial class CreateDistroDialog : UserControl
+    public sealed partial class CreateDistroDialogView : UserControl
     {
-
-        
-
-        public CreateDistroDialog()
+        public CreateDistroDialogView()
         {
             this.InitializeComponent();
 
@@ -58,7 +55,7 @@ namespace WSLStudio.Views
 
         }
 
-        public async void PickDockerFileFolder(object sender, RoutedEventArgs args)
+        private async void PickDockerFileFolder(object sender, RoutedEventArgs args)
         {
             var hwnd = App.MainWindow.GetWindowHandle();
             FolderPicker folderPicker = new();
@@ -77,7 +74,7 @@ namespace WSLStudio.Views
         }
 
 
-        public async void PickArchiveFile(object sender, RoutedEventArgs args)
+        private async void PickArchiveFile(object sender, RoutedEventArgs args)
         {
 
             var hwnd = App.MainWindow.GetWindowHandle();

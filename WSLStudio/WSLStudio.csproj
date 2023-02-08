@@ -15,7 +15,7 @@
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Views\CreateDistroDialog.xaml" />
+    <None Remove="Views\CreateDistroDialogView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
   </ItemGroup>
 
@@ -61,7 +61,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CreateDistroDialog.xaml">
+    <Page Update="Views\CreateDistroDialogView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

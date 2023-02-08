@@ -31,7 +31,21 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private bool _isDistroCreationProcessing;
 
-    public DistrosListDetailsViewModel ( IDistributionService distributionService, IInfoBarService infoBarService)
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
+
+    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
+
+    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
+
+    public RelayCommand<Distribution> StopDistroCommand { get; set; }
+
+    public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
+
+    public AsyncRelayCommand CreateDistroCommand { get; set; }
+
+    public ObservableCollection<Distribution> Distros { get; set; } = new();
+
+    public DistrosListDetailsViewModel(IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
         this._infoBarService = infoBarService;
@@ -48,21 +62,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
     }
-
-    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
-
-    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
-
-    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
-
-    public RelayCommand<Distribution> StopDistroCommand { get; set; }
-
-    public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
-
-    public AsyncRelayCommand CreateDistroCommand { get; set; }
-
-    public ObservableCollection<Distribution> Distros { get; set; } = new();
-
 
     private void PopulateDistributionsCollection()
     {
@@ -273,34 +272,6 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService.OpenDistributionFileSystem(distribution);
     }
 
-    private async Task CreateDistributionDialog()
-    {
-        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
-
-        var dialogService = App.GetService<IDialogBuilderService>();
-
-        // contentdialog content set in CreateDistroDialog.xaml
-        var createDistroDialog = new CreateDistroDialog();
-
-        var dialog = dialogService.SetTitle("Create distribution :")
-            .AddContent(createDistroDialog)
-            .SetPrimaryButtonText("Create")
-            .SetCloseButtonText("Cancel")
-            .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(ValidateCreationMode)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .Build();
-
-        var buttonClicked = await dialog.ShowAsync();
-
-        if (buttonClicked == ContentDialogResult.Primary)
-        {
-            var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
-
-            await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
-        }
-    }
-
     private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         this.ValidateDistributionName(sender, args);
@@ -323,7 +294,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         creationModeErrorInfoBar!.IsOpen = true;
     }
 
-    // return a tuple composed of the distro name and the resource origin (file/folder path or docker hub link)
+    // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
+    // and the creation mode chose by the user
     private Tuple<string, string, string> GetDistributionCreationInfos(ContentDialog dialog)
     {
 
@@ -356,6 +328,34 @@ public class DistrosListDetailsViewModel : ObservableObject
         var distroName = distroNameInput!.Text;
 
         return Tuple.Create(distroName, resourceOrigin, creationMode);
+    }
+
+    private async Task CreateDistributionDialog()
+    {
+        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+        // contentdialog content set in CreateDistroDialog.xaml
+        var createDistroDialog = new CreateDistroDialogView();
+
+        var dialog = dialogService.SetTitle("Create distribution :")
+            .AddContent(createDistroDialog)
+            .SetPrimaryButtonText("Create")
+            .SetCloseButtonText("Cancel")
+            .SetDefaultButton(ContentDialogButton.Primary)
+            .SetPrimaryButtonClick(ValidateCreationMode)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .Build();
+
+        var buttonClicked = await dialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
+
+            await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
+        }
     }
 
     private async Task CreateDistributionViewModel(string creationMode, string distroName, string resourceOrigin)

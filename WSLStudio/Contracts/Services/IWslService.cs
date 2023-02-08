@@ -7,6 +7,4 @@ public interface IWslService
 {
     bool CheckWsl();
     bool CheckHypervisor();
-
-    Task ImportDistribution(string distroName, string installDir, string tarLocation);
 }

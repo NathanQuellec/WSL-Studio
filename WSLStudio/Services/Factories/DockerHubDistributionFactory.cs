@@ -7,12 +7,9 @@ using WSLStudio.Models;
 
 namespace WSLStudio.Services.Factories;
 
-public class DockerHubDistributionFactory : IDistributionFactory
+public class DockerHubDistributionFactory : DistributionFactory
 {
-    private const string APP_FOLDER = "WslStudio";
-    private readonly IWslService _wslService = new WslService();
-
-    public async Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
+    public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
         var containerName = $"wsl-studio-{distroName.ToLower()}";
         var imageName = resourceOrigin;
@@ -28,7 +25,7 @@ public class DockerHubDistributionFactory : IDistributionFactory
             await docker.PullImageFromDockerHub(imageName);
             var container = await docker.CreateDockerContainer(imageName, containerName);
             await docker.ExportDockerContainer(containerName, tarLocation);
-            await this._wslService.ImportDistribution(distroName, installDir, tarLocation);
+            await ImportDistribution(distroName, installDir, tarLocation);
             await docker.RemoveDockerContainer(container!.ID);
             await docker.RemoveDockerImage(imageName);
 

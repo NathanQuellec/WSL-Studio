@@ -29,8 +29,7 @@ public class DistributionService : IDistributionService
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
 
-
-    private static IDistributionFactory _factory;
+    private DistributionFactory? _factory;
 
     public DistributionService()
     {
