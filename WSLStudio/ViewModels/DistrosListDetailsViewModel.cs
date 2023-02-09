@@ -41,6 +41,8 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
 
+    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
+
     public AsyncRelayCommand CreateDistroCommand { get; set; }
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
@@ -57,6 +59,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
+        OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
@@ -67,7 +70,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         try
         {
-            Debug.WriteLine($"[INFO] Populate distributions collection");
+            Console.WriteLine($"[INFO] Populate distributions collection");
             this.Distros.Clear();
             foreach (var distro in this._distributionService.GetAllDistributions())
             {
@@ -76,13 +79,13 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Debug.WriteLine(ex);
+            Console.WriteLine(ex);
         }
     }
 
     private async Task RemoveDistributionDialog(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to remove {distribution.Name} ...");
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to remove {distribution.Name} ...");
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
@@ -105,7 +108,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void RemoveDistributionViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
+        Console.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
 
         this._distributionService.RemoveDistribution(distribution);
         this.Distros.Remove(distribution);
@@ -192,7 +195,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private async Task RenameDistributionDialog(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
@@ -233,7 +236,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void RenameDistributionViewModel(Distribution distribution, string newDistroName)
     {
-        Debug.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
+        Console.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
         var isDistroRenamed = this._distributionService.RenameDistribution(distribution, newDistroName);
         if (!isDistroRenamed)
@@ -250,7 +253,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void LaunchDistributionViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : ${distribution!.Name} distribution is launching ...");
+        Console.WriteLine($"[INFO] Command called : ${distribution!.Name} distribution is launching ...");
 
         this._distributionService.LaunchDistribution(distribution);
         // Publish message  (allows us to show the stop button when the start button is clicked)
@@ -259,7 +262,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void StopDistributionViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : {distribution!.Name} distribution is stopping ...");
+        Console.WriteLine($"[INFO] Command called : {distribution!.Name} distribution is stopping ...");
 
         this._distributionService.StopDistribution(distribution);
         WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
@@ -267,9 +270,15 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private void OpenDistributionFileSystemViewModel(Distribution distribution)
     {
-        Debug.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
+        Console.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
         this._distributionService.OpenDistributionFileSystem(distribution);
+    }
+
+    private void OpenDistributionWithVsCodeViewModel(Distribution distribution)
+    {
+        Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with VS Code ...");
+        this._distributionService.OpenDistributionWithVsCode(distribution);
     }
 
     private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -332,7 +341,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     private async Task CreateDistributionDialog()
     {
-        Debug.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
 
         var dialogService = App.GetService<IDialogBuilderService>();
 

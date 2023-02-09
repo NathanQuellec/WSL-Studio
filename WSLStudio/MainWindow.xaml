@@ -11,18 +11,6 @@
     PersistenceId="MainWindow"
     mc:Ignorable="d">
 
-    <Grid x:Name="AppTitleBar">
-        <Image Source="Images/WindowIcon.png"
-               HorizontalAlignment="Left" 
-               Width="16" Height="16" 
-               Margin="8,0"/>
-        <TextBlock x:Name="AppTitleTextBlock" Text="App title"
-                   TextWrapping="NoWrap"
-                   Style="{StaticResource CaptionTextBlockStyle}" 
-                   VerticalAlignment="Center"
-                   Margin="28,0,0,0"/>
-    </Grid>
-
     <windowex:WindowEx.Backdrop>
         <windowex:MicaSystemBackdrop/>
     </windowex:WindowEx.Backdrop>

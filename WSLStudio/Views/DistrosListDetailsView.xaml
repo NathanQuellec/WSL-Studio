@@ -72,6 +72,15 @@
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
+                                <MenuFlyoutItem Text="Open with VS Code"
+                                                Command="{Binding ElementName=Page,
+                                                                  Path=ViewModel.OpenDistroWithVsCodeCommand}"
+                                                CommandParameter="{x:Bind}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE943;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+
                                 <MenuFlyoutItem Text="Remove" 
                                                 Command="{Binding ElementName=Page, 
                                                                   Path=ViewModel.RemoveDistroCommand}"

@@ -15,6 +15,10 @@
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
   <ItemGroup>
+    <Content Remove="Assets\vscode-alt.png" />
+    <Content Remove="Assets\vscode-alt.svg" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="Views\CreateDistroDialogView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
   </ItemGroup>

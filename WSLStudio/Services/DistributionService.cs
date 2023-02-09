@@ -29,8 +29,6 @@ public class DistributionService : IDistributionService
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
 
-    private DistributionFactory? _factory;
-
     public DistributionService()
     {
         _distros = new List<Distribution>();
@@ -98,21 +96,15 @@ public class DistributionService : IDistributionService
 
         var distroFolder = await CreateDistributionFolder(distroName);
 
-        switch (creationMode)
+        DistributionFactory factory = creationMode switch
         {
-            case "Dockerfile":
-                _factory = new DockerfileDistributionFactory();
-                break;
-            case "Archive":
-                _factory = new ArchiveDistributionFactory();
-                break;
-            case "Docker Hub":
-                _factory = new DockerHubDistributionFactory();
-                break;
-        }
+            "Dockerfile" => new DockerfileDistributionFactory(),
+            "Archive" => new ArchiveDistributionFactory(),
+            "Docker Hub" => new DockerHubDistributionFactory(),
+            _ => throw new NotImplementedException(),
+        };
 
-
-        var newDistro = await _factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+        var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
 
         if (newDistro == null)
         {
@@ -212,20 +204,6 @@ public class DistributionService : IDistributionService
     {
         try
         {
-
-            var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-            var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
-
-            foreach (var subKey in lxsSubKeys.GetSubKeyNames())
-            {
-                if (subKey == $"{{{distribution?.Id.ToString()}}}")
-                {
-                    var distroRegPath = Path.Combine(lxssRegPath, subKey);
-                    var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-                    Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
-                    distroSubkeys.Close();
-                }
-            }
             var process = new ProcessBuilderHelper("cmd.exe")
                 .SetArguments($"/c wsl ~ -d {distribution?.Name}")
                 .SetRedirectStandardOutput(false)
@@ -271,12 +249,20 @@ public class DistributionService : IDistributionService
 
     public void OpenDistributionFileSystem(Distribution distribution)
     {
-        string distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
+        var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
 
         var processBuilder = new ProcessBuilderHelper("explorer.exe")
             .SetArguments(distroPath)
             .Build();
         processBuilder.Start();
+    }
+
+    public void OpenDistributionWithVsCode(Distribution distribution)
+    {
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wsl ~ -d {distribution?.Name} code .")
+            .Build();
+        process.Start();
     }
 
 
