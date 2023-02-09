@@ -13,4 +13,5 @@ public interface IDistributionService
     void StopDistribution(Distribution distribution);
     void OpenDistributionFileSystem(Distribution distribution);
     void OpenDistributionWithVsCode(Distribution distribution);
+    void OpenDistroWithWt(Distribution distribution);
 }

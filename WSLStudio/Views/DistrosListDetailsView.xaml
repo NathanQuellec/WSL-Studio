@@ -63,9 +63,9 @@
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 
-                                <MenuFlyoutItem Text="File Explorer"
+                                <MenuFlyoutItem Text="Open with File Explorer"
                                                 Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroFileSystemCommand}"
+                                                                  Path=ViewModel.OpenDistroWithFileExplorerCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xEC50;"/>
@@ -78,6 +78,15 @@
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE943;"/>
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+
+                                <MenuFlyoutItem Text="Open with Windows Terminal"
+                                                Command="{Binding ElementName=Page,
+                                                                  Path=ViewModel.OpenDistroWithWtCommand}"
+                                                CommandParameter="{x:Bind}">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE756;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
 

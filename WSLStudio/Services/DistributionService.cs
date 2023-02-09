@@ -265,5 +265,14 @@ public class DistributionService : IDistributionService
         process.Start();
     }
 
-
+    public void OpenDistroWithWt(Distribution distribution)
+    {
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
+            .SetRedirectStandardOutput(false)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
+    }
 }

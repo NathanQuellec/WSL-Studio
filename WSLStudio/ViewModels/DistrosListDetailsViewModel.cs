@@ -39,9 +39,11 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> StopDistroCommand { get; set; }
 
-    public RelayCommand<Distribution> OpenDistroFileSystemCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand { get; set; }
 
     public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
+
+    public RelayCommand<Distribution> OpenDistroWithWtCommand { get; set; }
 
     public AsyncRelayCommand CreateDistroCommand { get; set; }
 
@@ -58,8 +60,9 @@ public class DistrosListDetailsViewModel : ObservableObject
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
-        OpenDistroFileSystemCommand = new RelayCommand<Distribution>(OpenDistributionFileSystemViewModel);
+        OpenDistroWithFileExplorerCommand = new RelayCommand<Distribution>(OpenDistributionWithFileExplorerViewModel);
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
+        OpenDistroWithWtCommand = new RelayCommand<Distribution>(OpenDistroWithWtViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
@@ -268,7 +271,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
     }
 
-    private void OpenDistributionFileSystemViewModel(Distribution distribution)
+    private void OpenDistributionWithFileExplorerViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
@@ -279,6 +282,12 @@ public class DistrosListDetailsViewModel : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with VS Code ...");
         this._distributionService.OpenDistributionWithVsCode(distribution);
+    }
+
+    private void OpenDistroWithWtViewModel(Distribution distribution)
+    {
+        Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with Windows Terminal ...");
+        this._distributionService.OpenDistroWithWt(distribution);
     }
 
     private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
