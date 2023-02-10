@@ -31,30 +31,6 @@ namespace WSLStudio.Views
 
         }
 
-        private void CreateDistro_SelectionMode(object sender, SelectionChangedEventArgs e)
-        {
-
-            DockerfileInputContainer.Visibility = Visibility.Collapsed;
-            DockerHubInputContainer.Visibility = Visibility.Collapsed;
-            ArchiveInputContainer.Visibility = Visibility.Collapsed;
-
-            var creationMode = e.AddedItems[0].ToString();
-
-            switch (creationMode)
-            {
-                case "Dockerfile":
-                    DockerfileInputContainer.Visibility = Visibility.Visible;
-                    break;
-                case "Docker Hub":
-                    DockerHubInputContainer.Visibility = Visibility.Visible;
-                    break;
-                case "Archive":
-                    ArchiveInputContainer.Visibility = Visibility.Visible;
-                    break;
-            }
-
-        }
-
         private async void PickDockerFileFolder(object sender, RoutedEventArgs args)
         {
             var hwnd = App.MainWindow.GetWindowHandle();
