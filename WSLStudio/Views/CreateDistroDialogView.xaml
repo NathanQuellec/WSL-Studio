@@ -13,7 +13,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <StackPanel>
-        <TextBox x:Name="distroNameInput" 
+        <TextBox x:Name="DistroNameInput" 
                  Header="Distribution name :"
                  Margin="0 12 0 16"
                  Height="64"/>
@@ -73,14 +73,14 @@
                  Title="Invalid Distribution Name"
                  IsOpen="False"
                  IsClosable="False"
-                 Margin="0 12 0 16"/>
+                 Margin="0 12 0 0"/>
 
         <InfoBar x:Name="CreationModeErrorInfoBar"
                  Severity="Error"
                  Title="No creation mode selected"
                  IsOpen="False"
                  IsClosable="False"
-                 Margin="0 12 0 16"/>
+                 Margin="0 12 0 0"/>
 
     </StackPanel>
 </UserControl>

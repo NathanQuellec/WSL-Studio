@@ -19,6 +19,7 @@
     <Content Remove="Assets\vscode-alt.svg" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="Assets\linux-svgrepo-com.svg" />
     <None Remove="Views\CreateDistroDialogView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
   </ItemGroup>
@@ -62,6 +63,12 @@
   <ItemGroup>
     <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Assets\linux-svgrepo-com.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

@@ -50,7 +50,7 @@
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
 
-                    <StackPanel>
+                    <StackPanel BorderThickness="1">
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
@@ -102,13 +102,19 @@
                             </MenuFlyout>
                         </StackPanel.Resources>
 
-                        <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}">
 
-                            <!--  Specify Binding ElementName property to access ViewModel object -->
+                        <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}"
+                                       BorderThickness="1"
+                                       VerticalAlignment="Center"
+                                       Background="Transparent"
+                                       Margin="0 8 0 12">
+
+                            <!--  Specify Binding ElementName property to Page for accessing access ViewModel elements -->
                             <Button x:Name="LaunchButton"
-                                        Command="{Binding ElementName=Page,
+                                    Margin="0 4 0 0 "
+                                    Command="{Binding ElementName=Page,
                                                           Path=ViewModel.LaunchDistroCommand}"
-                                        CommandParameter="{x:Bind}">
+                                    CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Play"/>
                             </Button>
 
@@ -118,20 +124,23 @@
                                      
                                 -->
                             <Button x:Name="StopButton"
-                                        Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
-                                        Command="{Binding ElementName=Page, 
+                                    Margin="0 4 0 0 "
+                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
+                                    RelativePanel.RightOf="LaunchButton"
+                                    Visibility="Collapsed"
+                                    Command="{Binding ElementName=Page, 
                                                           Path=ViewModel.StopDistroCommand}"
-                                        CommandParameter="{x:Bind}"
-                                        RelativePanel.RightOf="LaunchButton"
-                                        Visibility="Collapsed">
+                                    CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Stop"/>
                             </Button>
 
                             <TextBlock x:Name="DistroName" 
-                                           Text="{Binding Path=Name, Mode=TwoWay}"
-                                           RelativePanel.RightOf="StopButton"
-                                           VerticalAlignment="Center"
-                                           Margin="5"/>
+                                       Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="{Binding Path=Name, Mode=TwoWay}"
+                                       FontSize="16"
+                                       RelativePanel.RightOf="StopButton"
+                                       Margin="5"/>
+
                         </RelativePanel>
                     </StackPanel>
                 </DataTemplate>
@@ -140,11 +149,22 @@
             <controls:ListDetailsView.DetailsTemplate>
                 <DataTemplate x:DataType="model:Distribution">
                     <StackPanel>
-                       
+
 
                     </StackPanel>
                 </DataTemplate>
             </controls:ListDetailsView.DetailsTemplate>
+
+            <controls:ListDetailsView.NoSelectionContentTemplate>
+                <DataTemplate>
+                    <StackPanel HorizontalAlignment="Center"
+                                VerticalAlignment="Center">
+                        <TextBlock Text="{Binding}"
+                                   FontSize="24"
+                                   Margin="0,0, 0, 48"/>
+                    </StackPanel>
+                </DataTemplate>
+            </controls:ListDetailsView.NoSelectionContentTemplate>
 
             <controls:ListDetailsView.ListCommandBar>
                 <CommandBar>
@@ -157,13 +177,13 @@
         </controls:ListDetailsView>
 
         <InfoBar x:Name="RemoveDistroInfoSuccess"
-                     VerticalAlignment="Bottom"
-                     Grid.Row="1"
-                     Severity="Success"
-                     Title="WSL Studio has successfully removed the distribution from the system."
-                     IsOpen="False"
-                     Height="100"
-                     Width="450"/>
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Success"
+                 Title="WSL Studio has successfully removed the distribution from the system."
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
 
         <InfoBar x:Name="CreateNewDistroInfoProgress"
                  VerticalAlignment="Bottom"
@@ -181,7 +201,7 @@
             </InfoBar.Content>
         </InfoBar>
 
-            <InfoBar x:Name="CreateNewDistroInfoError"
+        <InfoBar x:Name="CreateNewDistroInfoError"
                  VerticalAlignment="Bottom"
                  Grid.Row="1"
                  Severity="Error"
