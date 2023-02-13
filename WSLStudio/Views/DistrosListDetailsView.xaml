@@ -27,7 +27,7 @@
         <StackPanel x:Name="AppTitleBar"
                     Orientation="Horizontal"
                     Grid.Row="0">
-            <Image Source="/Assets/WindowIcon.ico"
+            <Image Source="/Assets/WslStudioIcon.ico"
                    HorizontalAlignment="Left" 
                    Width="16" Height="16" 
                    Margin="8,0"/>
@@ -49,7 +49,7 @@
 
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
-
+        
                     <StackPanel BorderThickness="1">
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">

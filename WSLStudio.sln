@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33122.133
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WSLStudio", "WSLStudio\WSLStudio.csproj", "{B8C2916D-FD3C-4E1D-AACA-DA4229EB7C1E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WSL Studio", "WSLStudio\WSL Studio.csproj", "{B8C2916D-FD3C-4E1D-AACA-DA4229EB7C1E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WSLStudio.Core", "WSLStudio.Core\WSLStudio.Core.csproj", "{2051DBEA-6C56-4B46-8F2D-A10B14B41A61}"
 EndProject

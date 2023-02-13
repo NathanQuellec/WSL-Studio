@@ -9,16 +9,17 @@
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
   xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
-  IgnorableNamespaces="uap rescap genTemplate desktop6 virtualization">
+  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
+  IgnorableNamespaces="uap rescap genTemplate desktop6 virtualization mp">
 
   <Identity
-    Name="87EEABB0-77CB-4301-ACBF-5C67B02C34FD"
-    Publisher="CN=nathan"
+    Name="14543NathanQuellec.WSLStudio"
+    Publisher="CN=BAAB9B9E-CD72-40AB-BE14-24DCE13BA387"
     Version="1.0.0.0" />
 
   <Properties>
-    <DisplayName>WSLStudio</DisplayName>
-    <PublisherDisplayName>nathan quellec</PublisherDisplayName>
+    <DisplayName>WSL Studio</DisplayName>
+    <PublisherDisplayName>Nathan Quellec</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
 
 	  <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
@@ -59,10 +60,12 @@
         DisplayName="ms-resource:AppDisplayName"
         Description="ms-resource:AppDescription"
         BackgroundColor="transparent"
-        Square150x150Logo="Assets\Square150x150Logo.png"
-        Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+        Square150x150Logo="Assets\Square150x150Logo.png"  Square44x44Logo="Assets\WslStudioLogo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square310x310Logo="Assets\LargeTile.png" Square71x71Logo="Assets\SmallTile.png">
+          <uap:ShowNameOnTiles>
+            <uap:ShowOn Tile="square310x310Logo"/>
+          </uap:ShowNameOnTiles>
+        </uap:DefaultTile >
       </uap:VisualElements>
       <Extensions>
           <desktop:Extension Category="windows.toastNotificationActivation">
@@ -94,4 +97,5 @@
     <genTemplate:Item Name="platform" Value="WinUI" />
     <genTemplate:Item Name="appmodel" Value="Desktop" />
   </genTemplate:Metadata>
+
 </Package>
