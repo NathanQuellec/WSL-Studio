@@ -1,0 +1,183 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>WSLStudio</RootNamespace>
+    <ApplicationIcon>Assets\WslStudioIcon.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Platforms>x86;x64;arm64</Platforms>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <PublishProfile>Properties\PublishProfiles\win10-$(Platform).pubxml</PublishProfile>
+	<ImplicitUsings>enable</ImplicitUsings>
+	<Nullable>enable</Nullable>
+	<UseWinUI>true</UseWinUI>
+    <EnableMsixTooling>true</EnableMsixTooling>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Remove="Assets\LargeTile.scale-100.png" />
+    <Content Remove="Assets\LargeTile.scale-125.png" />
+    <Content Remove="Assets\LargeTile.scale-150.png" />
+    <Content Remove="Assets\LargeTile.scale-200.png" />
+    <Content Remove="Assets\LargeTile.scale-400.png" />
+    <Content Remove="Assets\SmallTile.scale-100.png" />
+    <Content Remove="Assets\SmallTile.scale-125.png" />
+    <Content Remove="Assets\SmallTile.scale-150.png" />
+    <Content Remove="Assets\SmallTile.scale-200.png" />
+    <Content Remove="Assets\SmallTile.scale-400.png" />
+    <Content Remove="Assets\SplashScreen.scale-100.png" />
+    <Content Remove="Assets\SplashScreen.scale-125.png" />
+    <Content Remove="Assets\SplashScreen.scale-150.png" />
+    <Content Remove="Assets\SplashScreen.scale-200.png" />
+    <Content Remove="Assets\SplashScreen.scale-400.png" />
+    <Content Remove="Assets\Square150x150Logo.scale-100.png" />
+    <Content Remove="Assets\Square150x150Logo.scale-125.png" />
+    <Content Remove="Assets\Square150x150Logo.scale-150.png" />
+    <Content Remove="Assets\Square150x150Logo.scale-200.png" />
+    <Content Remove="Assets\StoreLogo.scale-100.png" />
+    <Content Remove="Assets\StoreLogo.scale-125.png" />
+    <Content Remove="Assets\StoreLogo.scale-150.png" />
+    <Content Remove="Assets\StoreLogo.scale-200.png" />
+    <Content Remove="Assets\vscode-alt.png" />
+    <Content Remove="Assets\vscode-alt.svg" />
+    <Content Remove="Assets\Wide310x150Logo.scale-100.png" />
+    <Content Remove="Assets\Wide310x150Logo.scale-125.png" />
+    <Content Remove="Assets\Wide310x150Logo.scale-150.png" />
+    <Content Remove="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-lightunplated_targetsize-16.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-lightunplated_targetsize-24.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-lightunplated_targetsize-256.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-lightunplated_targetsize-32.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-lightunplated_targetsize-48.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-unplated_targetsize-16.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-unplated_targetsize-24.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-unplated_targetsize-256.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-unplated_targetsize-32.png" />
+    <Content Remove="Assets\WslStudioIcon.altform-unplated_targetsize-48.png" />
+    <Content Remove="Assets\WslStudioIcon.scale-100.png" />
+    <Content Remove="Assets\WslStudioIcon.scale-125.png" />
+    <Content Remove="Assets\WslStudioIcon.scale-150.png" />
+    <Content Remove="Assets\WslStudioIcon.scale-200.png" />
+    <Content Remove="Assets\WslStudioIcon.scale-400.png" />
+    <Content Remove="Assets\WslStudioIcon.targetsize-16.png" />
+    <Content Remove="Assets\WslStudioIcon.targetsize-24.png" />
+    <Content Remove="Assets\WslStudioIcon.targetsize-256.png" />
+    <Content Remove="Assets\WslStudioIcon.targetsize-32.png" />
+    <Content Remove="Assets\WslStudioIcon.targetsize-48.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-lightunplated_targetsize-16.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-lightunplated_targetsize-24.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-lightunplated_targetsize-256.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-lightunplated_targetsize-32.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-lightunplated_targetsize-48.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-unplated_targetsize-16.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-unplated_targetsize-24.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-unplated_targetsize-256.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-unplated_targetsize-32.png" />
+    <Content Remove="Assets\WslStudioLogo.altform-unplated_targetsize-48.png" />
+    <Content Remove="Assets\WslStudioLogo.scale-125.png" />
+    <Content Remove="Assets\WslStudioLogo.scale-150.png" />
+    <Content Remove="Assets\WslStudioLogo.targetsize-16.png" />
+    <Content Remove="Assets\WslStudioLogo.targetsize-24.png" />
+    <Content Remove="Assets\WslStudioLogo.targetsize-256.png" />
+    <Content Remove="Assets\WslStudioLogo.targetsize-32.png" />
+    <Content Remove="Assets\WslStudioLogo.targetsize-48.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="Assets\Square150x150Logo.scale-400.png" />
+    <None Remove="Assets\Square44x44Logo.scale-400.jpg" />
+    <None Remove="Assets\StoreLogo.scale-400.png" />
+    <None Remove="Assets\Wide310x150Logo.scale-400.png" />
+    <None Remove="Assets\WindowIcon.ico" />
+    <None Remove="Assets\WslStudioIcon.ico" />
+    <None Remove="Assets\WslStudioLogo.scale-100.png" />
+    <None Remove="Assets\WslStudioLogo.scale-200.png" />
+    <None Remove="Assets\WslStudioLogo.scale-400.png" />
+    <None Remove="Views\CreateDistroDialogView.xaml" />
+    <None Remove="Views\DistrosList.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Manifest Include="$(ApplicationManifest)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <ProjectCapability Include="Msix" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Community.Wsl.Sdk" Version="3.0.0" />
+    <PackageReference Include="CommunityToolkit.Common" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
+    <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
+    <PackageReference Include="Docker.DotNet" Version="3.125.12" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221116.1" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageReference Include="SonarAnalyzer.CSharp" Version="8.50.0.58025">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Management.Automation" Version="7.2.0" />
+    <PackageReference Include="WinUIEx" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\WSLStudio.Core\WSLStudio.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\DistrosListDetailsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\Factories\" />
+    <Folder Include="Themes\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Assets\WindowIcon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Assets\WslStudioIcon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\CreateDistroDialogView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  
+  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
+    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|arm64'">
+    <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
+  </PropertyGroup>
+
+</Project>

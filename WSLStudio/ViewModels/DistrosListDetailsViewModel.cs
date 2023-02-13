@@ -140,7 +140,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             contentForm = dialogContent;
         }
 
-        var newDistroNameInput = contentForm?.FindName("distroNameInput") as TextBox;
+        var newDistroNameInput = contentForm?.FindName("DistroNameInput") as TextBox;
         var newDistroName = newDistroNameInput?.Text;
 
         var namesList = this.Distros.Select(distro => distro.Name).ToList();
@@ -204,7 +204,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var newDistroNameInput = new TextBox()
         {
-            Name = "distroNameInput",
+            Name = "DistroNameInput",
             Margin = new Thickness(0 ,20, 0, 15),
             Height = 32,
         };
@@ -342,7 +342,7 @@ public class DistrosListDetailsViewModel : ObservableObject
                 break;
         }
 
-        var distroNameInput = form.FindName("distroNameInput") as TextBox;
+        var distroNameInput = form.FindName("DistroNameInput") as TextBox;
         var distroName = distroNameInput!.Text;
 
         return Tuple.Create(distroName, resourceOrigin, creationMode);

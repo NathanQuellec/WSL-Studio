@@ -21,76 +21,51 @@ using Microsoft.UI.Xaml.Navigation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WSLStudio.Views
+namespace WSLStudio.Views;
+
+public sealed partial class CreateDistroDialogView : UserControl
 {
-    public sealed partial class CreateDistroDialogView : UserControl
+    public CreateDistroDialogView()
     {
-        public CreateDistroDialogView()
-        {
-            this.InitializeComponent();
+        this.InitializeComponent();
 
+    }
+
+    public async void PickDockerFileFolder(object sender, RoutedEventArgs args)
+    {
+        var hwnd = App.MainWindow.GetWindowHandle();
+        FolderPicker folderPicker = new();
+
+        WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
+
+        folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        folderPicker.FileTypeFilter.Add("*");
+
+
+        var folder = await folderPicker.PickSingleFolderAsync();
+        if (folder != null)
+        {
+            DockerfileInput.Text = folder.Path;
         }
+    }
 
-        private void CreateDistro_SelectionMode(object sender, SelectionChangedEventArgs e)
+
+    public async void PickArchiveFile(object sender, RoutedEventArgs args)
+    {
+
+        var hwnd = App.MainWindow.GetWindowHandle();
+        FileOpenPicker filePicker = new();
+
+        WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
+
+        filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        filePicker.FileTypeFilter.Add(".tar");
+        filePicker.FileTypeFilter.Add(".gz");
+
+        var archiveFile = await filePicker.PickSingleFileAsync();
+        if (archiveFile != null)
         {
-
-            DockerfileInputContainer.Visibility = Visibility.Collapsed;
-            DockerHubInputContainer.Visibility = Visibility.Collapsed;
-            ArchiveInputContainer.Visibility = Visibility.Collapsed;
-
-            var creationMode = e.AddedItems[0].ToString();
-
-            switch (creationMode)
-            {
-                case "Dockerfile":
-                    DockerfileInputContainer.Visibility = Visibility.Visible;
-                    break;
-                case "Docker Hub":
-                    DockerHubInputContainer.Visibility = Visibility.Visible;
-                    break;
-                case "Archive":
-                    ArchiveInputContainer.Visibility = Visibility.Visible;
-                    break;
-            }
-
-        }
-
-        private async void PickDockerFileFolder(object sender, RoutedEventArgs args)
-        {
-            var hwnd = App.MainWindow.GetWindowHandle();
-            FolderPicker folderPicker = new();
-
-            WinRT.Interop.InitializeWithWindow.Initialize(folderPicker, hwnd);
-
-            folderPicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            folderPicker.FileTypeFilter.Add("*");
-
-
-            var folder = await folderPicker.PickSingleFolderAsync();
-            if (folder != null)
-            {
-                DockerfileInput.Text = folder.Path;
-            }
-        }
-
-
-        private async void PickArchiveFile(object sender, RoutedEventArgs args)
-        {
-
-            var hwnd = App.MainWindow.GetWindowHandle();
-            FileOpenPicker filePicker = new();
-
-            WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
-
-            filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
-            filePicker.FileTypeFilter.Add(".tar");
-            filePicker.FileTypeFilter.Add(".gz");
-
-            var archiveFile = await filePicker.PickSingleFileAsync();
-            if (archiveFile != null)
-            {
-                ArchiveInput.Text = archiveFile.Path;
-            }
+            ArchiveInput.Text = archiveFile.Path;
         }
     }
 }
