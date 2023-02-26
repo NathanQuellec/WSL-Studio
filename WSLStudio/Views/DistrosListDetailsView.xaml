@@ -29,8 +29,9 @@
                     Grid.Row="0">
             <Image Source="/Assets/WslStudioIcon.ico"
                    HorizontalAlignment="Left" 
-                   Width="16" Height="16" 
-                   Margin="8,0"/>
+                   VerticalAlignment="Center"
+                   Width="24" Height="24" 
+                   Margin="8,4"/>
             <TextBlock x:Name="AppTitleTextBlock" 
                        Text="WSL Studio"
                        TextWrapping="NoWrap"
