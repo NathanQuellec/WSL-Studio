@@ -149,10 +149,119 @@
 
             <controls:ListDetailsView.DetailsTemplate>
                 <DataTemplate x:DataType="model:Distribution">
-                    <StackPanel>
+
+                    <Grid Margin="36 0 0 0 ">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        
+                        <StackPanel Orientation="Horizontal"
+                                    Margin="0 0 0 24"
+                                    Grid.Column="1"
+                                    Grid.Row="0">
+                            
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                           Text="CPU : "
+                                           FontSize="16"
+                                           Margin="8"/>
+                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                           Text="32 %"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="8"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                           Text="Memory : "
+                                           FontSize="16"
+                                           Margin="8"/>
+                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                           Text="64 %"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Margin="8"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="1"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="OS Name : "
+                                       FontSize="16"/>
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="Ubuntu"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="12 0 0 0 "/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="2"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="OS Version : "
+                                       FontSize="16"/>
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="22.04"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="12 0 0 0 "/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="3"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="All Users : "
+                                       FontSize="16"
+                                       Margin="0 12 0 0 "/>
+                            <Expander IsExpanded="False"
+                                      ExpandDirection="Down"
+                                      Header="Users"
+                                      Content="Test User"
+                                      Width="124"
+                                      Margin="36 0 0 0 ">
+                            </Expander>
+                            <Button Margin="4 0 0 0">
+                                <FontIcon Glyph="&#xE710;"
+                                          FontSize="16"/>
+                            </Button>
+                        </StackPanel>
 
 
-                    </StackPanel>
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="4"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="All Groups : "
+                                       FontSize="16"
+                                       Margin="0 12 0 0 "/>
+                            <Expander IsExpanded="False"
+                                      ExpandDirection="Down"
+                                      Header="Groups"
+                                      Content="Test"
+                                      Margin="24 0 0 0 ">
+                            </Expander>
+                            <Button Margin="4 0 0 0">
+                                <FontIcon Glyph="&#xE710;"
+                                          FontSize="16"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </controls:ListDetailsView.DetailsTemplate>
 
