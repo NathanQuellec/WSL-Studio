@@ -14,4 +14,5 @@ public interface IDistributionService
     void OpenDistributionFileSystem(Distribution distribution);
     void OpenDistributionWithVsCode(Distribution distribution);
     void OpenDistroWithWt(Distribution distribution);
+    Task<string> GetDistroOsName(string distroName);
 }

@@ -200,7 +200,7 @@
                                        Text="OS Name : "
                                        FontSize="16"/>
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="Ubuntu"
+                                       Text="{x:Bind OsName}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Margin="12 0 0 0 "/>

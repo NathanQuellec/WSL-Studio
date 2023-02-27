@@ -50,6 +50,7 @@ public class DistributionService : IDistributionService
                     IsDefault = distro.IsDefault,
                     WslVersion = distro.WslVersion,
                     Name = distro.DistroName,
+                    OsName = GetDistroOsName(distro.DistroName).Result
                 });
 
             if (apiDistroList == null)
@@ -61,7 +62,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Debug.WriteLine("INFO: No WSL distributions found in the system");
+            Console.WriteLine("INFO: No WSL distributions found in the system");
         }
     }
 
@@ -135,7 +136,7 @@ public class DistributionService : IDistributionService
         if (distribution != null)
         {
             _distros.Remove(distribution);
-            Debug.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
+            Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
         }
         else
         {
@@ -150,7 +151,7 @@ public class DistributionService : IDistributionService
      */
     public bool RenameDistribution(Distribution distribution, string newDistroName)
     {
-        Debug.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
+        Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
         var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
@@ -163,9 +164,9 @@ public class DistributionService : IDistributionService
 
             var distroRegPath = Path.Combine(lxssRegPath, subKey);
             var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-            Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
+            Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
             distroSubkeys.SetValue("DistributionName", newDistroName);
-            Debug.WriteLine($"OK {subKey}");
+            Console.WriteLine($"OK {subKey}");
             distroSubkeys.Close();
             lxsSubKeys.Close();
             //this.RenameDistributionFolder(distribution.Name, newDistroName);
@@ -211,12 +212,12 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Debug.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
             distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
         }
 
     }
@@ -225,7 +226,7 @@ public class DistributionService : IDistributionService
     {
         if (distribution?.RunningProcesses == null)
         {
-            Debug.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
+            Console.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
                             $"they are no processes running for {distribution!.Name}");
         }
         else
@@ -238,7 +239,7 @@ public class DistributionService : IDistributionService
 
                 if (process.HasExited)
                 {
-                    Debug.WriteLine($"[INFO] Process ID : {process.Id} and " +
+                    Console.WriteLine($"[INFO] Process ID : {process.Id} and " +
                                     $"NAME : {process.ProcessName} is closed");
                 }
             }
@@ -274,5 +275,24 @@ public class DistributionService : IDistributionService
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
+    }
+
+    public async Task<string> GetDistroOsName(string distroName)
+    {
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
+            .SetRedirectStandardOutput(true)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
+
+        var output =  process.StandardOutput.ReadToEnd();
+        var osName = output.Remove(0, 5)
+            .Replace('\"',' ')
+            .Trim();
+        Console.WriteLine($"OS Name for {distroName} is {osName}");
+        
+        return osName;
     }
 }
