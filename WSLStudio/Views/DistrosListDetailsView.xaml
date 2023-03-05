@@ -214,7 +214,7 @@
                                        Text="OS Version : "
                                        FontSize="16"/>
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="22.04"
+                                       Text="{x:Bind OsVersion}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Margin="12 0 0 0 "/>

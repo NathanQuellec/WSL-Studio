@@ -70,6 +70,7 @@ public class DistributionService : IDistributionService
                         Path = distroPath,
                         WslVersion = wslVersion,
                         OsName = this.GetDistroOsName(distroName).Result,
+                        OsVersion = this.GetDistroOsVersion(distroName).Result,
                     };
 
                     this._distros.Add(distro);
@@ -311,12 +312,36 @@ public class DistributionService : IDistributionService
             process.Start();
 
             var output =  process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            var osName = output.Remove(0, 5)
+
+            var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
                 .Replace('\"', ' ')
                 .Trim();
             Console.WriteLine($"OS Name for {distroName} is {osName}");
 
             return Task.FromResult(osName);
+        }
+    }
+
+    public Task<string> GetDistroOsVersion(string distroName)
+    {
+        lock (_lock)
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+
+            var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Version for {distroName} is {osVersion}");
+
+            return Task.FromResult(osVersion);
         }
     }
 }
