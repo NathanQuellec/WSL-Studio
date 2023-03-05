@@ -47,6 +47,7 @@ public class DistributionService : IDistributionService
 
             foreach (var subKey in lxssSubKeys.GetSubKeyNames())
             {
+                // we iterate only on distros registry keys
                 if (!subKey.StartsWith('{') || !subKey.EndsWith('}'))
                 {
                     continue;
