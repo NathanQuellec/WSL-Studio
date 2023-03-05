@@ -230,6 +230,10 @@
                                        FontSize="16"/>
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                        Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
+                                       Text="WSL Version : "
+                                       FontSize="16"/>
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="{x:Bind WslVersion}"
                                        FontSize="16"
                                        FontWeight="SemiBold"
                                        Margin="12 0 0 0 "/>
