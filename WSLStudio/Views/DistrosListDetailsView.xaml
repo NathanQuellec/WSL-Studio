@@ -226,10 +226,6 @@
                                     Grid.Row="3"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="Size : "
-                                       FontSize="16"/>
-                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
                                        Text="WSL Version : "
                                        FontSize="16"/>
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"

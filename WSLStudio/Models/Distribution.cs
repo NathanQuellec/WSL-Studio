@@ -18,7 +18,6 @@ public class Distribution : INotifyPropertyChanged
     public int WslVersion { get; set; }
     public string OsName { get; set; }
     public string OsVersion { get; set; }
-    public string Size { get; set; }
 
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
