@@ -18,6 +18,7 @@ using Microsoft.Win32;
 using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
+using CommunityToolkit.WinUI.Helpers;
 
 namespace WSLStudio.Services;
 
@@ -38,7 +39,7 @@ public class DistributionService : IDistributionService
         _wslApi = new WslApi();
     }
 
-    public void InitDistributionsList()
+    public async Task InitDistributionsList()
     {
         try
         {
@@ -70,8 +71,6 @@ public class DistributionService : IDistributionService
                         Name = distroName,
                         Path = distroPath,
                         WslVersion = wslVersion,
-                        OsName = this.GetDistroOsName(distroName).Result,
-                        OsVersion = this.GetDistroOsVersion(distroName).Result,
                     };
 
                     this._distros.Add(distro);
@@ -82,10 +81,78 @@ public class DistributionService : IDistributionService
             }
 
             lxssSubKeys.Close();
+
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+        }
+    }
+
+    public async Task SetDistributionsInfos()
+    {
+        foreach (var distro in _distros)
+        {
+            distro.OsName = await GetDistroOsName(distro.Name);
+            distro.OsVersion =  await GetDistroOsVersion(distro.Name);
+            distro.Size =  GetDistroSize(distro.Path);
+        }
+    }
+
+    private static async Task<string> GetDistroOsName(string distroName)
+    {
+        
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            await process.WaitForExitAsync();
+
+            var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Name for {distroName} is {osName}");
+
+            return osName;
+    }
+
+    private static async Task<string> GetDistroOsVersion(string distroName)
+    {
+        
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            
+            await process.WaitForExitAsync();
+
+            var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Version for {distroName} is {osVersion}");
+
+            return osVersion;
+
+    }
+
+    private static string GetDistroSize(string distroPath)
+    {
+        lock (_lock)
+        {
+            var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
+            var diskFile = new FileInfo(diskLocation);
+            var sizeInGB = (double)diskFile.Length / 1024 / 1024 / 1024;
+            return Math.Round(sizeInGB, 2).ToString();
         }
     }
 
@@ -298,51 +365,5 @@ public class DistributionService : IDistributionService
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
-    }
-
-    public Task<string> GetDistroOsName(string distroName)
-    {
-        lock (_lock)
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
-
-            var output =  process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-
-            var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
-                .Replace('\"', ' ')
-                .Trim();
-            Console.WriteLine($"OS Name for {distroName} is {osName}");
-
-            return Task.FromResult(osName);
-        }
-    }
-
-    public Task<string> GetDistroOsVersion(string distroName)
-    {
-        lock (_lock)
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
-
-            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-
-            var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
-                .Replace('\"', ' ')
-                .Trim();
-            Console.WriteLine($"OS Version for {distroName} is {osVersion}");
-
-            return Task.FromResult(osVersion);
-        }
     }
 }
