@@ -162,6 +162,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         
                         <StackPanel Orientation="Horizontal"
@@ -240,6 +241,20 @@
                                     Grid.Row="4"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="WSL Version : "
+                                       FontSize="16"/>
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="{x:Bind WslVersion}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="12 0 0 0 "/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="5"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                        Text="All Users : "
                                        FontSize="16"
                                        Margin="0 12 0 0 "/>
@@ -259,7 +274,7 @@
 
                         <StackPanel Orientation="Horizontal"
                                     Grid.Column="0"
-                                    Grid.Row="5"
+                                    Grid.Row="6"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                        Text="All Groups : "
