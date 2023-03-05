@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Management;
 using Community.Wsl.Sdk;
+using Microsoft.Win32;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
+using WSLStudio.Models;
 
 namespace WSLStudio.Services;
 

@@ -26,7 +26,10 @@ public class DistributionService : IDistributionService
     private const string WSL_UNC_PATH = @"\\wsl.localhost";
     private const string APP_FOLDER = "WslStudio";
 
+    private static readonly object _lock = new object();
+
     private readonly IList<Distribution> _distros;
+
     private readonly WslApi _wslApi;
 
     public DistributionService()
@@ -39,29 +42,49 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var apiDistroList = _wslApi?.GetDistributionList()
-                // Filter Docker special-purpose internal Linux distros 
-                .Where(distro => (distro.DistroName != "docker-desktop") &&
-                                 (distro.DistroName != "docker-desktop-data"))
-                .Select(distro => new Distribution()
+            var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
+            var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+            foreach (var subKey in lxssSubKeys.GetSubKeyNames())
+            {
+                if (!subKey.StartsWith('{') || !subKey.EndsWith('}'))
                 {
-                    Id = distro.DistroId,
-                    Path = distro.BasePath,
-                    IsDefault = distro.IsDefault,
-                    WslVersion = distro.WslVersion,
-                    Name = distro.DistroName,
-                });
+                    continue;
+                }
 
-            if (apiDistroList == null)
-                return;
+                var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath);
 
-            foreach (var distro in apiDistroList)
-                this._distros.Add(distro);
+                var distroName = (string)distroSubkeys.GetValue("DistributionName");
 
+                // Filter Docker special-purpose internal Linux distros 
+                if ((distroName != "docker-desktop") && (distroName != "docker-desktop-data"))
+                {
+                    var distroPath = (string)distroSubkeys.GetValue("BasePath");
+                    var wslVersion = (int)distroSubkeys.GetValue("Version");
+
+                    var distro = new Distribution()
+                    {
+                        Id = Guid.Parse(subKey),
+                        Name = distroName,
+                        Path = distroPath,
+                        WslVersion = wslVersion,
+                        OsName = this.GetDistroOsName(distroName).Result,
+                        OsVersion = this.GetDistroOsVersion(distroName).Result,
+                    };
+
+                    this._distros.Add(distro);
+                    Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
+                }
+
+                distroSubkeys.Close();
+            }
+
+            lxssSubKeys.Close();
         }
         catch (Exception ex)
         {
-            Debug.WriteLine("INFO: No WSL distributions found in the system");
+            Console.WriteLine(ex.ToString());
         }
     }
 
@@ -135,7 +158,7 @@ public class DistributionService : IDistributionService
         if (distribution != null)
         {
             _distros.Remove(distribution);
-            Debug.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
+            Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
         }
         else
         {
@@ -150,7 +173,7 @@ public class DistributionService : IDistributionService
      */
     public bool RenameDistribution(Distribution distribution, string newDistroName)
     {
-        Debug.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
+        Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
         var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
@@ -163,9 +186,9 @@ public class DistributionService : IDistributionService
 
             var distroRegPath = Path.Combine(lxssRegPath, subKey);
             var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-            Debug.WriteLine(distroSubkeys.GetValue("DistributionName"));
+            Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
             distroSubkeys.SetValue("DistributionName", newDistroName);
-            Debug.WriteLine($"OK {subKey}");
+            Console.WriteLine($"OK {subKey}");
             distroSubkeys.Close();
             lxsSubKeys.Close();
             //this.RenameDistributionFolder(distribution.Name, newDistroName);
@@ -211,12 +234,12 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Debug.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
             distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
         }
 
     }
@@ -225,7 +248,7 @@ public class DistributionService : IDistributionService
     {
         if (distribution?.RunningProcesses == null)
         {
-            Debug.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
+            Console.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
                             $"they are no processes running for {distribution!.Name}");
         }
         else
@@ -238,7 +261,7 @@ public class DistributionService : IDistributionService
 
                 if (process.HasExited)
                 {
-                    Debug.WriteLine($"[INFO] Process ID : {process.Id} and " +
+                    Console.WriteLine($"[INFO] Process ID : {process.Id} and " +
                                     $"NAME : {process.ProcessName} is closed");
                 }
             }
@@ -274,5 +297,51 @@ public class DistributionService : IDistributionService
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
+    }
+
+    public Task<string> GetDistroOsName(string distroName)
+    {
+        lock (_lock)
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output =  process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+
+            var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Name for {distroName} is {osName}");
+
+            return Task.FromResult(osName);
+        }
+    }
+
+    public Task<string> GetDistroOsVersion(string distroName)
+    {
+        lock (_lock)
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+
+            var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Version for {distroName} is {osVersion}");
+
+            return Task.FromResult(osVersion);
+        }
     }
 }

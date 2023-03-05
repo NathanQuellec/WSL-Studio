@@ -15,8 +15,10 @@ public class Distribution : INotifyPropertyChanged
 {
     public Guid Id { get; set; }
     public string Path { get; set; }
-    public bool IsDefault { get; set; }
     public int WslVersion { get; set; }
+    public string OsName { get; set; }
+    public string OsVersion { get; set; }
+
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;
