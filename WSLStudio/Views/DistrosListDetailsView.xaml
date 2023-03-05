@@ -161,6 +161,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         
                         <StackPanel Orientation="Horizontal"
@@ -225,6 +226,20 @@
                                     Grid.Row="3"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="Size : "
+                                       FontSize="16"/>
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                       Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
+                                       FontSize="16"
+                                       FontWeight="SemiBold"
+                                       Margin="12 0 0 0 "/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal"
+                                    Grid.Column="0"
+                                    Grid.Row="4"
+                                    Margin="18">
+                            <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                        Text="All Users : "
                                        FontSize="16"
                                        Margin="0 12 0 0 "/>
@@ -244,7 +259,7 @@
 
                         <StackPanel Orientation="Horizontal"
                                     Grid.Column="0"
-                                    Grid.Row="4"
+                                    Grid.Row="5"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                        Text="All Groups : "
