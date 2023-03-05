@@ -26,7 +26,10 @@ public class DistributionService : IDistributionService
     private const string WSL_UNC_PATH = @"\\wsl.localhost";
     private const string APP_FOLDER = "WslStudio";
 
+    private static readonly object _lock = new object();
+
     private readonly IList<Distribution> _distros;
+
     private readonly WslApi _wslApi;
 
     public DistributionService()
@@ -39,30 +42,48 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var apiDistroList = _wslApi?.GetDistributionList()
-                // Filter Docker special-purpose internal Linux distros 
-                .Where(distro => (distro.DistroName != "docker-desktop") &&
-                                 (distro.DistroName != "docker-desktop-data"))
-                .Select(distro => new Distribution()
+            var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
+            var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+            foreach (var subKey in lxssSubKeys.GetSubKeyNames())
+            {
+                if (!subKey.StartsWith('{') || !subKey.EndsWith('}'))
                 {
-                    Id = distro.DistroId,
-                    Path = distro.BasePath,
-                    IsDefault = distro.IsDefault,
-                    WslVersion = distro.WslVersion,
-                    Name = distro.DistroName,
-                    OsName = GetDistroOsName(distro.DistroName).Result
-                });
+                    continue;
+                }
 
-            if (apiDistroList == null)
-                return;
+                var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath);
 
-            foreach (var distro in apiDistroList)
-                this._distros.Add(distro);
+                var distroName = (string)distroSubkeys.GetValue("DistributionName");
 
+                // Filter Docker special-purpose internal Linux distros 
+                if ((distroName != "docker-desktop") && (distroName != "docker-desktop-data"))
+                {
+                    var distroPath = (string)distroSubkeys.GetValue("BasePath");
+                    var wslVersion = (int)distroSubkeys.GetValue("Version");
+
+                    var distro = new Distribution()
+                    {
+                        Id = Guid.Parse(subKey),
+                        Name = distroName,
+                        Path = distroPath,
+                        WslVersion = wslVersion,
+                        OsName = this.GetDistroOsName(distroName).Result,
+                    };
+
+                    this._distros.Add(distro);
+                    Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
+                }
+
+                distroSubkeys.Close();
+            }
+
+            lxssSubKeys.Close();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("INFO: No WSL distributions found in the system");
+            Console.WriteLine(ex.ToString());
         }
     }
 
@@ -277,22 +298,25 @@ public class DistributionService : IDistributionService
         process.Start();
     }
 
-    public async Task<string> GetDistroOsName(string distroName)
+    public Task<string> GetDistroOsName(string distroName)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
+        lock (_lock)
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
 
-        var output =  process.StandardOutput.ReadToEnd();
-        var osName = output.Remove(0, 5)
-            .Replace('\"',' ')
-            .Trim();
-        Console.WriteLine($"OS Name for {distroName} is {osName}");
-        
-        return osName;
+            var output =  process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            var osName = output.Remove(0, 5)
+                .Replace('\"', ' ')
+                .Trim();
+            Console.WriteLine($"OS Name for {distroName} is {osName}");
+
+            return Task.FromResult(osName);
+        }
     }
 }
