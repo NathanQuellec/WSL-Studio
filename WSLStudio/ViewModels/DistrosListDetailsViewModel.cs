@@ -67,13 +67,6 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
-
-        // TODO : Print loading screen when this task is running
-        Task.Run(() =>
-        {
-            this._distributionService.SetDistributionsInfos();
-        });
-        
     }
 
     private void PopulateDistributionsCollection()
