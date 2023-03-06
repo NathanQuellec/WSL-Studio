@@ -89,15 +89,17 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public async Task SetDistributionsInfos()
+    public Task SetDistributionsInfos()
     {
-        foreach (var distro in _distros)
+        Parallel.ForEach(_distros, async distro =>
         {
             distro.OsName = await GetOsName(distro.Name);
             distro.OsVersion = await GetOsVersion(distro.Name);
             distro.Size = GetSize(distro.Path);
             distro.Users = await GetDistributionUsers(distro.Name);
-        }
+
+        });
+        return Task.CompletedTask;
     }
 
     private static async Task<string> GetOsName(string distroName)
