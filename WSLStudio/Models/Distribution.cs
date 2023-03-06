@@ -20,6 +20,7 @@ public class Distribution : INotifyPropertyChanged
     public string OsVersion { get; set; }
     public string Size { get; set; }
 
+    public IList<string> Users { get; set; } = new List<string>();
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;

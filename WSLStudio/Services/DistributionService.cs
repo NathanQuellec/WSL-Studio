@@ -93,59 +93,59 @@ public class DistributionService : IDistributionService
     {
         foreach (var distro in _distros)
         {
-            distro.OsName = await GetDistroOsName(distro.Name);
-            distro.OsVersion =  await GetDistroOsVersion(distro.Name);
-            distro.Size =  GetDistroSize(distro.Path);
+            distro.OsName = await GetOsName(distro.Name);
+            distro.OsVersion = await GetOsVersion(distro.Name);
+            distro.Size = GetSize(distro.Path);
+            distro.Users = await GetDistributionUsers(distro.Name);
         }
     }
 
-    private static async Task<string> GetDistroOsName(string distroName)
+    private static async Task<string> GetOsName(string distroName)
     {
-        
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release &")
+            .SetRedirectStandardOutput(true)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
 
-            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            await process.WaitForExitAsync();
+        var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+        await process.WaitForExitAsync();
 
-            var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
-                .Replace('\"', ' ')
-                .Trim();
-            Console.WriteLine($"OS Name for {distroName} is {osName}");
+        var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
+            .Replace('\"', ' ')
+            .Trim();
+        Console.WriteLine($"OS Name for {distroName} is {osName}");
 
-            return osName;
+        return osName;
     }
 
-    private static async Task<string> GetDistroOsVersion(string distroName)
+    private static async Task<string> GetOsVersion(string distroName)
     {
-        
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
 
-            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            
-            await process.WaitForExitAsync();
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release &")
+            .SetRedirectStandardOutput(true)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
 
-            var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
-                .Replace('\"', ' ')
-                .Trim();
-            Console.WriteLine($"OS Version for {distroName} is {osVersion}");
+        var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
 
-            return osVersion;
+        await process.WaitForExitAsync();
+
+        var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
+            .Replace('\"', ' ')
+            .Trim();
+        Console.WriteLine($"OS Version for {distroName} is {osVersion}");
+
+        return osVersion;
 
     }
 
-    private static string GetDistroSize(string distroPath)
+    private static string GetSize(string distroPath)
     {
         lock (_lock)
         {
@@ -154,6 +154,29 @@ public class DistributionService : IDistributionService
             var sizeInGB = (double)diskFile.Length / 1024 / 1024 / 1024;
             return Math.Round(sizeInGB, 2).ToString();
         }
+    }
+
+    private static async Task<List<string>> GetDistributionUsers(string distroName)
+    {
+
+        var usersList = new List<string>();
+
+        var process = new ProcessBuilderHelper("cmd.exe")
+            .SetArguments($"/c wsl -d {distroName} grep /bin/*sh /etc/passwd | wsl cut -d ':' -f2")
+            .SetRedirectStandardOutput(true)
+            .SetUseShellExecute(false)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
+
+        while (await process.StandardOutput.ReadLineAsync() is { } output)
+        {
+            usersList.Add(output);
+        }
+
+        await process.WaitForExitAsync();
+
+        return usersList;
     }
 
     public IEnumerable<Distribution> GetAllDistributions()

@@ -170,7 +170,7 @@
                                     Grid.Column="1"
                                     Grid.Row="0">
                             
-                            <StackPanel Orientation="Horizontal">
+                            <!--<StackPanel Orientation="Horizontal">
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            Text="CPU : "
                                            FontSize="16"
@@ -191,7 +191,7 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="8"/>
-                            </StackPanel>
+                            </StackPanel>-->
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal"
@@ -255,42 +255,47 @@
                                     Grid.Row="5"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="All Users : "
+                                       Text="Users : "
                                        FontSize="16"
                                        Margin="0 12 0 0 "/>
                             <Expander IsExpanded="False"
                                       ExpandDirection="Down"
                                       Header="Users"
-                                      Content="Test User"
                                       Width="124"
-                                      Margin="36 0 0 0 ">
+                                      Margin="60 0 0 0 ">
+                                <Expander.Content>
+                                    <ListView ItemsSource="{x:Bind Users}"/>
+                                </Expander.Content>
                             </Expander>
-                            <Button Margin="4 0 0 0">
+                            <!--<Button Margin="4 0 0 0">
                                 <FontIcon Glyph="&#xE710;"
                                           FontSize="16"/>
-                            </Button>
+                            </Button>-->
                         </StackPanel>
-
 
                         <StackPanel Orientation="Horizontal"
                                     Grid.Column="0"
                                     Grid.Row="6"
                                     Margin="18">
                             <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="All Groups : "
+                                       Text="Snapshots : "
                                        FontSize="16"
                                        Margin="0 12 0 0 "/>
                             <Expander IsExpanded="False"
                                       ExpandDirection="Down"
-                                      Header="Groups"
-                                      Content="Test"
+                                      Header="Snapshots"
+                                      Width="144"
                                       Margin="24 0 0 0 ">
+                                <Expander.Content>
+                                    <ListView ItemsSource="{x:Bind Users}"/>
+                                </Expander.Content>
                             </Expander>
                             <Button Margin="4 0 0 0">
                                 <FontIcon Glyph="&#xE710;"
                                           FontSize="16"/>
                             </Button>
                         </StackPanel>
+
                     </Grid>
                 </DataTemplate>
             </controls:ListDetailsView.DetailsTemplate>
