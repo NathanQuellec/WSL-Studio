@@ -103,7 +103,7 @@ public class DistributionService : IDistributionService
             }
 
             distro.OsName = await GetOsInfos(distro.Name, "NAME");
-            distro.OsVersion = await GetOsInfos(distro.Name, "VERSION_ID");
+            distro.OsVersion = await GetOsInfos(distro.Name, "VERSION");
             distro.Size = GetSize(distro.Path);
             //distro.Users = await GetDistributionUsers(distro.Name);
 
@@ -113,7 +113,7 @@ public class DistributionService : IDistributionService
     private static async Task<string> GetOsInfos(string distroName, string field)
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
-        var osNameRegex = $@"(\b{field}=""|\b{field}="")(.*?)""\n";
+        var osNameRegex = $@"(\b{field}="")(.*?)""\n";
         
         try
         {
@@ -123,30 +123,30 @@ public class DistributionService : IDistributionService
                 Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
                 osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
             }
+
             Console.WriteLine("----------------GET OS INFOS----------------");
-            using (var streamReader = new StreamReader(osInfosFilePath))
-            {
-                var osReleaseFile = await streamReader.ReadToEndAsync();
-                var osName = Regex.Match(osReleaseFile, osNameRegex)
-                    .Groups[2] // get second matching group of regex result (i.e. value of NAME field)
-                    .Value;
-                return osName;
-                
-            }
+            using var streamReader = new StreamReader(osInfosFilePath);
+            var osInfosFileOutput = await streamReader.ReadToEndAsync();
+            var osInfos = Regex.Match(osInfosFileOutput, osNameRegex)
+                .Groups[2] // get third matching group of regex result (i.e. value of NAME field)
+                .Value;
+            streamReader.Close();
+
+            return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
         }
         catch (FileNotFoundException e)
         {
-            Console.WriteLine("/usr/lib//os-release file doesn't exist : " + e.Message);
+            Console.WriteLine("os-release file doesn't exist : " + e.Message);
             return "Unknown";
         }
         catch (IOException e)
         {
-            Console.WriteLine("Cannot open/read /usr/lib//os-release file : " + e.Message);
+            Console.WriteLine("Cannot open or read os-release file : " + e.Message);
             return "Unknown";
         }
         catch (Exception e)
         {
-            Console.WriteLine("Cannot get os name from /usr/lib//os-release file : " + e.Message);
+            Console.WriteLine("Cannot get os infos from os-release file : " + e.Message);
             return "Unknown";
         }
     }
