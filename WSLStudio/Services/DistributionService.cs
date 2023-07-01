@@ -105,11 +105,12 @@ public class DistributionService : IDistributionService
             distro.OsName = await GetOsInfos(distro.Name, "NAME");
             distro.OsVersion = await GetOsInfos(distro.Name, "VERSION");
             distro.Size = GetSize(distro.Path);
-            //distro.Users = await GetDistributionUsers(distro.Name);
+            distro.Users = await GetDistributionUsers(distro.Name);
 
         });
     }
 
+    // TODO : Fix unknown os version field
     private static async Task<string> GetOsInfos(string distroName, string field)
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
@@ -164,25 +165,43 @@ public class DistributionService : IDistributionService
 
     private static async Task<List<string>> GetDistributionUsers(string distroName)
     {
-
+        var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
+        var userShellPattern = @"/bin/(.*?)sh$";
         var usersList = new List<string>();
 
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl -d {distroName} grep /bin/*sh /etc/passwd | wsl cut -d ':' -f2")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
-
-        while (await process.StandardOutput.ReadLineAsync() is { } output)
+        try
         {
-            usersList.Add(output);
+
+            Console.WriteLine("----------------GET USERS LIST----------------");
+            using var streamReader = new StreamReader(passwdFilePath);
+
+            while (!streamReader.EndOfStream)
+            {
+                var line = await streamReader.ReadLineAsync();
+                var userShellRegex = Regex.Match(line, userShellPattern);
+                if (userShellRegex.Success)
+                {
+                    usersList.Add(line.Split(':')[0]);
+                }
+            }
+            streamReader.Close();
+            return usersList;
         }
-
-        await process.WaitForExitAsync();
-
-        return usersList;
+        catch (FileNotFoundException e)
+        {
+            Console.WriteLine("/etc/passwd file doesn't exist : " + e.Message);
+            return null;
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine("Cannot open or read /etc/passwd file : " + e.Message);
+            return null;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
+            return null;
+        }
     }
 
     public IEnumerable<Distribution> GetAllDistributions()
