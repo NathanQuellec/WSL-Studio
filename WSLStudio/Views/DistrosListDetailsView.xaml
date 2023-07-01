@@ -84,7 +84,7 @@
 
                                 <MenuFlyoutItem Text="Open with Windows Terminal"
                                                 Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithWtCommand}"
+                                                                  Path=ViewModel.OpenDistroWithWinTermCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE756;"/>

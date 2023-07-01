@@ -43,7 +43,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
 
-    public RelayCommand<Distribution> OpenDistroWithWtCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithWinTermCommand { get; set; }
 
     public AsyncRelayCommand CreateDistroCommand { get; set; }
 
@@ -62,7 +62,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         StopDistroCommand = new RelayCommand<Distribution>(StopDistributionViewModel);
         OpenDistroWithFileExplorerCommand = new RelayCommand<Distribution>(OpenDistributionWithFileExplorerViewModel);
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
-        OpenDistroWithWtCommand = new RelayCommand<Distribution>(OpenDistroWithWtViewModel);
+        OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
 
         this._distributionService.InitDistributionsList();
@@ -287,10 +287,10 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService.OpenDistributionWithVsCode(distribution);
     }
 
-    private void OpenDistroWithWtViewModel(Distribution distribution)
+    private void OpenDistroWithWinTermViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with Windows Terminal ...");
-        this._distributionService.OpenDistroWithWt(distribution);
+        this._distributionService.OpenDistroWithWinTerm(distribution);
     }
 
     private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
