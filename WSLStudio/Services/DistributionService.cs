@@ -96,6 +96,7 @@ public class DistributionService : IDistributionService
         Parallel.ForEach(_distros, async distro =>
         {
             var isDistroRunning = await CheckRunningDistribution(distro);
+
             if (!isDistroRunning)
             { 
                 await HiddenLaunchDistribution(distro);
@@ -114,11 +115,12 @@ public class DistributionService : IDistributionService
     private static async Task<string> GetOsInfos(string distroName, string field)
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
-        var osNameRegex = $@"(\b{field}="")(.*?)""\n";
+        var osInfosPattern = $@"(\b{field}="")(.*?)""";
         
         try
         {
             var osInfosFile = new FileInfo(osInfosFilePath);
+
             if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
@@ -127,10 +129,17 @@ public class DistributionService : IDistributionService
 
             Console.WriteLine("----------------GET OS INFOS----------------");
             using var streamReader = new StreamReader(osInfosFilePath);
-            var osInfosFileOutput = await streamReader.ReadToEndAsync();
-            var osInfos = Regex.Match(osInfosFileOutput, osNameRegex)
-                .Groups[2] // get third matching group of regex result (i.e. value of NAME field)
-                .Value;
+            var osInfos = "";
+            while (!streamReader.EndOfStream)
+            {
+                var line = await streamReader.ReadLineAsync();
+                var osInfosRegex = Regex.Match(line, osInfosPattern);
+                if (osInfosRegex.Success)
+                {
+                    osInfos = osInfosRegex.Groups[2].Value;
+                }
+
+            }
             streamReader.Close();
 
             return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
@@ -179,9 +188,11 @@ public class DistributionService : IDistributionService
             {
                 var line = await streamReader.ReadLineAsync();
                 var userShellRegex = Regex.Match(line, userShellPattern);
+
+                // get first column of passwd file when matching regex (i.e. get user field)
                 if (userShellRegex.Success)
                 {
-                    usersList.Add(line.Split(':')[0]);
+                    usersList.Add(line.Split(':')[0]); 
                 }
             }
             streamReader.Close();
