@@ -8,6 +8,7 @@ using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
 using Docker.DotNet;
@@ -19,6 +20,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+
 
 namespace WSLStudio.Services;
 
@@ -60,7 +62,7 @@ public class DistributionService : IDistributionService
                 var distroName = (string)distroSubkeys.GetValue("DistributionName");
 
                 // Filter Docker special-purpose internal Linux distros 
-                if ((distroName != "docker-desktop") && (distroName != "docker-desktop-data"))
+                if (distroName != "docker-desktop" && distroName != "docker-desktop-data")
                 {
                     var distroPath = (string)distroSubkeys.GetValue("BasePath");
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
@@ -89,62 +91,76 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public Task SetDistributionsInfos()
+    // TODO : Put in viewmodel ?
+    // TODO : Enhance performance
+    public async Task SetDistributionsInfos()
     {
-        Parallel.ForEach(_distros, async distro =>
+        var tasks = _distros.Select( async distro =>
         {
-            distro.OsName = await GetOsName(distro.Name);
-            distro.OsVersion = await GetOsVersion(distro.Name);
+            var isDistroRunning = false;
+
+            await BackgroundLaunchDistribution(distro);
+            await WaitForRunningDistribution(distro);
+
+            distro.OsName = GetOsInfos(distro.Name, "NAME");
+            distro.OsVersion = GetOsInfos(distro.Name, "VERSION");
             distro.Size = GetSize(distro.Path);
-            distro.Users = await GetDistributionUsers(distro.Name);
+            distro.Users = GetDistributionUsers(distro.Name);
 
         });
-        return Task.CompletedTask;
+
+        await Task.WhenAll(tasks);
     }
 
-    private static async Task<string> GetOsName(string distroName)
+
+    // TODO : Fix unknown os version field
+    private static string GetOsInfos(string distroName, string field)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl -d {distroName} grep \"^NAME\" /etc/os-release &")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
+        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
+        var osInfosPattern = $@"(\b{field}="")(.*?)""";
+        
+        try
+        {
+            var osInfosFile = new FileInfo(osInfosFilePath);
 
-        var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-        await process.WaitForExitAsync();
+            if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
+                osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
+            }
 
-        var osName = output.Remove(0, 5) // Remove "NAME=" substring from output
-            .Replace('\"', ' ')
-            .Trim();
-        Console.WriteLine($"OS Name for {distroName} is {osName}");
+            Console.WriteLine("----------------GET OS INFOS----------------");
+            using var streamReader = new StreamReader(osInfosFilePath);
+            var osInfos = "";
+            while (!streamReader.EndOfStream)
+            {
+                var line = streamReader.ReadLine();
+                var osInfosRegex = Regex.Match(line, osInfosPattern);
+                if (osInfosRegex.Success)
+                {
+                    osInfos = osInfosRegex.Groups[2].Value;
+                }
 
-        return osName;
-    }
+            }
+            streamReader.Close();
 
-    private static async Task<string> GetOsVersion(string distroName)
-    {
-
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl -d {distroName} grep \"^VERSION_ID\" /etc/os-release &")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
-
-        var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-
-        await process.WaitForExitAsync();
-
-        var osVersion = output.Remove(0, 11) // Remove "VERSION_ID=" substring from output
-            .Replace('\"', ' ')
-            .Trim();
-        Console.WriteLine($"OS Version for {distroName} is {osVersion}");
-
-        return osVersion;
-
+            return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.WriteLine("os-release file doesn't exist : " + e.Message);
+            return "Unknown";
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine("Cannot open or read os-release file : " + e.Message);
+            return "Unknown";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Cannot get os infos from os-release file : " + e.Message);
+            return "Unknown";
+        }
     }
 
     private static string GetSize(string distroPath)
@@ -158,27 +174,50 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static async Task<List<string>> GetDistributionUsers(string distroName)
+    private static List<string> GetDistributionUsers(string distroName)
     {
-
+        var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
+        var userShellPattern = @"/bin/(.*?)sh$";
         var usersList = new List<string>();
 
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl -d {distroName} grep /bin/*sh /etc/passwd | wsl cut -d ':' -f2")
-            .SetRedirectStandardOutput(true)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
-
-        while (await process.StandardOutput.ReadLineAsync() is { } output)
+        try
         {
-            usersList.Add(output);
+
+            Console.WriteLine("----------------GET USERS LIST----------------");
+            using var streamReader = new StreamReader(passwdFilePath);
+
+            while (!streamReader.EndOfStream)
+            {
+                var line = streamReader.ReadLine();
+                var userShellRegex = Regex.Match(line, userShellPattern);
+
+                // get first column of passwd file when matching regex (i.e. get user field)
+                if (userShellRegex.Success)
+                {
+                    usersList.Add(line.Split(':')[0]); 
+                }
+            }
+            streamReader.Close();
+            return usersList;
         }
-
-        await process.WaitForExitAsync();
-
-        return usersList;
+        catch (FileNotFoundException e)
+        {
+            Console.WriteLine("/etc/passwd file doesn't exist : " + e.Message);
+            usersList.Add("Unknown");
+            return usersList;
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine("Cannot open or read /etc/passwd file : " + e.Message);
+            usersList.Add("Unknown");
+            return usersList;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
+            usersList.Add("Unknown");
+            return usersList;
+        }
     }
 
     public IEnumerable<Distribution> GetAllDistributions()
@@ -316,6 +355,66 @@ public class DistributionService : IDistributionService
         }
     }*/
 
+    private static async Task<bool> CheckRunningDistribution(Distribution distribution)
+    {
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments("/c wsl --list --running --quiet")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            await process.WaitForExitAsync();
+            var sanitizedOutput = output.Replace("\0", "").Replace("\r", "");  // remove special character
+            var runningDistros = sanitizedOutput.Split("\n");
+
+            return runningDistros.Contains(distribution.Name);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            return false;
+        }
+    }
+
+    private async Task WaitForRunningDistribution(Distribution distro)
+    {
+        var isDistroRunning = await CheckRunningDistribution(distro);
+        if (!isDistroRunning)
+        {
+            await WaitForRunningDistribution(distro);
+        }
+    }
+
+    /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
+        Because a distribution need to be running to use its file system, 
+        we quickly start and stop the corresponding distribution to avoid an error  
+    **/
+    private Task BackgroundLaunchDistribution(Distribution distribution)
+    {
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distribution?.Name}")
+                .SetCreateNoWindow(true)
+                .SetUseShellExecute(false)
+                .Build();
+            process.Start();
+            
+            return Task.CompletedTask;
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            return Task.FromException(ex);
+        }
+    }
+
     public void LaunchDistribution(Distribution distribution)
     {
         try
@@ -328,7 +427,7 @@ public class DistributionService : IDistributionService
                 .Build();
             process.Start();
             Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
-            distribution?.RunningProcesses.Add(process);
+            distribution.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
@@ -337,9 +436,9 @@ public class DistributionService : IDistributionService
 
     }
 
-    public void StopDistribution(Distribution distribution)
+    public async void StopDistribution(Distribution distribution)
     {
-        if (distribution?.RunningProcesses == null)
+        if (distribution.RunningProcesses.Count == 0)
         {
             Console.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
                             $"they are no processes running for {distribution!.Name}");
@@ -350,14 +449,19 @@ public class DistributionService : IDistributionService
             {
 
                 process.CloseMainWindow();
-                process.WaitForExit(30000);
+                await process.WaitForExitAsync();
 
                 if (process.HasExited)
                 {
                     Console.WriteLine($"[INFO] Process ID : {process.Id} and " +
-                                    $"NAME : {process.ProcessName} is closed");
+                                      $"NAME : {process.ProcessName} is closed");
+                }
+                else
+                {
+                    process.Kill();
                 }
             }
+            distribution.RunningProcesses.Clear();
         }
     }
 
@@ -366,7 +470,6 @@ public class DistributionService : IDistributionService
     public void OpenDistributionFileSystem(Distribution distribution)
     {
         var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
-
         var processBuilder = new ProcessBuilderHelper("explorer.exe")
             .SetArguments(distroPath)
             .Build();
@@ -381,7 +484,7 @@ public class DistributionService : IDistributionService
         process.Start();
     }
 
-    public void OpenDistroWithWt(Distribution distribution)
+    public void OpenDistroWithWinTerm(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
