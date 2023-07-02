@@ -62,7 +62,7 @@ public class DistributionService : IDistributionService
                 var distroName = (string)distroSubkeys.GetValue("DistributionName");
 
                 // Filter Docker special-purpose internal Linux distros 
-                if ((distroName != "docker-desktop") && (distroName != "docker-desktop-data"))
+                if (distroName != "docker-desktop" && distroName != "docker-desktop-data")
                 {
                     var distroPath = (string)distroSubkeys.GetValue("BasePath");
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
@@ -91,28 +91,30 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void SetDistributionsInfos()
+    // TODO : Put in viewmodel ?
+    // TODO : Enhance performance
+    public async Task SetDistributionsInfos()
     {
-        Parallel.ForEach(_distros, async distro =>
+        var tasks = _distros.Select( async distro =>
         {
-            var isDistroRunning = await CheckRunningDistribution(distro);
+            var isDistroRunning = false;
 
-            if (!isDistroRunning)
-            { 
-                await HiddenLaunchDistribution(distro);
+            await BackgroundLaunchDistribution(distro);
+            await WaitForRunningDistribution(distro);
 
-            }
-
-            distro.OsName = await GetOsInfos(distro.Name, "NAME");
-            distro.OsVersion = await GetOsInfos(distro.Name, "VERSION");
+            distro.OsName = GetOsInfos(distro.Name, "NAME");
+            distro.OsVersion = GetOsInfos(distro.Name, "VERSION");
             distro.Size = GetSize(distro.Path);
-            distro.Users = await GetDistributionUsers(distro.Name);
+            distro.Users = GetDistributionUsers(distro.Name);
 
         });
+
+        await Task.WhenAll(tasks);
     }
 
+
     // TODO : Fix unknown os version field
-    private static async Task<string> GetOsInfos(string distroName, string field)
+    private static string GetOsInfos(string distroName, string field)
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
@@ -132,7 +134,7 @@ public class DistributionService : IDistributionService
             var osInfos = "";
             while (!streamReader.EndOfStream)
             {
-                var line = await streamReader.ReadLineAsync();
+                var line = streamReader.ReadLine();
                 var osInfosRegex = Regex.Match(line, osInfosPattern);
                 if (osInfosRegex.Success)
                 {
@@ -172,7 +174,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static async Task<List<string>> GetDistributionUsers(string distroName)
+    private static List<string> GetDistributionUsers(string distroName)
     {
         var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
         var userShellPattern = @"/bin/(.*?)sh$";
@@ -186,7 +188,7 @@ public class DistributionService : IDistributionService
 
             while (!streamReader.EndOfStream)
             {
-                var line = await streamReader.ReadLineAsync();
+                var line = streamReader.ReadLine();
                 var userShellRegex = Regex.Match(line, userShellPattern);
 
                 // get first column of passwd file when matching regex (i.e. get user field)
@@ -201,17 +203,20 @@ public class DistributionService : IDistributionService
         catch (FileNotFoundException e)
         {
             Console.WriteLine("/etc/passwd file doesn't exist : " + e.Message);
-            return null;
+            usersList.Add("Unknown");
+            return usersList;
         }
         catch (IOException e)
         {
             Console.WriteLine("Cannot open or read /etc/passwd file : " + e.Message);
-            return null;
+            usersList.Add("Unknown");
+            return usersList;
         }
         catch (Exception e)
         {
             Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
-            return null;
+            usersList.Add("Unknown");
+            return usersList;
         }
     }
 
@@ -376,19 +381,30 @@ public class DistributionService : IDistributionService
         }
     }
 
+    private async Task WaitForRunningDistribution(Distribution distro)
+    {
+        var isDistroRunning = await CheckRunningDistribution(distro);
+        if (!isDistroRunning)
+        {
+            await WaitForRunningDistribution(distro);
+        }
+    }
+
     /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
         Because a distribution need to be running to use its file system, 
         we quickly start and stop the corresponding distribution to avoid an error  
     **/
-    private Task HiddenLaunchDistribution(Distribution distribution)
+    private Task BackgroundLaunchDistribution(Distribution distribution)
     {
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl ~ -d {distribution?.Name}")
+                .SetArguments($"/c wsl -d {distribution?.Name}")
                 .SetCreateNoWindow(true)
+                .SetUseShellExecute(false)
                 .Build();
             process.Start();
+            
             return Task.CompletedTask;
 
         }
