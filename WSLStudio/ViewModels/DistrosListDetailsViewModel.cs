@@ -67,9 +67,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
-        this._distributionService.SetAllDistributionsInfos();
-        
-        
+
     }
 
     private void PopulateDistributionsCollection()
