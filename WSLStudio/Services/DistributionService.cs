@@ -93,11 +93,10 @@ public class DistributionService : IDistributionService
 
     // TODO : Put in viewmodel ?
     // TODO : Enhance performance
-    public async Task SetDistributionsInfos()
+    public async Task SetAllDistributionsInfos()
     {
-        var tasks = _distros.Select( async distro =>
+        var tasks = _distros.Select(async distro =>
         {
-            var isDistroRunning = false;
 
             await BackgroundLaunchDistribution(distro);
             await WaitForRunningDistribution(distro);
@@ -111,6 +110,16 @@ public class DistributionService : IDistributionService
 
         await Task.WhenAll(tasks);
     }
+    public async Task SetDistributionInfos(Distribution distro)
+    {
+        await BackgroundLaunchDistribution(distro);
+        await WaitForRunningDistribution(distro);
+
+        distro.OsName = GetOsInfos(distro.Name, "NAME");
+        distro.OsVersion = GetOsInfos(distro.Name, "VERSION");
+        distro.Size = GetSize(distro.Path);
+        distro.Users = GetDistributionUsers(distro.Name);
+    }
 
 
     // TODO : Fix unknown os version field
@@ -118,7 +127,7 @@ public class DistributionService : IDistributionService
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
-        
+
         try
         {
             var osInfosFile = new FileInfo(osInfosFilePath);
@@ -194,7 +203,7 @@ public class DistributionService : IDistributionService
                 // get first column of passwd file when matching regex (i.e. get user field)
                 if (userShellRegex.Success)
                 {
-                    usersList.Add(line.Split(':')[0]); 
+                    usersList.Add(line.Split(':')[0]);
                 }
             }
             streamReader.Close();
@@ -272,8 +281,11 @@ public class DistributionService : IDistributionService
             if (distro.DistroName == newDistro.Name)
             {
                 newDistro.Id = distro.DistroId;
+                newDistro.Path = distro.BasePath;
+                newDistro.WslVersion = distro.WslVersion;
             }
         }
+        await SetDistributionInfos(newDistro);
         this._distros.Add(newDistro);
 
         return newDistro;
@@ -369,7 +381,8 @@ public class DistributionService : IDistributionService
 
             var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
             await process.WaitForExitAsync();
-            var sanitizedOutput = output.Replace("\0", "").Replace("\r", "");  // remove special character
+            var sanitizedOutput = output.Replace("\0", "")
+                .Replace("\r", "");  // remove special character
             var runningDistros = sanitizedOutput.Split("\n");
 
             return runningDistros.Contains(distribution.Name);
@@ -404,7 +417,7 @@ public class DistributionService : IDistributionService
                 .SetUseShellExecute(false)
                 .Build();
             process.Start();
-            
+
             return Task.CompletedTask;
 
         }
