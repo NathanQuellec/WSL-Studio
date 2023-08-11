@@ -67,9 +67,13 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                    await BackgroundLaunchDistribution(distroName);
-                    await WaitForRunningDistribution(distroName);
-
+                    var isRunning = await CheckRunningDistribution(distroName);
+                    if (!isRunning)
+                    {
+                        await BackgroundLaunchDistribution(distroName);
+                        await WaitForRunningDistribution(distroName);
+                    }
+                   
                     var distro = new Distribution()
                     {
                         Id = Guid.Parse(subKey),
@@ -80,7 +84,7 @@ public class DistributionService : IDistributionService
                         OsVersion = GetOsInfos(distroName, "VERSION"),
                         Size = GetSize(distroPath),
                         Users = GetDistributionUsers(distroName),
-                };
+                    };
 
                     this._distros.Add(distro);
                     Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
