@@ -46,7 +46,7 @@
                 Grid.Row="1"
                 BackButtonBehavior="Automatic"
                 ItemsSource="{x:Bind Path=ViewModel.Distros, Mode=TwoWay}"
-                NoSelectionContent="No distribution selected">
+                NoSelectionContent="No Distribution Selected">
 
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
@@ -196,12 +196,18 @@
                                 </StackPanel>
                             </StackPanel>-->
 
+                            <TextBlock Style="{StaticResource TitleTextBlockStyle}"
+                                       Text="Distribution details"
+                                       FontSize="24"
+                                       FontWeight="SemiBold"
+                                       TextWrapping="Wrap"
+                                       Margin="40 24 0 0"/>
                             <RelativePanel Grid.Column="0"
                                            Width="Auto"
                                            Grid.Row="1"
                                            Margin="40 24">
                                 <TextBlock x:Name="osName" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Name : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
@@ -217,7 +223,7 @@
                                            Grid.Row="2"
                                            Margin="40 24">
                                 <TextBlock x:Name="osVersion" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
@@ -232,7 +238,7 @@
                                            Grid.Row="3"
                                            Margin="40 24">
                                 <TextBlock x:Name="distroSize" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Size : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
@@ -247,7 +253,7 @@
                                            Grid.Row="4"
                                            Margin="40 24">
                                 <TextBlock x:Name="wslVersion" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="WSL Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
@@ -260,9 +266,9 @@
 
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="5"
-                                           Margin="40 24">
+                                           Margin="40 16">
                                 <TextBlock x:Name="usersList" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Users : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
@@ -285,9 +291,9 @@
 
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="6"
-                                           Margin="40 24">
+                                           Margin="40 16">
                                 <TextBlock x:Name="snapshotsList" 
-                                           Style="{StaticResource BodyTextBlockStyle}"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Snapshots : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
@@ -317,12 +323,15 @@
 
             <controls:ListDetailsView.NoSelectionContentTemplate>
                 <DataTemplate>
-                    <StackPanel HorizontalAlignment="Center"
+                    <Grid Background="{ThemeResource LayerFillColorAltBrush}"
+                          CornerRadius="5">
+                        <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
                         <TextBlock Text="{Binding}"
                                    FontSize="24"
                                    Margin="0,0, 0, 48"/>
                     </StackPanel>
+                    </Grid>
                 </DataTemplate>
             </controls:ListDetailsView.NoSelectionContentTemplate>
 
