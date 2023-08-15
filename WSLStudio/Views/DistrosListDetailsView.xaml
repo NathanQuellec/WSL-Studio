@@ -201,7 +201,7 @@
                                        FontSize="24"
                                        FontWeight="SemiBold"
                                        TextWrapping="Wrap"
-                                       Margin="40 24 0 0"/>
+                                       Margin="40 24 0 8"/>
                             <RelativePanel Grid.Column="0"
                                            Width="Auto"
                                            Grid.Row="1"
@@ -310,7 +310,10 @@
                                     </Expander.Content>
                                 </Expander>
                                 <Button RelativePanel.RightOf="snapshotsExp" 
-                                        Margin="4 12 0 0">
+                                        Margin="4 12 0 0"
+                                        Command="{Binding ElementName=Page,
+                                                            Path=ViewModel.CreateDistroSnapshotCommand}"
+                                        CommandParameter="{x:Bind}">
                                     <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
                                 </Button>

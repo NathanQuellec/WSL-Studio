@@ -21,12 +21,13 @@ public sealed partial class DistrosListDetailsView : Page
 {
     private Button _distroStopButton = new();
 
-    public DistrosListDetailsViewModel ViewModel { get; } =  App.GetService<DistrosListDetailsViewModel>();
+    public DistrosListDetailsViewModel ViewModel { get; }
 
     public DistrosListDetailsView()
     {
         this.InitializeComponent();
 
+        this.ViewModel = App.GetService<DistrosListDetailsViewModel>();
         App.MainWindow.SetTitleBar(AppTitleBar);
         TitleBarHelper.UpdateTitleBar(ElementTheme.Default);
 

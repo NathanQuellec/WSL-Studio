@@ -2,7 +2,9 @@
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Management.Automation.PSTasks;
 using System.Text.RegularExpressions;
 using System.Timers;
 using Windows.System;
@@ -17,9 +19,9 @@ using Microsoft.UI.Xaml.Input;
 using Timer = System.Timers.Timer;
 using System.Xml.Linq;
 using Microsoft.UI.Xaml.Controls.Primitives;
-using WSLStudio.Views;
 using Microsoft.UI.Xaml.Media;
 using WSLStudio.Helpers;
+using WSLStudio.Views.ContentDialog;
 
 namespace WSLStudio.ViewModels;
 
@@ -30,6 +32,8 @@ public class DistrosListDetailsViewModel : ObservableObject
     private readonly IInfoBarService _infoBarService;
 
     private bool _isDistroCreationProcessing;
+
+    #region RelayCommand
 
     public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
@@ -47,7 +51,19 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     public AsyncRelayCommand CreateDistroCommand { get; set; }
 
+    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand { get; set; }
+
+    #endregion
+
+
     public ObservableCollection<Distribution> Distros { get; set; } = new();
+
+    private string _snapshotName;
+    public string SnapshotName
+    {
+        get => _snapshotName;
+        set => SetProperty(ref _snapshotName, value);
+    }
 
     public DistrosListDetailsViewModel(IDistributionService distributionService, IInfoBarService infoBarService)
     {
@@ -64,6 +80,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
+        CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog);
 
         this._distributionService.InitDistributionsList();
         this.PopulateDistributionsCollection();
@@ -355,10 +372,10 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
-        // contentdialog content set in CreateDistroDialog.xaml
-        var createDistroDialog = new CreateDistroDialogView();
+        // contentdialog content set in CreateDistroView.xaml
+        var createDistroDialog = new CreateDistroView();
 
-        var dialog = dialogService.SetTitle("Create distribution :")
+        var dialog = dialogService.SetTitle("Create Distribution :")
             .AddContent(createDistroDialog)
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
@@ -406,5 +423,41 @@ public class DistrosListDetailsViewModel : ObservableObject
             var createNewDistroInfoError = this._infoBarService.FindInfoBar("CreateNewDistroInfoError");
             this._infoBarService.OpenInfoBar(createNewDistroInfoError, 5000);
         }
+    }
+
+    private async Task CreateDistroSnapshotDialog(Distribution distribution) 
+    {
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+        // contentdialog content set in CreateDistroSnapshotView.xaml
+        var addSnapshotDialog = new CreateDistroSnapshotView();
+
+        var dialog = dialogService.SetTitle("Create Snapshot :")
+            .AddContent(addSnapshotDialog)
+            .SetPrimaryButtonText("Create")
+            .SetCloseButtonText("Cancel")
+            .SetDefaultButton(ContentDialogButton.Primary)
+            //.SetPrimaryButtonClick(ValidateCreationMode)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .Build();
+
+        var buttonClicked = await dialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+            
+            //var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
+
+            //await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
+            await CreateDistroSnapshotViewModel(distribution, this.SnapshotName, " ");
+        }
+
+    }
+
+    private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName, string snapshotDescr)
+    {
+        this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
     }
 }

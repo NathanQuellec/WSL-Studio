@@ -32,13 +32,14 @@ public class DistributionService : IDistributionService
     private static readonly object _lock = new object();
 
     private readonly IList<Distribution> _distros;
-
+    private readonly IWslService _wslService;
     private readonly WslApi _wslApi;
 
-    public DistributionService()
+    public DistributionService(IWslService wslService)
     {
         _distros = new List<Distribution>();
         _wslApi = new WslApi();
+        _wslService = wslService;
     }
 
     public async Task InitDistributionsList()
@@ -67,8 +68,8 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                    var isRunning = await CheckRunningDistribution(distroName);
-                    if (!isRunning)
+                    var isDistroRunning = await CheckRunningDistribution(distroName);
+                    if (!isDistroRunning)
                     {
                         await BackgroundLaunchDistribution(distroName);
                         await WaitForRunningDistribution(distroName);
@@ -210,6 +211,27 @@ public class DistributionService : IDistributionService
             usersList.Add("Unknown");
             return usersList;
         }
+    }
+
+    public void CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    {
+        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
+        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
+        if (!Directory.Exists(snapshotFolder))
+        {
+            Directory.CreateDirectory(snapshotFolder);
+        }
+        var snapshotPath = Path.Combine(snapshotFolder, snapshotName);
+        this._wslService.ExportDistribution(distribution.Name, snapshotPath);
+        var snapshot = new Snapshot()
+        {
+            Name = snapshotName,
+            Description = snapshotDescr,
+            Date = currentDateTime,
+            Path = snapshotPath,
+        };
+
+        distribution.Snapshots.Add(snapshot);
     }
 
     public IEnumerable<Distribution> GetAllDistributions()

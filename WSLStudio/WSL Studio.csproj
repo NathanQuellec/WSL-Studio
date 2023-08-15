@@ -114,7 +114,8 @@
     <None Remove="Assets\WslStudioLogo.targetsize-256_altform-unplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-32_altform-lightunplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-48_altform-lightunplated.png" />
-    <None Remove="Views\CreateDistroDialogView.xaml" />
+    <None Remove="Views\CreateDistroSnapshotView.xaml" />
+    <None Remove="Views\CreateDistroView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
   </ItemGroup>
 
@@ -157,6 +158,7 @@
   <ItemGroup>
     <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
+    <Folder Include="Views\ContentDialog\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -169,7 +171,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CreateDistroDialogView.xaml">
+    <Page Update="Views\CreateDistroSnapshotView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\CreateDistroView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
