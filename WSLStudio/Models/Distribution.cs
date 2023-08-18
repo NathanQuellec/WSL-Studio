@@ -24,6 +24,7 @@ public class Distribution : INotifyPropertyChanged
     public IList<Snapshot> Snapshots { get; set; } = new List<Snapshot>();
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
+    // TODO : Replace OnPropertyChanged by SetProperty OR move to view model
     private string _name;
     public string Name
     {

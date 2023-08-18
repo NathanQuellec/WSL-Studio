@@ -8,5 +8,5 @@ public interface IWslService
 {
     bool CheckWsl();
     bool CheckHypervisor();
-    void ExportDistribution(string distroName, string destPath);
+    Task ExportDistribution(string distroName, string destPath);
 }

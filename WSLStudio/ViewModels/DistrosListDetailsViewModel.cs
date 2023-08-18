@@ -1,26 +1,14 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using WSLStudio.Models;
-using WSLStudio.Contracts.Services;
-using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Management.Automation.PSTasks;
+﻿using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
-using System.Timers;
-using Windows.System;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.UI.Controls;
+using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using WSLStudio.Contracts.Services;
 using WSLStudio.Messages;
-using WSLStudio.Services;
-using Microsoft.UI.Xaml.Input;
-using Timer = System.Timers.Timer;
-using System.Xml.Linq;
-using Microsoft.UI.Xaml.Controls.Primitives;
-using Microsoft.UI.Xaml.Media;
-using WSLStudio.Helpers;
+using WSLStudio.Models;
 using WSLStudio.Views.ContentDialog;
 
 namespace WSLStudio.ViewModels;
@@ -55,15 +43,10 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     #endregion
 
-
     public ObservableCollection<Distribution> Distros { get; set; } = new();
 
     private string _snapshotName;
-    public string SnapshotName
-    {
-        get => _snapshotName;
-        set => SetProperty(ref _snapshotName, value);
-    }
+    private string _snapshotDescr;
 
     public DistrosListDetailsViewModel(IDistributionService distributionService, IInfoBarService infoBarService)
     {
@@ -142,6 +125,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     }
 
     // Check if the new distribution has valid characters 
+    // TODO : REFACTOR
     private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var dialogContent = sender.Content as StackPanel;
@@ -308,6 +292,8 @@ public class DistrosListDetailsViewModel : ObservableObject
         this._distributionService.OpenDistroWithWinTerm(distribution);
     }
 
+
+    // TODO : REFACTOR
     private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         this.ValidateDistributionName(sender, args);
@@ -425,6 +411,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         }
     }
 
+
     private async Task CreateDistroSnapshotDialog(Distribution distribution) 
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
@@ -439,25 +426,39 @@ public class DistrosListDetailsViewModel : ObservableObject
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
-            //.SetPrimaryButtonClick(ValidateCreationMode)
+            .SetPrimaryButtonClick(ValidateSnapshot)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
-
         var buttonClicked = await dialog.ShowAsync();
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            
+
             //var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
 
             //await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
-            await CreateDistroSnapshotViewModel(distribution, this.SnapshotName, " ");
+            await CreateDistroSnapshotViewModel(distribution,this._snapshotName, this._snapshotDescr);
         }
 
     }
 
-    private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName, string snapshotDescr)
+    private async void ValidateSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+        var snapshotNameTextBox= sender.FindChild("SnapshotNameInput") as TextBox;
+        var snapshotDescrTextBox= sender.FindChild("SnapshotDescrInput") as TextBox;
+        this._snapshotName = snapshotNameTextBox.Text;
+        this._snapshotDescr = snapshotDescrTextBox.Text;
+
+
+    }
+
+    private async Task<bool> CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName, string snapshotDescr)
+    {
+        var isSnapCreated = await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+        if (!isSnapCreated)
+        {
+            return false;
+        }
+        return true;
     }
 }

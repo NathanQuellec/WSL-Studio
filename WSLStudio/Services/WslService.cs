@@ -37,15 +37,16 @@ public class WslService : IWslService
         return virtualizationEnabled;
     }
 
-    public void ExportDistribution(string distroName, string destPath)
+    public async Task ExportDistribution(string distroName, string destPath)
     {
         var processBuilder = new ProcessBuilderHelper("cmd.exe")
             .SetArguments(
-                $"/c wsl --export {distroName} {destPath}")
+                $"/c wsl --export {distroName} {destPath}.tar.gz")
             .SetRedirectStandardOutput(true)
             .SetUseShellExecute(false)
             .SetCreateNoWindow(true)
             .Build();
         processBuilder.Start();
+        await processBuilder.WaitForExitAsync();
     }
 }

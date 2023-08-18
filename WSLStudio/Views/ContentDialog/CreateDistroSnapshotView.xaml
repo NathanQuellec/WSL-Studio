@@ -13,9 +13,9 @@
     <StackPanel>
         <TextBox x:Name="SnapshotNameInput" 
                  Header="Name :"
-                 Text="{x:Bind Path=ViewModel.SnapshotName, Mode=TwoWay}"
                  Margin="0 12 0 16"
                  Height="64"/>
+
         <TextBox x:Name="SnapshotDescrInput" 
                  Header="Description : (Optional)"
                  TextWrapping="Wrap"
@@ -30,6 +30,5 @@
                  IsOpen="False"
                  IsClosable="False"
                  Margin="0 12 0 0"/>
-
     </StackPanel>
 </UserControl>

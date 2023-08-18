@@ -23,11 +23,8 @@ using WSLStudio.ViewModels;
 namespace WSLStudio.Views.ContentDialog;
 public sealed partial class CreateDistroSnapshotView : UserControl
 {
-    public DistrosListDetailsViewModel ViewModel { get; }
-
     public CreateDistroSnapshotView()
     {
-        this.ViewModel = App.GetService<DistrosListDetailsViewModel>();
         this.InitializeComponent();
     }
 }

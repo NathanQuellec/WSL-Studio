@@ -213,25 +213,35 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
-        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
-        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
-        if (!Directory.Exists(snapshotFolder))
+        try
         {
-            Directory.CreateDirectory(snapshotFolder);
-        }
-        var snapshotPath = Path.Combine(snapshotFolder, snapshotName);
-        this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-        var snapshot = new Snapshot()
-        {
-            Name = snapshotName,
-            Description = snapshotDescr,
-            Date = currentDateTime,
-            Path = snapshotPath,
-        };
+            var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
+            var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
+            if (!Directory.Exists(snapshotFolder))
+            {
+                Directory.CreateDirectory(snapshotFolder);
+            }
 
-        distribution.Snapshots.Add(snapshot);
+            var snapshotPath = Path.Combine(snapshotFolder, snapshotName);
+            await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
+            var snapshot = new Snapshot()
+            {
+                Name = snapshotName,
+                Description = snapshotDescr,
+                Date = currentDateTime,
+                Path = snapshotPath,
+            };
+
+            distribution.Snapshots.Add(snapshot);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return false;
+        }
     }
 
     public IEnumerable<Distribution> GetAllDistributions()
