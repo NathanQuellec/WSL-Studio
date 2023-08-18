@@ -20,6 +20,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+using WinRT;
 
 
 namespace WSLStudio.Services;
@@ -213,7 +214,23 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
+    {
+        try
+        {
+            var snapshotInfos = $"Name={snapshot.Name};Description={snapshot.Description};CreationDate={snapshot.CreationDate}";
+            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
+
+            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    // TODO : Compress snapshot
+    public async Task CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
         try
         {
@@ -230,17 +247,17 @@ public class DistributionService : IDistributionService
             {
                 Name = snapshotName,
                 Description = snapshotDescr,
-                Date = currentDateTime,
+                CreationDate = currentDateTime,
                 Path = snapshotPath,
             };
 
             distribution.Snapshots.Add(snapshot);
-            return true;
+            await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
+
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return false;
         }
     }
 

@@ -23,27 +23,67 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     #region RelayCommand
 
-    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand
+    {
+        get;
+        set;
+    }
 
-    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RenameDistroCommand
+    {
+        get;
+        set;
+    }
 
-    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
+    public RelayCommand<Distribution> LaunchDistroCommand
+    {
+        get;
+        set;
+    }
 
-    public RelayCommand<Distribution> StopDistroCommand { get; set; }
+    public RelayCommand<Distribution> StopDistroCommand
+    {
+        get;
+        set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand
+    {
+        get;
+        set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand
+    {
+        get;
+        set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithWinTermCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithWinTermCommand
+    {
+        get;
+        set;
+    }
 
-    public AsyncRelayCommand CreateDistroCommand { get; set; }
+    public AsyncRelayCommand CreateDistroCommand
+    {
+        get;
+        set;
+    }
 
-    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand { get; set; }
+    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand
+    {
+        get;
+        set;
+    }
 
     #endregion
 
-    public ObservableCollection<Distribution> Distros { get; set; } = new();
+    public ObservableCollection<Distribution> Distros
+    {
+        get;
+        set;
+    } = new();
 
     private string _snapshotName;
     private string _snapshotDescr;
@@ -207,7 +247,7 @@ public class DistrosListDetailsViewModel : ObservableObject
         var newDistroNameInput = new TextBox()
         {
             Name = "DistroNameInput",
-            Margin = new Thickness(0 ,20, 0, 15),
+            Margin = new Thickness(0, 20, 0, 15),
             Height = 32,
         };
 
@@ -412,7 +452,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     }
 
 
-    private async Task CreateDistroSnapshotDialog(Distribution distribution) 
+    private async Task CreateDistroSnapshotDialog(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
 
@@ -437,28 +477,24 @@ public class DistrosListDetailsViewModel : ObservableObject
             //var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
 
             //await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
-            await CreateDistroSnapshotViewModel(distribution,this._snapshotName, this._snapshotDescr);
+            await CreateDistroSnapshotViewModel(distribution, this._snapshotName, this._snapshotDescr);
         }
 
     }
 
     private async void ValidateSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        var snapshotNameTextBox= sender.FindChild("SnapshotNameInput") as TextBox;
-        var snapshotDescrTextBox= sender.FindChild("SnapshotDescrInput") as TextBox;
+        var snapshotNameTextBox = sender.FindChild("SnapshotNameInput") as TextBox;
+        var snapshotDescrTextBox = sender.FindChild("SnapshotDescrInput") as TextBox;
         this._snapshotName = snapshotNameTextBox.Text;
         this._snapshotDescr = snapshotDescrTextBox.Text;
 
 
     }
 
-    private async Task<bool> CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName, string snapshotDescr)
+    private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
+        string snapshotDescr)
     {
-        var isSnapCreated = await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
-        if (!isSnapCreated)
-        {
-            return false;
-        }
-        return true;
+        await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
     }
 }
