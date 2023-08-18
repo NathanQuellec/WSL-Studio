@@ -23,67 +23,27 @@ public class DistrosListDetailsViewModel : ObservableObject
 
     #region RelayCommand
 
-    public AsyncRelayCommand<Distribution> RemoveDistroCommand
-    {
-        get;
-        set;
-    }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
 
-    public AsyncRelayCommand<Distribution> RenameDistroCommand
-    {
-        get;
-        set;
-    }
+    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
 
-    public RelayCommand<Distribution> LaunchDistroCommand
-    {
-        get;
-        set;
-    }
+    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
 
-    public RelayCommand<Distribution> StopDistroCommand
-    {
-        get;
-        set;
-    }
+    public RelayCommand<Distribution> StopDistroCommand { get; set; }
 
-    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand
-    {
-        get;
-        set;
-    }
+    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand { get; set; }
 
-    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand
-    {
-        get;
-        set;
-    }
+    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
 
-    public RelayCommand<Distribution> OpenDistroWithWinTermCommand
-    {
-        get;
-        set;
-    }
+    public RelayCommand<Distribution> OpenDistroWithWinTermCommand { get; set; }
 
-    public AsyncRelayCommand CreateDistroCommand
-    {
-        get;
-        set;
-    }
+    public AsyncRelayCommand CreateDistroCommand { get; set; }
 
-    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand
-    {
-        get;
-        set;
-    }
+    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand { get; set; }
 
     #endregion
 
-    public ObservableCollection<Distribution> Distros
-    {
-        get;
-        set;
-    } = new();
+    public ObservableCollection<Distribution> Distros { get; set; } = new();
 
     private string _snapshotName;
     private string _snapshotDescr;
@@ -495,6 +455,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {
-        await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+      await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+
     }
 }

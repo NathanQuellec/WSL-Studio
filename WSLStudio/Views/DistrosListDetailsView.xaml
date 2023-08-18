@@ -306,7 +306,17 @@
                                           Width="144"
                                           Margin="24 0 0 0 ">
                                     <Expander.Content>
-                                        <ListView ItemsSource="{x:Bind Users}"/>
+                                        <ListView x:Name="SnapshotsListView" ItemsSource="{x:Bind Snapshots, Mode=TwoWay}">
+                                            <ListView.ItemTemplate>
+                                                <DataTemplate x:DataType="model:Snapshot">
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{x:Bind Name}" Margin="0 0 8 0"/>
+                                                        <TextBlock Text="{x:Bind Description}" Margin="0 0 8 0"/>
+                                                        <TextBlock Text="{x:Bind CreationDate}" Margin="0 0 8 0"/>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </ListView.ItemTemplate>
+                                        </ListView>
                                     </Expander.Content>
                                 </Expander>
                                 <Button RelativePanel.RightOf="snapshotsExp" 

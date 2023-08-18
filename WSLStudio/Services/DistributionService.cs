@@ -86,6 +86,7 @@ public class DistributionService : IDistributionService
                         OsVersion = GetOsInfos(distroName, "VERSION"),
                         Size = GetSize(distroPath),
                         Users = GetDistributionUsers(distroName),
+                        Snapshots = GetDistributionSnapshots(distroPath),
                     };
 
                     this._distros.Add(distro);
@@ -214,13 +215,45 @@ public class DistributionService : IDistributionService
         }
     }
 
+    public static List<Snapshot> GetDistributionSnapshots(string distroPath)
+    {
+        var snapshotsList = new List<Snapshot>();
+        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
+
+        try
+        {
+            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
+            for (var i = 1; i < snapshotsInfosLines.Length; i++)
+            {
+                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
+                snapshotsList.Add(new Snapshot()
+                {
+                    Name = snapshotsInfos[0],
+                    Description = snapshotsInfos[1],
+                    CreationDate = snapshotsInfos[2]
+                });
+            }
+
+            return snapshotsList;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return new List<Snapshot>();
+        }
+    }
+
     private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
     {
         try
         {
-            var snapshotInfos = $"Name={snapshot.Name};Description={snapshot.Description};CreationDate={snapshot.CreationDate}";
+            var snapshotInfos = $"{snapshot.Name};{snapshot.Description};{snapshot.CreationDate}\n";
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
 
+            if (!File.Exists(snapshotInfosFile))
+            {
+                await File.AppendAllTextAsync(snapshotInfosFile, "NAME;DESCRIPTION;CREATIONDATE\n");
+            }
             await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos);
         }
         catch (Exception e)
@@ -248,7 +281,6 @@ public class DistributionService : IDistributionService
                 Name = snapshotName,
                 Description = snapshotDescr,
                 CreationDate = currentDateTime,
-                Path = snapshotPath,
             };
 
             distribution.Snapshots.Add(snapshot);
