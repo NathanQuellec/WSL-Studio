@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Net.Mime;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -47,9 +48,6 @@ public class DistrosListDetailsVM : ObservableObject
     #endregion
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
-
-    private string _snapshotName;
-    private string _snapshotDescr;
 
     public DistrosListDetailsVM(IDistributionService distributionService, IInfoBarService infoBarService)
     {
@@ -377,7 +375,7 @@ public class DistrosListDetailsVM : ObservableObject
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(ValidateSnapshot)
+            .SetPrimaryButtonClick(ValidateSnapshotName)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
         var buttonClicked = await dialog.ShowAsync();
@@ -385,27 +383,40 @@ public class DistrosListDetailsVM : ObservableObject
         if (buttonClicked == ContentDialogResult.Primary)
         {
 
-            //var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
-
-            //await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
-            await CreateDistroSnapshotViewModel(distribution, this._snapshotName, this._snapshotDescr);
+            var snapshotName = (dialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
+            var snapshotDescr = (dialog.FindChild("SnapshotDescrInput") as TextBox)!.Text;
+            await CreateDistroSnapshotViewModel(distribution, snapshotName, snapshotDescr);
         }
     }
 
-    private async void ValidateSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private async void ValidateSnapshotName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        var snapshotNameTextBox = sender.FindChild("SnapshotNameInput") as TextBox;
-        snapshotNameTextBox.ClearValue(Control.BorderBrushProperty);
+        var snapshotNameInput = sender.FindChild("SnapshotNameInput") as TextBox;
+        snapshotNameInput.ClearValue(Control.BorderBrushProperty);
         var snapshotDescrTextBox = sender.FindChild("SnapshotDescrInput") as TextBox;
+
         var errorInfoBar = sender.FindChild("SnapshotNameErrorInfoBar") as InfoBar;
         errorInfoBar.IsOpen = false;
 
-        var snapshotNamesList = Distros.Select(distro => distro.Name).ToList();
         var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
         var minLength = 2;
 
-        var inputValidationHelper = new InputValidationHelper();
-       // inputValidationHelper.
+        try
+        {
+            var inputValidationHelper = new InputValidationHelper();
+            inputValidationHelper
+                .NotNullOrWhiteSpace(snapshotNameInput.Text)
+                .IncludeWhiteSpaceChar(snapshotNameInput.Text)
+                .MinimumLength(snapshotNameInput.Text, minLength)
+                .InvalidCharacters(snapshotNameInput.Text, regex, "special characters");
+        }
+        catch (ArgumentException e)
+        {
+            args.Cancel = true;
+            errorInfoBar.Message = e.Message;
+            errorInfoBar.IsOpen = true;
+            snapshotNameInput.BorderBrush = new SolidColorBrush(Colors.DarkRed);
+        }
     }
 
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
