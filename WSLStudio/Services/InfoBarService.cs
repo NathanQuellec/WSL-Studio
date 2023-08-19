@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Timers;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Messages;
@@ -17,17 +18,7 @@ public class InfoBarService : IInfoBarService
         {
             throw new Exception("Could not find App Frame.");
         }
-        var appPage = appFrame.Content as Page;
-        if (appPage == null)
-        {
-            throw new Exception("Could not find App Page.");
-        }
-        var infoBarContainer = appPage.Content as Grid;
-        if (infoBarContainer == null)
-        {
-            throw new Exception("Could not find InfoBar Container.");
-        }
-        var infoBar = infoBarContainer.FindName(infoBarName) as InfoBar;
+        var infoBar = appFrame.FindChild(infoBarName) as InfoBar;
         if (infoBar == null)
         {
             throw new Exception("Could not find InfoBar.");

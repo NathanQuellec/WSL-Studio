@@ -71,7 +71,7 @@
 
         <InfoBar x:Name="DistroNameErrorInfoBar"
                  Severity="Error"
-                 Title="Invalid Distribution Name"
+                 Title="Invalid : Distribution Name"
                  IsOpen="False"
                  IsClosable="False"
                  Margin="0 12 0 0"/>

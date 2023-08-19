@@ -1,17 +1,21 @@
 ﻿using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
+using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Media;
 using WSLStudio.Contracts.Services;
-using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
 using WSLStudio.Views.ContentDialog;
+using Brush = Microsoft.UI.Xaml.Media.Brush;
 
 namespace WSLStudio.ViewModels;
 
@@ -101,7 +105,6 @@ public class DistrosListDetailsVM : ObservableObject
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .SetPrimaryButtonClick(ValidateDistributionName)
             .Build();
 
         var buttonClicked = await dialog.ShowAsync();
@@ -126,114 +129,6 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        var distroNameInput = sender.FindChild("DistroNameInput") as TextBox;
-        var errorInfoBar = sender.FindChild("DistroNameErrorInfoBar") as InfoBar;
-        errorInfoBar.IsOpen = false;
-
-        var distroNamesList = Distros.Select(distro => distro.Name).ToList();
-        var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
-        var minLength = 2;
-
-
-        try
-        {
-            var inputValidationHelper = new InputValidationHelper();
-
-            inputValidationHelper.NotNullOrWhiteSpace(distroNameInput.Text, "You cannot set an empty distribution name.");
-
-            inputValidationHelper.IncludeWhiteSpaceChar(distroNameInput.Text, "You cannot set a new distribution name with white spaces.");
-
-            inputValidationHelper.MinimumLength(distroNameInput.Text, minLength, "You cannot set a new distribution name" +
-                $" with a length shorter than {minLength} characters.");
-
-            inputValidationHelper.ValidCharacters(distroNameInput.Text, regex, "You cannot set a new distribution name with special characters.");
-
-            inputValidationHelper.DataAlreadyExist(distroNameInput.Text, distroNamesList, "You cannot set a new distribution name with an existing one.");
-
-        }
-        catch (InputValidationException e)
-        {
-            args.Cancel = true;
-            errorInfoBar.Message = e.Message;
-            errorInfoBar.IsOpen = true;
-        }
-    }
-    // Check if the new distribution has valid characters 
-    // TODO : REFACTOR
-    private void ValidateDistributionNameTEMP(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        var dialogContent = sender.Content as StackPanel;
-        var contentForm = new StackPanel();
-
-        if (dialogContent?.Children.First() is UserControl)
-        {
-            var contentContainer = dialogContent.Children.First() as UserControl;
-            contentForm = contentContainer?.Content as StackPanel;
-        }
-
-        else
-        {
-            contentForm = dialogContent;
-        }
-
-        var newDistroNameInput = contentForm?.FindName("DistroNameInput") as TextBox;
-        var newDistroName = newDistroNameInput?.Text;
-
-        var namesList = this.Distros.Select(distro => distro.Name).ToList();
-
-        var renameDistroErrorInfoBar = contentForm?.FindName("DistroNameErrorInfoBar") as InfoBar;
-
-        if (renameDistroErrorInfoBar == null)
-        {
-            return;
-        }
-
-        var regexItem = new Regex("^[a-zA-Z0-9-_ ]*$");
-
-        if (string.IsNullOrWhiteSpace(newDistroName))
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "You cannot set an empty distribution name.";
-            renameDistroErrorInfoBar.IsOpen = true;
-        }
-
-        else if (newDistroName.Any(char.IsWhiteSpace))
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with white spaces.";
-            renameDistroErrorInfoBar.IsOpen = true;
-        }
-
-        else if (newDistroName.Length is <= 2)
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
-                                               " with a length shorter than 2 characters or longer than 30 characters.";
-            renameDistroErrorInfoBar.IsOpen = true;
-        }
-
-        else if (!regexItem.IsMatch(newDistroName))
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with special characters.";
-            renameDistroErrorInfoBar.IsOpen = true;
-        }
-
-        else if (namesList.Contains(newDistroName))
-        {
-            args.Cancel = true;
-            renameDistroErrorInfoBar.Message = "You cannot set a new distribution name with an existing one.";
-            renameDistroErrorInfoBar.IsOpen = true;
-        }
-        else
-        {
-            renameDistroErrorInfoBar.IsOpen = false;
-        }
-
-    }
-
     private async Task RenameDistributionDialog(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
@@ -252,7 +147,7 @@ public class DistrosListDetailsVM : ObservableObject
         {
             Name = "DistroNameErrorInfoBar",
             Severity = InfoBarSeverity.Error,
-            Title = "Invalid Distribution Name",
+            Title = "Invalid : Distribution Name",
             IsOpen = false,
             IsClosable = false,
         };
@@ -273,6 +168,36 @@ public class DistrosListDetailsVM : ObservableObject
         if (buttonClicked == ContentDialogResult.Primary)
         {
             RenameDistributionViewModel(distribution, newDistroNameInput.Text);
+        }
+    }
+
+    private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        var distroNameInput = sender.FindChild("DistroNameInput") as TextBox;
+        distroNameInput.ClearValue(Control.BorderBrushProperty);
+        var errorInfoBar = sender.FindChild("DistroNameErrorInfoBar") as InfoBar;
+        errorInfoBar.IsOpen = false;
+
+        var distroNamesList = Distros.Select(distro => distro.Name).ToList();
+        var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
+        var minLength = 2;
+
+        try
+        {
+            var inputValidationHelper = new InputValidationHelper();
+            inputValidationHelper
+                .NotNullOrWhiteSpace(distroNameInput.Text)
+                .IncludeWhiteSpaceChar(distroNameInput.Text)
+                .MinimumLength(distroNameInput.Text, minLength)
+                .InvalidCharacters(distroNameInput.Text, regex, "special characters")
+                .DataAlreadyExist(distroNameInput.Text, distroNamesList);
+        }
+        catch (ArgumentException e)
+        {
+            args.Cancel = true;
+            errorInfoBar.Message = e.Message;
+            errorInfoBar.IsOpen = true;
+            distroNameInput.BorderBrush = new SolidColorBrush(Colors.DarkRed);
         }
     }
 
@@ -329,32 +254,9 @@ public class DistrosListDetailsVM : ObservableObject
         this._distributionService.OpenDistroWithWinTerm(distribution);
     }
 
-
-    // TODO : REFACTOR
-    private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-    {
-        this.ValidateDistributionName(sender, args);
-
-        var dialogContent = sender.Content as StackPanel;
-        var contentContainer = dialogContent!.Children.First() as UserControl;
-        var form = contentContainer!.Content as StackPanel;
-
-        var creationModeErrorInfoBar = form!.FindName("CreationModeErrorInfoBar") as InfoBar;
-
-        var creationMode = form.FindName("DistroCreationMode") as ComboBox;
-
-        if (creationMode?.SelectedItem != null)
-        {
-            creationModeErrorInfoBar!.IsOpen = false;
-            return;
-        }
-
-        args.Cancel = true;
-        creationModeErrorInfoBar!.IsOpen = true;
-    }
-
     // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
     // and the creation mode chose by the user
+    // TODO : Refactor
     private Tuple<string, string, string> GetDistributionCreationInfos(ContentDialog dialog)
     {
 
@@ -403,7 +305,7 @@ public class DistrosListDetailsVM : ObservableObject
             .SetPrimaryButtonText("Create")
             .SetCloseButtonText("Cancel")
             .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(ValidateCreationMode)
+            .SetPrimaryButtonClick(ValidateCreateDistribution)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
 
@@ -414,6 +316,32 @@ public class DistrosListDetailsVM : ObservableObject
             var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
 
             await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
+        }
+    }
+
+    private void ValidateCreateDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        ValidateDistributionName(sender, args);
+        ValidateCreationMode(sender, args);
+    }
+
+    private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        var creationMode = sender.FindChild("DistroCreationMode") as ComboBox;
+        creationMode.ClearValue(Control.BorderBrushProperty);
+        var creationModeErrorInfoBar = sender.FindChild("CreationModeErrorInfoBar") as InfoBar;
+        creationModeErrorInfoBar.IsOpen = false;
+
+        try
+        {
+            var inputValidationHelper = new InputValidationHelper();
+            inputValidationHelper.SelectorNotNull(creationMode.SelectedItem);
+        }
+        catch (ArgumentException e)
+        {
+            args.Cancel = true;
+            creationModeErrorInfoBar.IsOpen = true;
+            creationMode.BorderBrush = new SolidColorBrush(Colors.DarkRed);
         }
     }
 
