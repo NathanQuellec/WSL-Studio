@@ -395,9 +395,17 @@ public class DistrosListDetailsVM : ObservableObject
     private async void ValidateSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var snapshotNameTextBox = sender.FindChild("SnapshotNameInput") as TextBox;
+        snapshotNameTextBox.ClearValue(Control.BorderBrushProperty);
         var snapshotDescrTextBox = sender.FindChild("SnapshotDescrInput") as TextBox;
-        this._snapshotName = snapshotNameTextBox.Text;
-        this._snapshotDescr = snapshotDescrTextBox.Text;
+        var errorInfoBar = sender.FindChild("SnapshotNameErrorInfoBar") as InfoBar;
+        errorInfoBar.IsOpen = false;
+
+        var snapshotNamesList = Distros.Select(distro => distro.Name).ToList();
+        var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
+        var minLength = 2;
+
+        var inputValidationHelper = new InputValidationHelper();
+       // inputValidationHelper.
     }
 
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,

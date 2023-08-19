@@ -228,9 +228,10 @@ public class DistributionService : IDistributionService
                 var snapshotsInfos = snapshotsInfosLines[i].Split(';');
                 snapshotsList.Add(new Snapshot()
                 {
-                    Name = snapshotsInfos[0],
-                    Description = snapshotsInfos[1],
-                    CreationDate = snapshotsInfos[2]
+                    Id = Guid.Parse(snapshotsInfos[0]),
+                    Name = snapshotsInfos[1],
+                    Description = snapshotsInfos[2],
+                    CreationDate = snapshotsInfos[3],
                 });
             }
 
@@ -247,12 +248,12 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var snapshotInfos = $"{snapshot.Name};{snapshot.Description};{snapshot.CreationDate}\n";
+            var snapshotInfos = $"{snapshot.Id};{snapshot.Name};{snapshot.Description};{snapshot.CreationDate}\n";
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
 
             if (!File.Exists(snapshotInfosFile))
             {
-                await File.AppendAllTextAsync(snapshotInfosFile, "NAME;DESCRIPTION;CREATIONDATE\n");
+                await File.AppendAllTextAsync(snapshotInfosFile, "ID;NAME;DESCRIPTION;CREATIONDATE\n");
             }
             await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos);
         }
@@ -274,10 +275,12 @@ public class DistributionService : IDistributionService
                 Directory.CreateDirectory(snapshotFolder);
             }
 
-            var snapshotPath = Path.Combine(snapshotFolder, snapshotName);
+            var snapshotId = Guid.NewGuid();
+            var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
             var snapshot = new Snapshot()
             {
+                Id = snapshotId,
                 Name = snapshotName,
                 Description = snapshotDescr,
                 CreationDate = currentDateTime,
@@ -285,7 +288,6 @@ public class DistributionService : IDistributionService
 
             distribution.Snapshots.Add(snapshot);
             await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
-
         }
         catch (Exception e)
         {
@@ -298,7 +300,7 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    private static Task<string> CreateDistributionFolder(string distroName)
+    private static string CreateDistributionFolder(string distroName)
     {
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
@@ -316,13 +318,13 @@ public class DistributionService : IDistributionService
             Directory.CreateDirectory(distroFolder);
         }
 
-        return Task.FromResult(distroFolder);
+        return distroFolder;
     }
 
     public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
     {
 
-        var distroFolder = await CreateDistributionFolder(distroName);
+        var distroFolder = CreateDistributionFolder(distroName);
 
         DistributionFactory factory = creationMode switch
         {
@@ -550,8 +552,6 @@ public class DistributionService : IDistributionService
             distribution.RunningProcesses.Clear();
         }
     }
-
-    // TODO: Check why opening distro file system invoke sometimes an error. 
 
     public void OpenDistributionFileSystem(Distribution distribution)
     {
