@@ -14,7 +14,7 @@ public class PageService : IPageService
 
     public PageService()
     {
-        Configure<DistrosListDetailsViewModel, DistrosListDetailsView>();
+        Configure<DistrosListDetailsVM, DistrosListDetailsView>();
     }
 
     public Type GetPageType(string key)

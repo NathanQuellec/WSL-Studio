@@ -117,7 +117,7 @@ public partial class App : Application
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
-            services.AddTransient<DistrosListDetailsViewModel>();
+            services.AddTransient<DistrosListDetailsVM>();
             services.AddTransient<DistrosListDetailsView>();
 
             // Configuration

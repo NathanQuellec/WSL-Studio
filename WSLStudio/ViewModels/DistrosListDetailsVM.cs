@@ -13,7 +13,7 @@ using WSLStudio.Views.ContentDialog;
 
 namespace WSLStudio.ViewModels;
 
-public class DistrosListDetailsViewModel : ObservableObject
+public class DistrosListDetailsVM : ObservableObject
 {
 
     private readonly IDistributionService _distributionService;
@@ -48,7 +48,7 @@ public class DistrosListDetailsViewModel : ObservableObject
     private string _snapshotName;
     private string _snapshotDescr;
 
-    public DistrosListDetailsViewModel(IDistributionService distributionService, IInfoBarService infoBarService)
+    public DistrosListDetailsVM(IDistributionService distributionService, IInfoBarService infoBarService)
     {
         this._distributionService = distributionService;
         this._infoBarService = infoBarService;
@@ -170,7 +170,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             renameDistroErrorInfoBar.IsOpen = true;
         }
 
-        else if (newDistroName.Length is <= 2 or > 30)
+        else if (newDistroName.Length is <= 2)
         {
             args.Cancel = true;
             renameDistroErrorInfoBar.Message = "You cannot set a new distribution name" +
@@ -209,6 +209,7 @@ public class DistrosListDetailsViewModel : ObservableObject
             Name = "DistroNameInput",
             Margin = new Thickness(0, 20, 0, 15),
             Height = 32,
+            MaxLength = 30,
         };
 
         var renameDistroErrorInfoBar = new InfoBar()
@@ -304,7 +305,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var creationModeErrorInfoBar = form!.FindName("CreationModeErrorInfoBar") as InfoBar;
 
-        var creationMode = form.FindName("CreationMode") as ComboBox;
+        var creationMode = form.FindName("DistroCreationMode") as ComboBox;
 
         if (creationMode?.SelectedItem != null)
         {
@@ -327,7 +328,7 @@ public class DistrosListDetailsViewModel : ObservableObject
 
         var resourceOrigin = "";
 
-        var creationModeComboBox = form.FindName("CreationMode") as ComboBox;
+        var creationModeComboBox = form.FindName("DistroCreationMode") as ComboBox;
         var creationMode = creationModeComboBox!.SelectedItem.ToString();
         TextBox? inputTextBox;
         switch (creationMode)

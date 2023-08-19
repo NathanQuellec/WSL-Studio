@@ -15,9 +15,10 @@
     <StackPanel>
         <TextBox x:Name="DistroNameInput" 
                  Header="Distribution Name :"
+                 MaxLength="30"
                  Margin="0 12 0 16"
                  Height="64"/>
-        <ComboBox x:Name="CreationMode"
+        <ComboBox x:Name="DistroCreationMode"
                   Header="Creation Mode :" 
                   PlaceholderText="Select a mode">
             <x:String>Docker Hub</x:String>
@@ -25,7 +26,7 @@
             <x:String>Archive</x:String>
         </ComboBox>
 
-        <controls:SwitchPresenter Value="{Binding SelectedItem, ElementName=CreationMode}">
+        <controls:SwitchPresenter Value="{Binding SelectedItem, ElementName=DistroCreationMode}">
 
             <controls:Case Value="Docker Hub">
                 <Grid x:Name="DockerHubInputContainer" 

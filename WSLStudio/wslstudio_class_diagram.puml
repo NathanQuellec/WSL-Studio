@@ -19,12 +19,12 @@ DockerHubDistributionFactory --> DockerHelper
 DistributionService o-- Distribution
 DistributionService --> ProcessBuilderHelper
 
-DistrosListDetailsViewModel ..> IDialogBuilderService
-DistrosListDetailsViewModel ..> IInfoBarService
-DistrosListDetailsViewModel ..> IDistributionService
-DistrosListDetailsView ..> DistrosListDetailsViewModel
-DistrosListDetailsViewModel --> App
-DistrosListDetailsViewModel --> CreateDistroDialogView
+DistrosListDetailsVM ..> IDialogBuilderService
+DistrosListDetailsVM ..> IInfoBarService
+DistrosListDetailsVM ..> IDistributionService
+DistrosListDetailsView ..> DistrosListDetailsVM
+DistrosListDetailsVM --> App
+DistrosListDetailsVM --> CreateDistroDialogView
 
 App ..> IWslService
 App ..> IDialogBuilderService
@@ -175,7 +175,7 @@ class DialogBuilderService
   + Build() : ContentDialog
 }
 
-class DistrosListDetailsViewModel 
+class DistrosListDetailsVM 
 {
   - _distributionService : IDistributionService
   - _dialogBuilderService : IDialogBuilderService
@@ -188,7 +188,7 @@ class DistrosListDetailsViewModel
   + <<property>> OpenDistroFileSystemCommand : RelayCommand<Distribution>
   + <<property>> Distros : ObservableCollection<Distribution>
   
-  + DistrosListDetailsViewModel(distributionService: IDistributionService, infoBarService: IInfoBarService)
+  + DistrosListDetailsVM(distributionService: IDistributionService, infoBarService: IInfoBarService)
   - PopulateDistributionsCollection()
   - RemoveDistributionDialog(distribution: Distribution): Task
   - RemoveDistributionViewModel(distribution: Distribution?)
@@ -207,7 +207,7 @@ class DistrosListDetailsViewModel
 class DistrosListDetailsView
 {
     - _distroStopButton: Button
-    + <<property>> ViewModel: DistrosListDetailsViewModel
+    + <<property>> ViewModel: DistrosListDetailsVM
     + DistrosListDetailsView()
     - FindDistroStopButton(parent: DependencyObject, findDistroName: string)
 }
