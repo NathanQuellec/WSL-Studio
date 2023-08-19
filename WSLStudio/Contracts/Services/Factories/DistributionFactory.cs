@@ -7,7 +7,7 @@ public abstract class DistributionFactory
 {
     public abstract Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder);
 
-    public static Task ImportDistribution(string distroName, string installDir, string tarLocation)
+    public static async Task ImportDistribution(string distroName, string installDir, string tarLocation)
     {
         try
         {
@@ -19,14 +19,11 @@ public abstract class DistributionFactory
                 .Build();
 
             process.Start();
-            process.WaitForExit();
+            await process.WaitForExitAsync();
         }
         catch (Exception ex)
         {
             Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
-            throw;
         }
-
-        return Task.CompletedTask;
     }
 }

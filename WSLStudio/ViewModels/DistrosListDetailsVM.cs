@@ -67,7 +67,7 @@ public class DistrosListDetailsVM : ObservableObject
         CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog);
 
         this._distributionService.InitDistributionsList();
-        this.PopulateDistributionsCollection();
+        PopulateDistributionsCollection();
 
     }
 
@@ -76,10 +76,10 @@ public class DistrosListDetailsVM : ObservableObject
         try
         {
             Console.WriteLine($"[INFO] Populate distributions collection");
-            this.Distros.Clear();
+            Distros.Clear();
             foreach (var distro in this._distributionService.GetAllDistributions())
             {
-                this.Distros.Add(distro);
+                Distros.Add(distro);
             }
         }
         catch (Exception ex)
@@ -115,7 +115,7 @@ public class DistrosListDetailsVM : ObservableObject
         Console.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
 
         this._distributionService.RemoveDistribution(distribution);
-        this.Distros.Remove(distribution);
+        Distros.Remove(distribution);
 
         if (!Distros.Contains(distribution))
         {
@@ -169,23 +169,23 @@ public class DistrosListDetailsVM : ObservableObject
     private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var distroNameInput = sender.FindChild("DistroNameInput") as TextBox;
-        distroNameInput.ClearValue(Control.BorderBrushProperty);
+        distroNameInput!.ClearValue(Control.BorderBrushProperty);
         var errorInfoBar = sender.FindChild("DistroNameErrorInfoBar") as InfoBar;
-        errorInfoBar.IsOpen = false;
+        errorInfoBar!.IsOpen = false;
 
         var distroNamesList = Distros.Select(distro => distro.Name).ToList();
         var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
-        var minLength = 2;
+        const int minLength = 2;
 
         try
         {
-            var inputValidationHelper = new InputValidationHelper();
-            inputValidationHelper
-                .NotNullOrWhiteSpace(distroNameInput.Text)
-                .IncludeWhiteSpaceChar(distroNameInput.Text)
-                .MinimumLength(distroNameInput.Text, minLength)
-                .InvalidCharacters(distroNameInput.Text, regex, "special characters")
-                .DataAlreadyExist(distroNameInput.Text, distroNamesList);
+            var textInputValidationHelper = new TextInputValidationHelper(distroNameInput.Text);
+            textInputValidationHelper
+                .NotNullOrWhiteSpace()
+                .IncludeWhiteSpaceChar()
+                .MinimumLength(minLength)
+                .InvalidCharacters(regex, "special characters")
+                .DataAlreadyExist(distroNamesList);
         }
         catch (ArgumentException e)
         {
@@ -206,10 +206,10 @@ public class DistrosListDetailsVM : ObservableObject
             return;
         }
 
-        var index = this.Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
+        var index = Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
         if (index != -1)
         {
-            this.Distros.ElementAt(index).Name = newDistroName;
+            Distros.ElementAt(index).Name = newDistroName;
         }
     }
 
@@ -316,19 +316,14 @@ public class DistrosListDetailsVM : ObservableObject
         ValidateCreationMode(sender, args);
     }
 
-    private void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private static void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var creationMode = sender.FindChild("DistroCreationMode") as ComboBox;
-        creationMode.ClearValue(Control.BorderBrushProperty);
+        creationMode!.ClearValue(Control.BorderBrushProperty);
         var creationModeErrorInfoBar = sender.FindChild("CreationModeErrorInfoBar") as InfoBar;
-        creationModeErrorInfoBar.IsOpen = false;
+        creationModeErrorInfoBar!.IsOpen = false;
 
-        try
-        {
-            var inputValidationHelper = new InputValidationHelper();
-            inputValidationHelper.ControlNotNull(creationMode.SelectedItem);
-        }
-        catch (ArgumentException e)
+        if (creationMode.SelectedItem == null)
         {
             args.Cancel = true;
             creationModeErrorInfoBar.IsOpen = true;
@@ -349,7 +344,7 @@ public class DistrosListDetailsVM : ObservableObject
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
             var createNewDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateNewDistroInfoSuccess");
             this._infoBarService.OpenInfoBar(createNewDistroInfoSuccess, 2000);
-            this.Distros.Add(newDistro);
+            Distros.Add(newDistro);
         }
         else
         {
@@ -360,6 +355,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
+    // TODO : Progress InfoBar
 
     private async Task CreateDistroSnapshotDialog(Distribution distribution)
     {
@@ -389,26 +385,25 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private async void ValidateSnapshotName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private static void ValidateSnapshotName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var snapshotNameInput = sender.FindChild("SnapshotNameInput") as TextBox;
-        snapshotNameInput.ClearValue(Control.BorderBrushProperty);
-        var snapshotDescrTextBox = sender.FindChild("SnapshotDescrInput") as TextBox;
+        snapshotNameInput!.ClearValue(Control.BorderBrushProperty);
 
         var errorInfoBar = sender.FindChild("SnapshotNameErrorInfoBar") as InfoBar;
-        errorInfoBar.IsOpen = false;
+        errorInfoBar!.IsOpen = false;
 
         var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
-        var minLength = 2;
+        const int minLength = 2;
 
         try
         {
-            var inputValidationHelper = new InputValidationHelper();
-            inputValidationHelper
-                .NotNullOrWhiteSpace(snapshotNameInput.Text)
-                .IncludeWhiteSpaceChar(snapshotNameInput.Text)
-                .MinimumLength(snapshotNameInput.Text, minLength)
-                .InvalidCharacters(snapshotNameInput.Text, regex, "special characters");
+            var textInputValidationHelper = new TextInputValidationHelper(snapshotNameInput.Text);
+            textInputValidationHelper
+                .NotNullOrWhiteSpace()
+                .IncludeWhiteSpaceChar()
+                .MinimumLength(minLength)
+                .InvalidCharacters(regex, "special characters");
         }
         catch (ArgumentException e)
         {
