@@ -1,6 +1,7 @@
 ﻿
 using System.Collections;
 using System.Text.RegularExpressions;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Controls.Primitives;
 
 namespace WSLStudio.Helpers;
@@ -54,9 +55,9 @@ public class InputValidationHelper
         return this;
     }
 
-    public InputValidationHelper SelectorNotNull(object? selector)
+    public InputValidationHelper ControlNotNull(object? control)
     {
-        if (selector == null)
+        if (control == null)
         {
             throw new ArgumentException($"You must select one option.");
         }

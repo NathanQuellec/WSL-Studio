@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -8,14 +7,12 @@ using CommunityToolkit.WinUI.UI;
 using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Media;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
 using WSLStudio.Views.ContentDialog;
-using Brush = Microsoft.UI.Xaml.Media.Brush;
 
 namespace WSLStudio.ViewModels;
 
@@ -257,38 +254,34 @@ public class DistrosListDetailsVM : ObservableObject
     // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
     // and the creation mode chose by the user
     // TODO : Refactor
-    private Tuple<string, string, string> GetDistributionCreationInfos(ContentDialog dialog)
+    private Tuple<string, string, string> GetCreateDistroFormInfos(ContentDialog dialog)
     {
+        var distroNameInput = dialog.FindChild("DistroNameInput") as TextBox;
+        var distroName = distroNameInput!.Text;
 
-        var dialogContent = dialog.Content as StackPanel;
-        var contentContainer = dialogContent!.Children.First() as UserControl;
-        var form = contentContainer!.Content as StackPanel;
+        var creationModeComboBox = dialog.FindChild("DistroCreationMode") as ComboBox;
+        var creationMode = creationModeComboBox!.SelectedItem.ToString();
 
+        TextBox? resourceOriginTextBox;
         var resourceOrigin = "";
 
-        var creationModeComboBox = form.FindName("DistroCreationMode") as ComboBox;
-        var creationMode = creationModeComboBox!.SelectedItem.ToString();
-        TextBox? inputTextBox;
         switch (creationMode)
         {
             case "Dockerfile":
-                inputTextBox = form.FindName("DockerfileInput") as TextBox;
-                resourceOrigin = inputTextBox!.Text;
+                resourceOriginTextBox = dialog.FindChild("DockerfileInput") as TextBox;
+                resourceOrigin = resourceOriginTextBox.Text;
                 break;
             case "Docker Hub":
-                inputTextBox = form.FindName("DockerHubInput") as TextBox;
-                resourceOrigin = inputTextBox!.Text;
+                resourceOriginTextBox = dialog.FindChild("DockerHubInput") as TextBox;
+                resourceOrigin = resourceOriginTextBox.Text;
                 break;
             case "Archive":
-                inputTextBox = form.FindName("ArchiveInput") as TextBox;
-                resourceOrigin = inputTextBox!.Text;
+                resourceOriginTextBox = dialog.FindChild("ArchiveInput") as TextBox;
+                resourceOrigin = resourceOriginTextBox.Text;
                 break;
         }
 
-        var distroNameInput = form.FindName("DistroNameInput") as TextBox;
-        var distroName = distroNameInput!.Text;
-
-        return Tuple.Create(distroName, resourceOrigin, creationMode);
+        return Tuple.Create(distroName, creationMode, resourceOrigin);
     }
 
     private async Task CreateDistributionDialog()
@@ -313,7 +306,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var (distroName, resourceOrigin, creationMode) = this.GetDistributionCreationInfos(dialog);
+            var (distroName, creationMode, resourceOrigin) = this.GetCreateDistroFormInfos(dialog);
 
             await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
         }
@@ -335,7 +328,7 @@ public class DistrosListDetailsVM : ObservableObject
         try
         {
             var inputValidationHelper = new InputValidationHelper();
-            inputValidationHelper.SelectorNotNull(creationMode.SelectedItem);
+            inputValidationHelper.ControlNotNull(creationMode.SelectedItem);
         }
         catch (ArgumentException e)
         {
@@ -397,7 +390,6 @@ public class DistrosListDetailsVM : ObservableObject
             //await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
             await CreateDistroSnapshotViewModel(distribution, this._snapshotName, this._snapshotDescr);
         }
-
     }
 
     private async void ValidateSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -406,14 +398,11 @@ public class DistrosListDetailsVM : ObservableObject
         var snapshotDescrTextBox = sender.FindChild("SnapshotDescrInput") as TextBox;
         this._snapshotName = snapshotNameTextBox.Text;
         this._snapshotDescr = snapshotDescrTextBox.Text;
-
-
     }
 
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {
       await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
-
     }
 }
