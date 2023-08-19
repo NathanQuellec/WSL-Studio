@@ -7,6 +7,8 @@ using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Exceptions;
+using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
 using WSLStudio.Views.ContentDialog;
@@ -124,9 +126,43 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
+    private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        var distroNameInput = sender.FindChild("DistroNameInput") as TextBox;
+        var errorInfoBar = sender.FindChild("DistroNameErrorInfoBar") as InfoBar;
+        errorInfoBar.IsOpen = false;
+
+        var distroNamesList = Distros.Select(distro => distro.Name).ToList();
+        var regex = new Regex("^[a-zA-Z0-9-_ ]*$");
+        var minLength = 2;
+
+
+        try
+        {
+            var inputValidationHelper = new InputValidationHelper();
+
+            inputValidationHelper.NotNullOrWhiteSpace(distroNameInput.Text, "You cannot set an empty distribution name.");
+
+            inputValidationHelper.IncludeWhiteSpaceChar(distroNameInput.Text, "You cannot set a new distribution name with white spaces.");
+
+            inputValidationHelper.MinimumLength(distroNameInput.Text, minLength, "You cannot set a new distribution name" +
+                $" with a length shorter than {minLength} characters.");
+
+            inputValidationHelper.ValidCharacters(distroNameInput.Text, regex, "You cannot set a new distribution name with special characters.");
+
+            inputValidationHelper.DataAlreadyExist(distroNameInput.Text, distroNamesList, "You cannot set a new distribution name with an existing one.");
+
+        }
+        catch (InputValidationException e)
+        {
+            args.Cancel = true;
+            errorInfoBar.Message = e.Message;
+            errorInfoBar.IsOpen = true;
+        }
+    }
     // Check if the new distribution has valid characters 
     // TODO : REFACTOR
-    private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    private void ValidateDistributionNameTEMP(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var dialogContent = sender.Content as StackPanel;
         var contentForm = new StackPanel();
@@ -384,29 +420,22 @@ public class DistrosListDetailsVM : ObservableObject
     private async Task CreateDistributionViewModel(string creationMode, string distroName, string resourceOrigin)
     {
         this._isDistroCreationProcessing = true;
-
         var createNewDistroInfoProgress = this._infoBarService.FindInfoBar("CreateNewDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createNewDistroInfoProgress);
-
         var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
 
         if (newDistro != null)
         {
             this._isDistroCreationProcessing = false;
-
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
-
             var createNewDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateNewDistroInfoSuccess");
             this._infoBarService.OpenInfoBar(createNewDistroInfoSuccess, 2000);
-
             this.Distros.Add(newDistro);
         }
         else
         {
             this._isDistroCreationProcessing = false;
-
             this._infoBarService.CloseInfoBar(createNewDistroInfoProgress);
-
             var createNewDistroInfoError = this._infoBarService.FindInfoBar("CreateNewDistroInfoError");
             this._infoBarService.OpenInfoBar(createNewDistroInfoError, 5000);
         }

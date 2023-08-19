@@ -29,7 +29,7 @@ public class InputValidationHelper
     {
         if (input.Length <= minLength)
         {
-            throw new InvalidOperationException(errorMessage);
+            throw new InputValidationException(errorMessage);
         }
     }
 
