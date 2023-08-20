@@ -307,7 +307,7 @@ public class DistrosListDetailsVM : ObservableObject
         {
             var (distroName, creationMode, resourceOrigin) = this.GetCreateDistroFormInfos(dialog);
 
-            await CreateDistributionViewModel(creationMode, distroName, resourceOrigin);
+            await CreateDistributionViewModel(distroName, creationMode, resourceOrigin);
         }
     }
 
@@ -332,7 +332,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private async Task CreateDistributionViewModel(string creationMode, string distroName, string resourceOrigin)
+    private async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
         this._isDistroCreationProcessing = true;
         var createDistroInfoProgress = this._infoBarService.FindInfoBar("CreateDistroInfoProgress");
@@ -340,7 +340,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         try
         {
-            var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
+            var newDistro = await this._distributionService.CreateDistribution(distroName, creationMode, resourceOrigin);
             this._isDistroCreationProcessing = false;
             this._infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateDistroInfoSuccess");
@@ -416,7 +416,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    //TODO MERGE WITH OTHER METHOD
+    //TODO : Refactor with CreateDistributionViewModel to avoid boilerplate code
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {

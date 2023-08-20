@@ -117,6 +117,7 @@
     <None Remove="Views\CreateDistroSnapshotView.xaml" />
     <None Remove="Views\CreateDistroView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
+    <None Remove="Views\WslProcessInfoBar.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -168,6 +169,12 @@
     <Content Update="Assets\WslStudioIcon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\WslProcessInfoBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

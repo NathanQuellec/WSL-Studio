@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UserControl
+    x:Class="WSLStudio.Views.WslProcessInfoBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:WSLStudio.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid>
+        <InfoBar x:Name="RemoveDistroInfoSuccess"
+                 VerticalAlignment="Bottom"
+                 Severity="Success"
+                 Title="WSL Studio has successfully removed the distribution from the system."
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
+
+        <InfoBar x:Name="CreateDistroInfoProgress"
+                 VerticalAlignment="Bottom"
+                 Severity="Informational"
+                 Title="WSL Studio is currently creating your distribution"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Height="100"
+                 Width="450">
+            <InfoBar.Content>
+                <ProgressBar IsIndeterminate="True" 
+                     Margin="0,0,20,6" 
+                     MaxWidth="200"/>
+            </InfoBar.Content>
+        </InfoBar>
+
+        <InfoBar x:Name="CreateDistroInfoError"
+                 VerticalAlignment="Bottom"
+                 Severity="Error"
+                 Title="WSL Studio has failed to create your distribution"
+                 Message="Docker is either not running or has failed to build the image."
+                 IsOpen="False"
+                 Height="100"
+                 Width="600"/>
+
+        <InfoBar x:Name="CreateDistroInfoSuccess"
+                 VerticalAlignment="Bottom"
+                 Severity="Success"
+                 Title="WSL Studio has successfully create your distribution"
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
+
+        <InfoBar x:Name="CreateSnapshotInfoProgress"
+                 VerticalAlignment="Bottom"
+                 Severity="Informational"
+                 Title="WSL Studio is currently creating your snapshot"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Height="100"
+                 Width="450">
+            <InfoBar.Content>
+                <ProgressBar IsIndeterminate="True" 
+                     Margin="0,0,20,6" 
+                     MaxWidth="200"/>
+            </InfoBar.Content>
+        </InfoBar>
+
+        <InfoBar x:Name="CreateSnapshotInfoError"
+                 VerticalAlignment="Bottom"
+                 Severity="Error"
+                 Title="WSL Studio has failed to create your snapshot"
+                 IsOpen="False"
+                 Height="100"
+                 Width="600"/>
+
+        <InfoBar x:Name="CreateSnapshotInfoSuccess"
+                 VerticalAlignment="Bottom"
+                 Severity="Success"
+                 Title="WSL Studio has successfully create your snapshot"
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
+    </Grid>
+</UserControl>

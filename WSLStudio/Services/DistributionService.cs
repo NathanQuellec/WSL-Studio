@@ -241,21 +241,21 @@ public class DistributionService : IDistributionService
         return distroFolder;
     }
 
-    public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
+    public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
-
-        var distroFolder = CreateDistributionFolder(distroName);
-
-        DistributionFactory factory = creationMode switch
-        {
-            "Dockerfile" => new DockerfileDistributionFactory(),
-            "Archive" => new ArchiveDistributionFactory(),
-            "Docker Hub" => new DockerHubDistributionFactory(),
-            _ => throw new NullReferenceException(),
-        };
-
         try
         {
+
+            var distroFolder = CreateDistributionFolder(distroName);
+
+            DistributionFactory factory = creationMode switch
+            {
+                "Dockerfile" => new DockerfileDistributionFactory(),
+                "Archive" => new ArchiveDistributionFactory(),
+                "Docker Hub" => new DockerHubDistributionFactory(),
+                _ => throw new NullReferenceException(),
+            };
+
             var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
             var distro = _wslApi
                 .GetDistributionList()
