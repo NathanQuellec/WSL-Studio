@@ -337,26 +337,27 @@ public class DistrosListDetailsVM : ObservableObject
         this._isDistroCreationProcessing = true;
         var createDistroInfoProgress = this._infoBarService.FindInfoBar("CreateDistroInfoProgress");
         this._infoBarService.OpenInfoBar(createDistroInfoProgress);
-        var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
 
-        if (newDistro != null)
+        try
         {
+            var newDistro = await this._distributionService.CreateDistribution(creationMode, distroName, resourceOrigin);
             this._isDistroCreationProcessing = false;
             this._infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateDistroInfoSuccess");
             this._infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
             Distros.Add(newDistro);
+
         }
-        else
+      
+        catch (Exception e)
         {
+            Console.WriteLine($"Service failed to create distribution {distroName}: " + e.Message);
             this._isDistroCreationProcessing = false;
             this._infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = this._infoBarService.FindInfoBar("CreateDistroInfoError");
             this._infoBarService.OpenInfoBar(createDistroInfoError, 5000);
         }
     }
-
-    // TODO : Progress InfoBar
 
     private async Task CreateDistroSnapshotDialog(Distribution distribution)
     {

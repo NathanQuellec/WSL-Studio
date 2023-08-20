@@ -215,7 +215,73 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public static List<Snapshot> GetDistributionSnapshots(string distroPath)
+    public IEnumerable<Distribution> GetAllDistributions()
+    {
+        return _distros;
+    }
+
+    private static string CreateDistributionFolder(string distroName)
+    {
+        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+        var appPath = Path.Combine(roamingPath, APP_FOLDER);
+
+        if (!Directory.Exists(appPath))
+        {
+            Directory.CreateDirectory(appPath);
+        }
+
+        var distroFolder = Path.Combine(appPath, distroName);
+
+        if (!Directory.Exists(distroFolder))
+        {
+            Directory.CreateDirectory(distroFolder);
+        }
+
+        return distroFolder;
+    }
+
+    public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
+    {
+
+        var distroFolder = CreateDistributionFolder(distroName);
+
+        DistributionFactory factory = creationMode switch
+        {
+            "Dockerfile" => new DockerfileDistributionFactory(),
+            "Archive" => new ArchiveDistributionFactory(),
+            "Docker Hub" => new DockerHubDistributionFactory(),
+            _ => throw new NullReferenceException(),
+        };
+
+        try
+        {
+            var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+            var distro = _wslApi
+                .GetDistributionList()
+                .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
+
+
+            newDistro.Id = distro.DistroId;
+            newDistro.Path = distro.BasePath;
+            newDistro.WslVersion = distro.WslVersion;
+            newDistro.OsName = GetOsInfos(distroName, "NAME");
+            newDistro.OsVersion = GetOsInfos(distroName, "VERSION");
+            newDistro.Size = GetSize(distro.BasePath);
+            newDistro.Users = GetDistributionUsers(distroName);
+
+            this._distros.Add(newDistro);
+
+            return newDistro;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw;
+        }
+    }
+
+    private static List<Snapshot> GetDistributionSnapshots(string distroPath)
     {
         var snapshotsList = new List<Snapshot>();
         var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
@@ -266,17 +332,19 @@ public class DistributionService : IDistributionService
     // TODO : Compress snapshot
     public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
+
+        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
+        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
+        if (!Directory.Exists(snapshotFolder))
+        {
+            Directory.CreateDirectory(snapshotFolder);
+        }
+
+        var snapshotId = Guid.NewGuid();
+        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
+
         try
         {
-            var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
-            var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
-            if (!Directory.Exists(snapshotFolder))
-            {
-                Directory.CreateDirectory(snapshotFolder);
-            }
-
-            var snapshotId = Guid.NewGuid();
-            var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
             var snapshot = new Snapshot()
             {
@@ -295,77 +363,6 @@ public class DistributionService : IDistributionService
             Console.WriteLine(e.Message);
             return false;
         }
-    }
-
-    public IEnumerable<Distribution> GetAllDistributions()
-    {
-        return _distros;
-    }
-
-    private static string CreateDistributionFolder(string distroName)
-    {
-        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-        var appPath = Path.Combine(roamingPath, APP_FOLDER);
-
-        if (!Directory.Exists(appPath))
-        {
-            Directory.CreateDirectory(appPath);
-        }
-
-        var distroFolder = Path.Combine(appPath, distroName);
-
-        if (!Directory.Exists(distroFolder))
-        {
-            Directory.CreateDirectory(distroFolder);
-        }
-
-        return distroFolder;
-    }
-
-    public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
-    {
-
-        var distroFolder = CreateDistributionFolder(distroName);
-
-        DistributionFactory factory = creationMode switch
-        {
-            "Dockerfile" => new DockerfileDistributionFactory(),
-            "Archive" => new ArchiveDistributionFactory(),
-            "Docker Hub" => new DockerHubDistributionFactory(),
-            _ => throw new NotImplementedException(),
-        };
-
-        var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
-
-        if (newDistro == null)
-        {
-            return null;
-        }
-
-        // set the id of our model with the id of the new distro generated by wsl 
-        // TODO : getters for distro id,path and wsl version
-        // TODO : refactor
-        foreach (var distro in _wslApi.GetDistributionList())
-        {
-            if (distro.DistroName == newDistro.Name)
-            {
-                // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                await BackgroundLaunchDistribution(newDistro.Name);
-                await WaitForRunningDistribution(newDistro.Name);
-
-                newDistro.Id = distro.DistroId;
-                newDistro.Path = distro.BasePath;
-                newDistro.WslVersion = distro.WslVersion;
-                newDistro.OsName = GetOsInfos(distroName, "NAME");
-                newDistro.OsVersion = GetOsInfos(distroName, "VERSION");
-                newDistro.Size = GetSize(distro.BasePath);
-                newDistro.Users = GetDistributionUsers(distroName);
-            }
-        }
-        this._distros.Add(newDistro);
-
-        return newDistro;
     }
 
     public void RemoveDistribution(Distribution distribution)

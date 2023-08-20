@@ -5,9 +5,9 @@ namespace WSLStudio.Contracts.Services;
 public interface IDistributionService
 {
     Task InitDistributionsList();
-    Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr);
     IEnumerable<Distribution> GetAllDistributions();
     Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin);
+    Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr);
     void RemoveDistribution(Distribution distribution);
     bool RenameDistribution(Distribution distribution, string newDistroName);
     void LaunchDistribution(Distribution distribution);

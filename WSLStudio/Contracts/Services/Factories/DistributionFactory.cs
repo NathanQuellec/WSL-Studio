@@ -1,4 +1,5 @@
-﻿using WSLStudio.Helpers;
+﻿using ICSharpCode.SharpZipLib.Tar;
+using WSLStudio.Helpers;
 using WSLStudio.Models;
 
 namespace WSLStudio.Contracts.Services.Factories;
@@ -14,6 +15,7 @@ public abstract class DistributionFactory
             var process = new ProcessBuilderHelper("cmd.exe")
                 .SetArguments($"/c wsl --import {distroName} {installDir} {tarLocation}")
                 .SetRedirectStandardOutput(true)
+                .SetRedirectStandardError(true)
                 .SetUseShellExecute(false)
                 .SetCreateNoWindow(true)
                 .Build();

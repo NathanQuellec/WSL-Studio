@@ -43,12 +43,12 @@ public class DockerfileDistributionFactory : DistributionFactory
         catch (DockerApiException ex)
         {
             Console.WriteLine(ex.ToString());
-            return null;
+            throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return null;
+            throw;
         }
     }
 }
