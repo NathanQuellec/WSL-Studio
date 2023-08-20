@@ -264,7 +264,7 @@ public class DistributionService : IDistributionService
     }
 
     // TODO : Compress snapshot
-    public async Task CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
         try
         {
@@ -288,10 +288,12 @@ public class DistributionService : IDistributionService
 
             distribution.Snapshots.Add(snapshot);
             await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
+            return false;
         }
     }
 

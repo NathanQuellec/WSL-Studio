@@ -367,7 +367,7 @@
                  Height="100"
                  Width="450"/>
 
-        <InfoBar x:Name="CreateNewDistroInfoProgress"
+        <InfoBar x:Name="CreateDistroInfoProgress"
                  VerticalAlignment="Bottom"
                  Grid.Row="1"
                  Severity="Informational"
@@ -383,7 +383,7 @@
             </InfoBar.Content>
         </InfoBar>
 
-        <InfoBar x:Name="CreateNewDistroInfoError"
+        <InfoBar x:Name="CreateDistroInfoError"
                  VerticalAlignment="Bottom"
                  Grid.Row="1"
                  Severity="Error"
@@ -393,11 +393,45 @@
                  Height="100"
                  Width="600"/>
 
-        <InfoBar x:Name="CreateNewDistroInfoSuccess"
+        <InfoBar x:Name="CreateDistroInfoSuccess"
                  VerticalAlignment="Bottom"
                  Grid.Row="1"
                  Severity="Success"
                  Title="WSL Studio has successfully create your distribution"
+                 IsOpen="False"
+                 Height="100"
+                 Width="450"/>
+
+        <InfoBar x:Name="CreateSnapshotInfoProgress"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Informational"
+                 Title="WSL Studio is currently creating your snapshot"
+                 IsOpen="False"
+                 IsClosable="False"
+                 Height="100"
+                 Width="450">
+            <InfoBar.Content>
+                <ProgressBar IsIndeterminate="True" 
+                             Margin="0,0,20,6" 
+                             MaxWidth="200"/>
+            </InfoBar.Content>
+        </InfoBar>
+
+        <InfoBar x:Name="CreateSnapshotInfoError"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Error"
+                 Title="WSL Studio has failed to create your snapshot"
+                 IsOpen="False"
+                 Height="100"
+                 Width="600"/>
+
+        <InfoBar x:Name="CreateSnapshotInfoSuccess"
+                 VerticalAlignment="Bottom"
+                 Grid.Row="1"
+                 Severity="Success"
+                 Title="WSL Studio has successfully create your snapshot"
                  IsOpen="False"
                  Height="100"
                  Width="450"/>
