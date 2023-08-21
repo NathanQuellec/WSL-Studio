@@ -110,6 +110,7 @@ public partial class App : Application
             services.AddTransient<IDialogBuilderService, DialogBuilderService>();
             services.AddTransient<IInfoBarService, InfoBarService>();
             services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<ISnapshotService, SnapshotService>();
             services.AddSingleton<IWslService, WslService>();
             
 

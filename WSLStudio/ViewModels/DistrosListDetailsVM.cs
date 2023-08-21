@@ -21,6 +21,7 @@ public class DistrosListDetailsVM : ObservableObject
 {
 
     private readonly IDistributionService _distributionService;
+    private readonly ISnapshotService _snapshotService;
     private readonly IInfoBarService _infoBarService;
 
     private bool _isDistroCreationProcessing = false;
@@ -50,12 +51,13 @@ public class DistrosListDetailsVM : ObservableObject
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
 
-    public DistrosListDetailsVM(IDistributionService distributionService, IInfoBarService infoBarService)
+    public DistrosListDetailsVM(IDistributionService distributionService, ISnapshotService snapshotService, IInfoBarService infoBarService)
     {
-        this._distributionService = distributionService;
-        this._infoBarService = infoBarService;
+        _distributionService = distributionService;
+        _snapshotService = snapshotService;
+        _infoBarService = infoBarService;
 
-        this._isDistroCreationProcessing = false;
+        _isDistroCreationProcessing = false;
 
         RemoveDistroCommand = new AsyncRelayCommand<Distribution>(RemoveDistributionDialog);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
@@ -64,12 +66,12 @@ public class DistrosListDetailsVM : ObservableObject
         OpenDistroWithFileExplorerCommand = new RelayCommand<Distribution>(OpenDistributionWithFileExplorerViewModel);
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !this._isDistroCreationProcessing);
-        CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog, (distro) => !this._isSnapshotCreationProcessing);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !_isDistroCreationProcessing);
+        CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog, (distro) => !_isSnapshotCreationProcessing);
 
-        this._distributionService.InitDistributionsList();
+        _distributionService.InitDistributionsList();
         PopulateDistributionsCollection();
-
+        
     }
 
     private void PopulateDistributionsCollection()
@@ -78,7 +80,7 @@ public class DistrosListDetailsVM : ObservableObject
         {
             Console.WriteLine($"[INFO] Populate distributions collection");
             Distros.Clear();
-            foreach (var distro in this._distributionService.GetAllDistributions())
+            foreach (var distro in _distributionService.GetAllDistributions())
             {
                 Distros.Add(distro);
             }
@@ -115,13 +117,13 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Removing {distribution.Name} ...");
 
-        this._distributionService.RemoveDistribution(distribution);
+        _distributionService.RemoveDistribution(distribution);
         Distros.Remove(distribution);
 
         if (!Distros.Contains(distribution))
         {
-            var removeDistroInfoBar = this._infoBarService.FindInfoBar("RemoveDistroInfoSuccess");
-            this._infoBarService.OpenInfoBar(removeDistroInfoBar, 2000);
+            var removeDistroInfoBar = _infoBarService.FindInfoBar("RemoveDistroInfoSuccess");
+            _infoBarService.OpenInfoBar(removeDistroInfoBar, 2000);
         }
     }
 
@@ -201,7 +203,7 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
-        var isDistroRenamed = this._distributionService.RenameDistribution(distribution, newDistroName);
+        var isDistroRenamed = _distributionService.RenameDistribution(distribution, newDistroName);
         if (!isDistroRenamed)
         {
             return;
@@ -218,7 +220,7 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : ${distribution!.Name} distribution is launching ...");
 
-        this._distributionService.LaunchDistribution(distribution);
+        _distributionService.LaunchDistribution(distribution);
         // Publish message  (allows us to show the stop button when the start button is clicked)
         WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
@@ -227,7 +229,7 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : {distribution!.Name} distribution is stopping ...");
 
-        this._distributionService.StopDistribution(distribution);
+        _distributionService.StopDistribution(distribution);
         WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
     }
 
@@ -235,19 +237,19 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : {distribution.Name} file system is opening ...");
 
-        this._distributionService.OpenDistributionFileSystem(distribution);
+        _distributionService.OpenDistributionFileSystem(distribution);
     }
 
     private void OpenDistributionWithVsCodeViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with VS Code ...");
-        this._distributionService.OpenDistributionWithVsCode(distribution);
+        _distributionService.OpenDistributionWithVsCode(distribution);
     }
 
     private void OpenDistroWithWinTermViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with Windows Terminal ...");
-        this._distributionService.OpenDistroWithWinTerm(distribution);
+        _distributionService.OpenDistroWithWinTerm(distribution);
     }
 
     // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
@@ -305,7 +307,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var (distroName, creationMode, resourceOrigin) = this.GetCreateDistroFormInfos(dialog);
+            var (distroName, creationMode, resourceOrigin) = GetCreateDistroFormInfos(dialog);
 
             await CreateDistributionViewModel(distroName, creationMode, resourceOrigin);
         }
@@ -334,17 +336,17 @@ public class DistrosListDetailsVM : ObservableObject
 
     private async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
-        this._isDistroCreationProcessing = true;
-        var createDistroInfoProgress = this._infoBarService.FindInfoBar("CreateDistroInfoProgress");
-        this._infoBarService.OpenInfoBar(createDistroInfoProgress);
+        _isDistroCreationProcessing = true;
+        var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
+        _infoBarService.OpenInfoBar(createDistroInfoProgress);
 
         try
         {
-            var newDistro = await this._distributionService.CreateDistribution(distroName, creationMode, resourceOrigin);
-            this._isDistroCreationProcessing = false;
-            this._infoBarService.CloseInfoBar(createDistroInfoProgress);
-            var createDistroInfoSuccess = this._infoBarService.FindInfoBar("CreateDistroInfoSuccess");
-            this._infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
+            var newDistro = await _distributionService.CreateDistribution(distroName, creationMode, resourceOrigin);
+            _isDistroCreationProcessing = false;
+            _infoBarService.CloseInfoBar(createDistroInfoProgress);
+            var createDistroInfoSuccess = _infoBarService.FindInfoBar("CreateDistroInfoSuccess");
+            _infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
             Distros.Add(newDistro);
 
         }
@@ -352,10 +354,10 @@ public class DistrosListDetailsVM : ObservableObject
         catch (Exception e)
         {
             Console.WriteLine($"Service failed to create distribution {distroName}: " + e.Message);
-            this._isDistroCreationProcessing = false;
-            this._infoBarService.CloseInfoBar(createDistroInfoProgress);
-            var createDistroInfoError = this._infoBarService.FindInfoBar("CreateDistroInfoError");
-            this._infoBarService.OpenInfoBar(createDistroInfoError, 5000);
+            _isDistroCreationProcessing = false;
+            _infoBarService.CloseInfoBar(createDistroInfoProgress);
+            var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
+            _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
         }
     }
 
@@ -420,25 +422,24 @@ public class DistrosListDetailsVM : ObservableObject
     private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {
-        this._isSnapshotCreationProcessing = true;
-        var createSnapshotInfoProgress = this._infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
-        this._infoBarService.OpenInfoBar(createSnapshotInfoProgress);
-        var isSnapshotCreated = await this._distributionService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+        _isSnapshotCreationProcessing = true;
+        var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
+        _infoBarService.OpenInfoBar(createSnapshotInfoProgress);
+        var isSnapshotCreated = await _snapshotService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
 
         if (isSnapshotCreated)
         {
-            this._isSnapshotCreationProcessing = false;
-            this._infoBarService.CloseInfoBar(createSnapshotInfoProgress);
-            var createSnapshotInfoSuccess = this._infoBarService.FindInfoBar("CreateSnapshotInfoSuccess");
-            this._infoBarService.OpenInfoBar(createSnapshotInfoSuccess, 2000);
+            _isSnapshotCreationProcessing = false;
+            _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
+            var createSnapshotInfoSuccess = _infoBarService.FindInfoBar("CreateSnapshotInfoSuccess");
+            _infoBarService.OpenInfoBar(createSnapshotInfoSuccess, 2000);
         }
         else
         {
-            this._isSnapshotCreationProcessing = false;
-            this._infoBarService.CloseInfoBar(createSnapshotInfoProgress);
-            var createSnapshotInfoError = this._infoBarService.FindInfoBar("CreateSnapshotInfoError");
-            this._infoBarService.OpenInfoBar(createSnapshotInfoError, 5000);
-
+            _isSnapshotCreationProcessing = false;
+            _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
+            var createSnapshotInfoError = _infoBarService.FindInfoBar("CreateSnapshotInfoError");
+            _infoBarService.OpenInfoBar(createSnapshotInfoError, 5000);
         }
     }
 }

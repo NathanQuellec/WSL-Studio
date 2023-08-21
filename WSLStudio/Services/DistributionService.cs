@@ -40,14 +40,15 @@ public class DistributionService : IDistributionService
     private static readonly object _lock = new object();
 
     private readonly IList<Distribution> _distros;
-    private readonly IWslService _wslService;
     private readonly WslApi _wslApi;
 
-    public DistributionService(IWslService wslService)
+    private readonly ISnapshotService _snapshotService;
+
+    public DistributionService(ISnapshotService snapshotService)
     {
         _distros = new List<Distribution>();
         _wslApi = new WslApi();
-        _wslService = wslService;
+        _snapshotService = snapshotService;
     }
 
     // TODO : Refactor InitDistributionsList using parallel task
@@ -94,7 +95,7 @@ public class DistributionService : IDistributionService
                         OsVersion = GetOsInfos(distroName, "VERSION"),
                         Size = GetSize(distroPath),
                         Users = GetDistributionUsers(distroName),
-                        Snapshots = GetDistributionSnapshots(distroPath),
+                        Snapshots = this._snapshotService.GetDistributionSnapshots(distroPath),
                     };
 
                     this._distros.Add(distro);
@@ -220,34 +221,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static List<Snapshot> GetDistributionSnapshots(string distroPath)
-    {
-        var snapshotsList = new List<Snapshot>();
-        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
-
-        try
-        {
-            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
-            for (var i = 1; i < snapshotsInfosLines.Length; i++)
-            {
-                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
-                snapshotsList.Add(new Snapshot()
-                {
-                    Id = Guid.Parse(snapshotsInfos[0]),
-                    Name = snapshotsInfos[1],
-                    Description = snapshotsInfos[2],
-                    CreationDate = snapshotsInfos[3],
-                });
-            }
-
-            return snapshotsList;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return new List<Snapshot>();
-        }
-    }
+    
 
     public IEnumerable<Distribution> GetAllDistributions()
     {
@@ -312,91 +286,6 @@ public class DistributionService : IDistributionService
         {
             Console.WriteLine(ex.ToString());
             throw;
-        }
-    }
-
-    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
-    {
-
-        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
-        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
-        if (!Directory.Exists(snapshotFolder))
-        {
-            Directory.CreateDirectory(snapshotFolder);
-        }
-
-        var snapshotId = Guid.NewGuid();
-        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
-
-        try
-        {
-            await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-            double sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
-            var snapshot = new Snapshot()
-            {
-                Id = snapshotId,
-                Name = snapshotName,
-                Description = snapshotDescr,
-                CreationDate = currentDateTime,
-                Size = sizeOfSnap.ToString(),
-                DistroSize = distribution.Size,
-            };
-
-            distribution.Snapshots.Add(snapshot);
-            await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return false;
-        }
-    }
-
-    private async Task<double> CompressSnapshot(string snapshotPath, string destPath)
-    {
-        try
-        {
-            var compressedFilePath = snapshotPath + ".gz";
-            await using Stream s = new GZipOutputStream(File.Create(compressedFilePath));
-            await using var fs = File.OpenRead(snapshotPath);
-            await fs.CopyToAsync(s, 4096, CancellationToken.None);
-            fs.Close();
-            File.Delete(snapshotPath);
-            var sizeInGB = (double)s.Length / 1024 / 1024 / 1024;
-            return Math.Round(sizeInGB, 2);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Snapshot compression failed : " + ex.Message);
-            throw;
-        }
-    }
-
-    private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
-    {
-        try
-        {
-            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
-            var snapshotInfosHeader = new StringBuilder();
-            var snapshotInfos = new StringBuilder();
-            var properties = snapshot.GetType().GetProperties();
-
-            snapshotInfosHeader.Append(string.Join(';', properties.Select(prop => prop.Name)));
-            snapshotInfosHeader.Append('\n');
-            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot))));
-            snapshotInfos.Append('\n');
-
-            if (!File.Exists(snapshotInfosFile))
-            {
-                await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfosHeader.ToString());
-            }
-
-            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
         }
     }
 
