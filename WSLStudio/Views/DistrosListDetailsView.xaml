@@ -55,8 +55,7 @@
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
                                 <MenuFlyoutItem Text="Rename"
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RenameDistroCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.RenameDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8AC;"/>
@@ -64,8 +63,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with File Explorer"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithFileExplorerCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xEC50;"/>
@@ -73,8 +71,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with VS Code"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithVsCodeCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE943;"/>
@@ -82,8 +79,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with Windows Terminal"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithWinTermCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE756;"/>
@@ -91,8 +87,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Remove" 
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RemoveDistroCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE74D;"/>
@@ -112,8 +107,7 @@
                             <!--  Specify Binding ElementName property to Page for accessing access ViewModel elements -->
                             <Button x:Name="LaunchButton"
                                     Margin="0 4 0 0 "
-                                    Command="{Binding ElementName=Page,
-                                                          Path=ViewModel.LaunchDistroCommand}"
+                                    Command="{Binding ElementName=Page,Path=ViewModel.LaunchDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Play"/>
                             </Button>
@@ -128,8 +122,7 @@
                                     Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
                                     RelativePanel.RightOf="LaunchButton"
                                     Visibility="Collapsed"
-                                    Command="{Binding ElementName=Page, 
-                                                          Path=ViewModel.StopDistroCommand}"
+                                    Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Stop"/>
                             </Button>
@@ -151,7 +144,7 @@
 
                     <ScrollViewer>
                             <Grid Background="{ThemeResource LayerFillColorAltBrush}"
-                              CornerRadius="5">
+                                  CornerRadius="5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -165,35 +158,35 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
+                                
                                 <!--<StackPanel Orientation="Horizontal"
                                             Margin="0 0 0 24"
                                             Grid.Column="1"
                                             Grid.Row="0">
                                 
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="CPU : "
-                                               FontSize="16"
-                                               Margin="8"/>
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="32 %"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="8"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="Memory : "
-                                               FontSize="16"
-                                               Margin="8"/>
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="64 %"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="8"/>
-                                </StackPanel>
-                            </StackPanel>-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="CPU : "
+                                                   FontSize="16"
+                                                   Margin="8"/>
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="32 %"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Margin="8"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="Memory : "
+                                                   FontSize="16"
+                                                   Margin="8"/>
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="64 %"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Margin="8"/>
+                                    </StackPanel>
+                                </StackPanel>-->
 
                             <TextBlock Style="{StaticResource TitleTextBlockStyle}"
                                        Text="Distribution details"
@@ -320,8 +313,7 @@
                                 </Expander>
                                 <Button RelativePanel.RightOf="snapshotsExp" 
                                         Margin="4 12 0 0"
-                                        Command="{Binding ElementName=Page,
-                                                            Path=ViewModel.CreateDistroSnapshotCommand}"
+                                        Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroSnapshotCommand}"
                                         CommandParameter="{x:Bind}">
                                     <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
@@ -339,10 +331,10 @@
                           CornerRadius="5">
                         <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                        <TextBlock Text="{Binding}"
-                                   FontSize="24"
-                                   Margin="0,0, 0, 48"/>
-                    </StackPanel>
+                            <TextBlock Text="{Binding}"
+                                       FontSize="24"
+                                       Margin="0,0, 0, 48"/>
+                        </StackPanel>
                     </Grid>
                 </DataTemplate>
             </controls:ListDetailsView.NoSelectionContentTemplate>
@@ -351,8 +343,7 @@
                 <CommandBar>
                     <AppBarButton Icon="Add" 
                                   Label="Add"
-                                  Command="{Binding ElementName=Page,
-                                                    Path=ViewModel.CreateDistroCommand}"/>
+                                  Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroCommand}"/>
                 </CommandBar>
             </controls:ListDetailsView.ListCommandBar>
         </controls:ListDetailsView>

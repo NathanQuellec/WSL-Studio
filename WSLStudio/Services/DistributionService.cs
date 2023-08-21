@@ -20,7 +20,14 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Zip;
+using Ionic.Zip;
 using WinRT;
+using ZipEntry = ICSharpCode.SharpZipLib.Zip.ZipEntry;
+using ZipFile = ICSharpCode.SharpZipLib.Zip.ZipFile;
+using ZipOutputStream = ICSharpCode.SharpZipLib.Zip.ZipOutputStream;
 
 
 namespace WSLStudio.Services;
@@ -43,6 +50,7 @@ public class DistributionService : IDistributionService
         _wslService = wslService;
     }
 
+    // TODO : Refactor InitDistributionsList using parallel task
     public async Task InitDistributionsList()
     {
         try
@@ -97,9 +105,6 @@ public class DistributionService : IDistributionService
             }
 
             lxssSubKeys.Close();
-
-            //await this.SetAllDistributionsInfos();
-
         }
         catch (Exception ex)
         {
@@ -215,6 +220,35 @@ public class DistributionService : IDistributionService
         }
     }
 
+    private static List<Snapshot> GetDistributionSnapshots(string distroPath)
+    {
+        var snapshotsList = new List<Snapshot>();
+        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
+
+        try
+        {
+            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
+            for (var i = 1; i < snapshotsInfosLines.Length; i++)
+            {
+                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
+                snapshotsList.Add(new Snapshot()
+                {
+                    Id = Guid.Parse(snapshotsInfos[0]),
+                    Name = snapshotsInfos[1],
+                    Description = snapshotsInfos[2],
+                    CreationDate = snapshotsInfos[3],
+                });
+            }
+
+            return snapshotsList;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return new List<Snapshot>();
+        }
+    }
+
     public IEnumerable<Distribution> GetAllDistributions()
     {
         return _distros;
@@ -281,32 +315,55 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static List<Snapshot> GetDistributionSnapshots(string distroPath)
+    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
-        var snapshotsList = new List<Snapshot>();
-        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
+
+        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
+        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
+        if (!Directory.Exists(snapshotFolder))
+        {
+            Directory.CreateDirectory(snapshotFolder);
+        }
+
+        var snapshotId = Guid.NewGuid();
+        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
 
         try
         {
-            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
-            for (var i = 1; i < snapshotsInfosLines.Length; i++)
+            await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
+            await CompressSnapshot(snapshotPath, snapshotFolder);
+            var snapshot = new Snapshot()
             {
-                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
-                snapshotsList.Add(new Snapshot()
-                {
-                    Id = Guid.Parse(snapshotsInfos[0]),
-                    Name = snapshotsInfos[1],
-                    Description = snapshotsInfos[2],
-                    CreationDate = snapshotsInfos[3],
-                });
-            }
+                Id = snapshotId,
+                Name = snapshotName,
+                Description = snapshotDescr,
+                CreationDate = currentDateTime,
+            };
 
-            return snapshotsList;
+            distribution.Snapshots.Add(snapshot);
+            await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
+            return true;
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return new List<Snapshot>();
+            return false;
+        }
+    }
+
+    private async Task CompressSnapshot(string snapshotPath, string destPath)
+    {
+        try
+        {
+            await using Stream s = new GZipOutputStream(File.Create(snapshotPath + ".gz"));
+            await using var fs = File.OpenRead(snapshotPath);
+            await fs.CopyToAsync(s, 4096, CancellationToken.None);
+            fs.Close();
+            File.Delete(snapshotPath);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Snapshot compression failed : " + ex.Message);
         }
     }
 
@@ -326,42 +383,6 @@ public class DistributionService : IDistributionService
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-        }
-    }
-
-    // TODO : Compress snapshot
-    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
-    {
-
-        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
-        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
-        if (!Directory.Exists(snapshotFolder))
-        {
-            Directory.CreateDirectory(snapshotFolder);
-        }
-
-        var snapshotId = Guid.NewGuid();
-        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
-
-        try
-        {
-            await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-            var snapshot = new Snapshot()
-            {
-                Id = snapshotId,
-                Name = snapshotName,
-                Description = snapshotDescr,
-                CreationDate = currentDateTime,
-            };
-
-            distribution.Snapshots.Add(snapshot);
-            await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
-            return true;
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-            return false;
         }
     }
 
