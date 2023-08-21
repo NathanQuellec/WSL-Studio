@@ -41,6 +41,7 @@
 
 
         <controls:ListDetailsView
+                x:Name="DistrosListDetails"
                 Margin="0 10 0 0"
                 Grid.Row="1"
                 BackButtonBehavior="Automatic"
@@ -198,14 +199,14 @@
                                            Width="Auto"
                                            Grid.Row="1"
                                            Margin="40 24">
-                                <TextBlock x:Name="osName" 
+                                <TextBlock x:Name="OsName" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Name : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            TextWrapping="Wrap"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="osName"
+                                           RelativePanel.RightOf="OsName"
                                            Text="{x:Bind OsName}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "
@@ -214,13 +215,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="2"
                                            Margin="40 24">
-                                <TextBlock x:Name="osVersion" 
+                                <TextBlock x:Name="OsVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="osVersion"
+                                           RelativePanel.RightOf="OsVersion"
                                            Text="{x:Bind OsVersion}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -229,13 +230,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="3"
                                            Margin="40 24">
-                                <TextBlock x:Name="distroSize" 
+                                <TextBlock x:Name="DistroSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Size : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="distroSize"
+                                           RelativePanel.RightOf="DistroSize"
                                            Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -244,13 +245,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="4"
                                            Margin="40 24">
-                                <TextBlock x:Name="wslVersion" 
+                                <TextBlock x:Name="WslVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="WSL Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="wslVersion"
+                                           RelativePanel.RightOf="WslVersion"
                                            Text="{x:Bind WslVersion}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -259,13 +260,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="5"
                                            Margin="40 16">
-                                <TextBlock x:Name="usersList" 
+                                <TextBlock x:Name="UsersList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Users : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Expander RelativePanel.RightOf="usersList"
+                                <Expander RelativePanel.RightOf="UsersList"
                                           IsExpanded="False"
                                           ExpandDirection="Down"
                                           Header="Users"
@@ -284,13 +285,18 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="6"
                                            Margin="40 16">
-                                <TextBlock x:Name="snapshotsList" 
+                                <TextBlock x:Name="SnapshotsList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Snapshots : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Expander x:Name="snapshotsExp"
+                                    <Button x:Name="DisplaySnapshots"
+                                            RelativePanel.RightOf="SnapshotsList"
+                                            Content="Display"
+                                            Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
+                                            Margin=" 24 0 0 0"/>
+                                <!--<Expander x:Name="snapshotsExp"
                                           RelativePanel.RightOf="snapshotsList"
                                           IsExpanded="False"
                                           ExpandDirection="Down"
@@ -310,8 +316,8 @@
                                             </ListView.ItemTemplate>
                                         </ListView>
                                     </Expander.Content>
-                                </Expander>
-                                <Button RelativePanel.RightOf="snapshotsExp" 
+                                </Expander>-->
+                                <Button RelativePanel.RightOf="DisplaySnapshots" 
                                         Margin="4 12 0 0"
                                         Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroSnapshotCommand}"
                                         CommandParameter="{x:Bind}">

@@ -6,8 +6,10 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.WinUI.UI.Controls;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
+using WSLStudio.Models;
 using WSLStudio.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,

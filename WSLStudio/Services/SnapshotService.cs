@@ -1,4 +1,5 @@
-﻿using ICSharpCode.SharpZipLib.GZip;
+﻿using System.Globalization;
+using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
@@ -17,7 +18,7 @@ public class SnapshotService : ISnapshotService
     public List<Snapshot> GetDistributionSnapshots(string distroPath)
     {
         var snapshotsList = new List<Snapshot>();
-        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.txt");
+        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
 
         try
         {
@@ -59,14 +60,14 @@ public class SnapshotService : ISnapshotService
         try
         {
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-            double sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
+            decimal sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
             var snapshot = new Snapshot()
             {
                 Id = snapshotId,
                 Name = snapshotName,
                 Description = snapshotDescr,
                 CreationDate = currentDateTime,
-                Size = sizeOfSnap.ToString(),
+                Size = sizeOfSnap.ToString(CultureInfo.InvariantCulture),
                 DistroSize = distribution.Size,
             };
 
@@ -81,7 +82,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private async Task<double> CompressSnapshot(string snapshotPath, string destPath)
+    private async Task<decimal> CompressSnapshot(string snapshotPath, string destPath)
     {
         try
         {
@@ -91,7 +92,7 @@ public class SnapshotService : ISnapshotService
             await fs.CopyToAsync(s, 4096, CancellationToken.None);
             fs.Close();
             File.Delete(snapshotPath);
-            var sizeInGB = (double)s.Length / 1024 / 1024 / 1024;
+            var sizeInGB = (decimal)s.Length / 1024 / 1024 / 1024;
             return Math.Round(sizeInGB, 2);
         }
         catch (Exception ex)
@@ -105,7 +106,7 @@ public class SnapshotService : ISnapshotService
     {
         try
         {
-            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
+            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
             var snapshotInfosHeader = new StringBuilder();
             var snapshotInfos = new StringBuilder();
             var properties = snapshot.GetType().GetProperties();

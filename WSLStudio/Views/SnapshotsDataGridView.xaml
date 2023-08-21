@@ -3,12 +3,23 @@
     x:Class="WSLStudio.Views.SnapshotsDataGridView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:local="using:WSLStudio.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
     <Grid>
+        <controls:DataGrid x:Name="SnapshotsDataGrid"
+                           DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                           ItemsSource="{Binding Snapshots}"
+                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                           CanUserSortColumns="True"
+                           IsReadOnly="True">
+            <controls:DataGrid.Columns>
+                <controls:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+            </controls:DataGrid.Columns>
 
+        </controls:DataGrid>
     </Grid>
 </UserControl>

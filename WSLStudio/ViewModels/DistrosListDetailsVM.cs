@@ -13,6 +13,7 @@ using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
+using WSLStudio.Views;
 using WSLStudio.Views.ContentDialog;
 
 namespace WSLStudio.ViewModels;
@@ -47,6 +48,8 @@ public class DistrosListDetailsVM : ObservableObject
 
     public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand { get; set; }
 
+    public AsyncRelayCommand<Distribution> DisplaySnapshotsListCommand { get; set; }
+
     #endregion
 
     public ObservableCollection<Distribution> Distros { get; set; } = new();
@@ -68,6 +71,7 @@ public class DistrosListDetailsVM : ObservableObject
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !_isDistroCreationProcessing);
         CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog, (distro) => !_isSnapshotCreationProcessing);
+        DisplaySnapshotsListCommand = new AsyncRelayCommand<Distribution>(DisplaySnapshotsList);
 
         _distributionService.InitDistributionsList();
         PopulateDistributionsCollection();
@@ -440,6 +444,28 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
             var createSnapshotInfoError = _infoBarService.FindInfoBar("CreateSnapshotInfoError");
             _infoBarService.OpenInfoBar(createSnapshotInfoError, 5000);
+        }
+    }
+
+    private async Task DisplaySnapshotsList(Distribution distribution)
+    {
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to display snapshots");
+
+        var dialogService = App.GetService<IDialogBuilderService>();
+
+        // contentdialog content set in SnapshotsDataGridView.xaml
+        var snapshotsDataGridDialog = new SnapshotsDataGridView();
+
+        var dialog = dialogService.SetTitle("Snapshots List :")
+            .AddContent(snapshotsDataGridDialog)
+            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
+            .Build();
+        var buttonClicked = await dialog.ShowAsync();
+
+        if (buttonClicked == ContentDialogResult.Primary)
+        {
+
+            
         }
     }
 }

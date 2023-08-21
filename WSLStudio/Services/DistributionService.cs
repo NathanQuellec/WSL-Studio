@@ -8,6 +8,7 @@ using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
@@ -95,7 +96,7 @@ public class DistributionService : IDistributionService
                         OsVersion = GetOsInfos(distroName, "VERSION"),
                         Size = GetSize(distroPath),
                         Users = GetDistributionUsers(distroName),
-                        Snapshots = this._snapshotService.GetDistributionSnapshots(distroPath),
+                        Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
 
                     this._distros.Add(distro);
@@ -170,8 +171,8 @@ public class DistributionService : IDistributionService
         {
             var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
             var diskFile = new FileInfo(diskLocation);
-            var sizeInGB = (double)diskFile.Length / 1024 / 1024 / 1024;
-            return Math.Round(sizeInGB, 2).ToString();
+            var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
+            return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
         }
     }
 

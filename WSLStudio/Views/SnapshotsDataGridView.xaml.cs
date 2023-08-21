@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using WSLStudio.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -19,8 +20,11 @@ using Windows.Foundation.Collections;
 namespace WSLStudio.Views;
 public sealed partial class SnapshotsDataGridView : UserControl
 {
+    public DistrosListDetailsVM ViewModel { get; }
+
     public SnapshotsDataGridView()
     {
+        this.ViewModel = App.GetService<DistrosListDetailsVM>();
         this.InitializeComponent();
     }
 }
