@@ -458,10 +458,12 @@ public class DistrosListDetailsVM : ObservableObject
 
         var dialog = dialogService.SetTitle("Snapshots List :")
             .AddContent(snapshotsDataGridDialog)
+            .SetDataContext(distribution)
             .SetXamlRoot(App.MainWindow.Content.XamlRoot)
             .Build();
         var buttonClicked = await dialog.ShowAsync();
 
+        
         if (buttonClicked == ContentDialogResult.Primary)
         {
 

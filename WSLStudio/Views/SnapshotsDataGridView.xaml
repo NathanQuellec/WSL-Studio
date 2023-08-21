@@ -11,7 +11,6 @@
 
     <Grid>
         <controls:DataGrid x:Name="SnapshotsDataGrid"
-                           DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                            ItemsSource="{Binding Snapshots}"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                            CanUserSortColumns="True"

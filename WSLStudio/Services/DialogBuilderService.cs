@@ -73,6 +73,12 @@ public class DialogBuilderService : IDialogBuilderService
         return this;
     }
 
+    public IDialogBuilderService SetDataContext(object dataContext)
+    {
+        this._contentDialog.DataContext = dataContext;
+        return this;
+    }
+
     public IDialogBuilderService AddContent(FrameworkElement element)
     {
         this._stackPanel.Children.Add(element); 
