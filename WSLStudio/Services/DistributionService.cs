@@ -373,7 +373,6 @@ public class DistributionService : IDistributionService
         }
     }
 
-    //TODO : max length snapshot
     private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
     {
         try

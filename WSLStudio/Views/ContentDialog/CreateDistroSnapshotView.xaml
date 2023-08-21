@@ -13,6 +13,7 @@
     <StackPanel>
         <TextBox x:Name="SnapshotNameInput" 
                  Header="Name :"
+                 MaxLength="30"
                  Margin="0 12 0 16"
                  Height="64"/>
 
