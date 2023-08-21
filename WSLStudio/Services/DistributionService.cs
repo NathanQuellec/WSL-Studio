@@ -331,13 +331,15 @@ public class DistributionService : IDistributionService
         try
         {
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-            await CompressSnapshot(snapshotPath, snapshotFolder);
+            double sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
             var snapshot = new Snapshot()
             {
                 Id = snapshotId,
                 Name = snapshotName,
                 Description = snapshotDescr,
                 CreationDate = currentDateTime,
+                Size = sizeOfSnap.ToString(),
+                DistroSize = distribution.Size,
             };
 
             distribution.Snapshots.Add(snapshot);
@@ -351,34 +353,47 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private async Task CompressSnapshot(string snapshotPath, string destPath)
+    private async Task<double> CompressSnapshot(string snapshotPath, string destPath)
     {
         try
         {
-            await using Stream s = new GZipOutputStream(File.Create(snapshotPath + ".gz"));
+            var compressedFilePath = snapshotPath + ".gz";
+            await using Stream s = new GZipOutputStream(File.Create(compressedFilePath));
             await using var fs = File.OpenRead(snapshotPath);
             await fs.CopyToAsync(s, 4096, CancellationToken.None);
             fs.Close();
             File.Delete(snapshotPath);
+            var sizeInGB = (double)s.Length / 1024 / 1024 / 1024;
+            return Math.Round(sizeInGB, 2);
         }
         catch (Exception ex)
         {
             Console.WriteLine("Snapshot compression failed : " + ex.Message);
+            throw;
         }
     }
 
+    //TODO : max length snapshot
     private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
     {
         try
         {
-            var snapshotInfos = $"{snapshot.Id};{snapshot.Name};{snapshot.Description};{snapshot.CreationDate}\n";
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.txt");
+            var snapshotInfosHeader = new StringBuilder();
+            var snapshotInfos = new StringBuilder();
+            var properties = snapshot.GetType().GetProperties();
+
+            snapshotInfosHeader.Append(string.Join(';', properties.Select(prop => prop.Name)));
+            snapshotInfosHeader.Append('\n');
+            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot))));
+            snapshotInfos.Append('\n');
 
             if (!File.Exists(snapshotInfosFile))
             {
-                await File.AppendAllTextAsync(snapshotInfosFile, "ID;NAME;DESCRIPTION;CREATIONDATE\n");
+                await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfosHeader.ToString());
             }
-            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos);
+
+            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
         }
         catch (Exception e)
         {
