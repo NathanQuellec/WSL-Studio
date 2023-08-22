@@ -14,7 +14,7 @@ using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
 using WSLStudio.Views;
-using WSLStudio.Views.ContentDialog;
+using WSLStudio.Views.Dialogs;
 
 namespace WSLStudio.ViewModels;
 
@@ -451,23 +451,19 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog to display snapshots");
 
-        var dialogService = App.GetService<IDialogBuilderService>();
-
-        // contentdialog content set in SnapshotsDataGridView.xaml
-        var snapshotsDataGridDialog = new SnapshotsDataGridView();
-
-        var dialog = dialogService.SetTitle("Snapshots List :")
-            .AddContent(snapshotsDataGridDialog)
-            .SetDataContext(distribution)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .Build();
-        var buttonClicked = await dialog.ShowAsync();
-
-        
-        if (buttonClicked == ContentDialogResult.Primary)
+        try
         {
+            var displaySnapshots = new DisplaySnapshotsView()
+            {
+                XamlRoot = App.MainWindow.Content.XamlRoot,
+                DataContext = distribution
+            };
 
-            
+            await displaySnapshots.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }

@@ -114,6 +114,7 @@
     <None Remove="Assets\WslStudioLogo.targetsize-256_altform-unplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-32_altform-lightunplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-48_altform-lightunplated.png" />
+    <None Remove="Styles\ContentDialog.xaml" />
     <None Remove="Views\CreateDistroSnapshotView.xaml" />
     <None Remove="Views\CreateDistroView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
@@ -171,6 +172,12 @@
     <Content Update="Assets\WslStudioIcon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Styles\ContentDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <ItemGroup>

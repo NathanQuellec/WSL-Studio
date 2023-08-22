@@ -17,14 +17,12 @@ using WSLStudio.ViewModels;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WSLStudio.Views;
-public sealed partial class SnapshotsDataGridView : UserControl
+namespace WSLStudio.Views.Dialogs;
+public sealed partial class DisplaySnapshotsView : ContentDialog
 {
-    public DistrosListDetailsVM ViewModel { get; }
 
-    public SnapshotsDataGridView()
+    public DisplaySnapshotsView()
     {
-        this.ViewModel = App.GetService<DistrosListDetailsVM>();
         this.InitializeComponent();
     }
 }
