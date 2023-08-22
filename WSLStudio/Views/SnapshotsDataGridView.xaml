@@ -12,11 +12,16 @@
     <Grid>
         <controls:DataGrid x:Name="SnapshotsDataGrid"
                            ItemsSource="{Binding Snapshots}"
+                           AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                            CanUserSortColumns="True"
                            IsReadOnly="True">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
+                <controls:DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
+                <controls:DataGridTextColumn Header="Created" Binding="{Binding CreationDate}"/>
+                <controls:DataGridTextColumn Header="Snapshot Size (GB)" Binding="{Binding Size}"/>
+                <controls:DataGridTextColumn Header="Distribution Size (GB)" Binding="{Binding DistroSize}"/>
             </controls:DataGrid.Columns>
 
         </controls:DataGrid>

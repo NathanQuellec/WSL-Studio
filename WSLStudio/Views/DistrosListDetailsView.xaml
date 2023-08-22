@@ -295,7 +295,7 @@
                                             RelativePanel.RightOf="SnapshotsList"
                                             Content="Display"
                                             Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
-                                            CommandParameter="{Binding}"
+                                            CommandParameter="{x:Bind}"
                                             Margin=" 24 0 0 0"/>
                                 <!--<Expander x:Name="snapshotsExp"
                                           RelativePanel.RightOf="snapshotsList"

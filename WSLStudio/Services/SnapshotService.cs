@@ -32,6 +32,8 @@ public class SnapshotService : ISnapshotService
                     Name = snapshotsInfos[1],
                     Description = snapshotsInfos[2],
                     CreationDate = snapshotsInfos[3],
+                    Size = snapshotsInfos[4],
+                    DistroSize = snapshotsInfos[5],
                 });
             }
 
