@@ -5,9 +5,5 @@
     xmlns:local="using:WSLStudio.Styles"
     xmlns:dialogs="using:WSLStudio.Views.Dialogs">
 
-    
-
-    <!-- Overriding DefaultContentDialogStyle style -->
-    <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
 
 </ResourceDictionary>
