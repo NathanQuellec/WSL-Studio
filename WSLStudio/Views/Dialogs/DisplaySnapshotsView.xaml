@@ -39,17 +39,22 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     <TextBlock Text="Description :"
                                FontWeight="SemiBold"
-                               Margin="8"
-                               Grid.Row="0"/>
+                               Margin="16 8 0 0"
+                               Grid.Row="0"
+                               Grid.Column="0"/>
                     <TextBlock Text="{Binding Description}"
                                TextWrapping="Wrap"
                                TextAlignment="Justify"
-                               MaxWidth="500"
                                Padding="0 5 5 5"
-                               Margin="0 0 500 16"
-                               Grid.Row="1"/>
+                               Margin="16 0 0 8"
+                               Grid.Row="1"
+                               Grid.Column="0"/>
                 </Grid>
             </DataTemplate>
         </Grid.Resources>
@@ -75,7 +80,4 @@
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>
-
-
-
 </ContentDialog>
