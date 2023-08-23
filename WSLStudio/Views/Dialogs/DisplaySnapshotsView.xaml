@@ -7,42 +7,61 @@
     xmlns:local="using:WSLStudio.Views.Dialogs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:functions="using:WSLStudio.Views.Functions"
     mc:Ignorable="d"
-    
-   Title="Snapshots :"
+
+    PrimaryButtonText="Create"
+    DefaultButton="Primary"
     CloseButtonText="Close">
 
     <ContentDialog.Resources>
-        <!--Issue : https://github.com/microsoft/microsoft-ui-xaml/issues/6154-->
+        <!--ContentDialog style inheritance; Issue : https://github.com/microsoft/microsoft-ui-xaml/issues/6154-->
         <Style TargetType="local:DisplaySnapshotsView" BasedOn="{StaticResource DefaultContentDialogStyle}"/>
+
         <!-- Overriding DefaultContentDialogStyle style -->
         <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
     </ContentDialog.Resources>
+
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <TextBlock Text="Snapshots :"
+                       Margin="16 0 0 0"
+                       FontSize="{StaticResource LargeFontSize}"/>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
 
 
     <Grid Margin="16">
         <Grid.Resources>
             <DataTemplate x:Key="RowDetailsTemplate">
-                <StackPanel>
-                    <TextBlock Text="Description :" 
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Description :"
                                FontWeight="SemiBold"
-                               Margin="8"/>
+                               Margin="8"
+                               Grid.Row="0"/>
                     <TextBlock Text="{Binding Description}"
                                TextWrapping="Wrap"
-                               Margin="8"/>
-                </StackPanel>
+                               TextAlignment="Justify"
+                               MaxWidth="500"
+                               Padding="0 5 5 5"
+                               Margin="0 0 500 16"
+                               Grid.Row="1"/>
+                </Grid>
             </DataTemplate>
         </Grid.Resources>
 
         <controls:DataGrid x:Name="SnapshotsDataGrid"
                            ItemsSource="{Binding Snapshots}"
-                           MaxColumnWidth="250"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                            CanUserSortColumns="True"
                            CanUserResizeColumns="True"
                            CanUserReorderColumns="False"
-                           GridLinesVisibility="None"
+                           GridLinesVisibility="Horizontal"
                            IsReadOnly="True"
                            HeadersVisibility="Column"
                            SelectionMode="Extended"

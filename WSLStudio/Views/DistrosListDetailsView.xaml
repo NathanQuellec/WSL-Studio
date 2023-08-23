@@ -132,7 +132,7 @@
 
                             <TextBlock x:Name="DistroName" 
                                        Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="{Binding Path=Name, Mode=TwoWay}"
+                                       Text="{x:Bind Name, Mode=TwoWay}"
                                        FontSize="16"
                                        RelativePanel.RightOf="StopButton"
                                        Margin="5"/>
