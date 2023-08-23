@@ -456,7 +456,7 @@ public class DistrosListDetailsVM : ObservableObject
             var displaySnapshots = new DisplaySnapshotsView()
             {
                 XamlRoot = App.MainWindow.Content.XamlRoot,
-                DataContext = distribution
+                DataContext = distribution,
             };
 
             await displaySnapshots.ShowAsync();

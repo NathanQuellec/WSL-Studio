@@ -7,22 +7,58 @@
     xmlns:local="using:WSLStudio.Views.Dialogs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    
+    CloseButtonText="Close"
+    CornerRadius="8">
 
-    <Grid>
+    <ContentDialog.TitleTemplate>
+        <DataTemplate>
+            <TextBlock Text="Snapshots :"
+                       FontSize="{StaticResource LargeFontSize}"
+                       FontWeight="SemiBold"
+                       Margin="16 0 0 0"/>
+        </DataTemplate>
+    </ContentDialog.TitleTemplate>
+
+    <Grid Margin="16">
+        <Grid.Resources>
+            <DataTemplate x:Key="RowDetailsTemplate">
+                <StackPanel>
+                    <TextBlock Text="Description :" 
+                               FontWeight="SemiBold"
+                               Margin="8"/>
+                    <TextBlock Text="{Binding Description}"
+                               TextWrapping="Wrap"
+                               Margin="8"/>
+                </StackPanel>
+            </DataTemplate>
+        </Grid.Resources>
+
         <controls:DataGrid x:Name="SnapshotsDataGrid"
+                           Grid.Row="1"
                            ItemsSource="{Binding Snapshots}"
+                           MaxColumnWidth="250"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                            CanUserSortColumns="True"
-                           IsReadOnly="True">
+                           CanUserResizeColumns="True"
+                           CanUserReorderColumns="False"
+                           GridLinesVisibility="None"
+                           IsReadOnly="True"
+                           HeadersVisibility="Column"
+                           SelectionMode="Extended"
+                           RowDetailsVisibilityMode="VisibleWhenSelected"
+                           RowDetailsTemplate="{StaticResource RowDetailsTemplate}">
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <controls:DataGridTextColumn Header="Description" Binding="{Binding Description}"/>
                 <controls:DataGridTextColumn Header="Created" Binding="{Binding CreationDate}"/>
                 <controls:DataGridTextColumn Header="Snapshot Size (GB)" Binding="{Binding Size}"/>
                 <controls:DataGridTextColumn Header="Distribution Size (GB)" Binding="{Binding DistroSize}"/>
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>
+
+
+
 </ContentDialog>

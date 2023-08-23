@@ -108,6 +108,7 @@
                             <!--  Specify Binding ElementName property to Page for accessing access ViewModel elements -->
                             <Button x:Name="LaunchButton"
                                     Margin="0 4 0 0 "
+                                    Style="{StaticResource MinimalistButtonStyle}"
                                     Command="{Binding ElementName=Page,Path=ViewModel.LaunchDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Play"/>
@@ -123,6 +124,7 @@
                                     Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
                                     RelativePanel.RightOf="LaunchButton"
                                     Visibility="Collapsed"
+                                    Style="{StaticResource MinimalistButtonStyle}"
                                     Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Stop"/>

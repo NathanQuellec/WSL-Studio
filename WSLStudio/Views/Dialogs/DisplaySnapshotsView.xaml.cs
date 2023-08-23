@@ -12,6 +12,7 @@ using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Navigation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Microsoft.UI.Xaml.Shapes;
 using WSLStudio.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
