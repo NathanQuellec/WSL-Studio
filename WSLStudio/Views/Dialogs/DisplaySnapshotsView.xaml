@@ -9,17 +9,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     
-    CloseButtonText="Close"
-    CornerRadius="8">
+   Title="Snapshots :"
+    CloseButtonText="Close">
 
-    <ContentDialog.TitleTemplate>
-        <DataTemplate>
-            <TextBlock Text="Snapshots :"
-                       FontSize="{StaticResource LargeFontSize}"
-                       FontWeight="SemiBold"
-                       Margin="16 0 0 0"/>
-        </DataTemplate>
-    </ContentDialog.TitleTemplate>
+    <ContentDialog.Resources>
+        <!--Issue : https://github.com/microsoft/microsoft-ui-xaml/issues/6154-->
+        <Style TargetType="local:DisplaySnapshotsView" BasedOn="{StaticResource DefaultContentDialogStyle}"/>
+    </ContentDialog.Resources>
+
 
     <Grid Margin="16">
         <Grid.Resources>
@@ -36,7 +33,6 @@
         </Grid.Resources>
 
         <controls:DataGrid x:Name="SnapshotsDataGrid"
-                           Grid.Row="1"
                            ItemsSource="{Binding Snapshots}"
                            MaxColumnWidth="250"
                            AutoGenerateColumns="False"

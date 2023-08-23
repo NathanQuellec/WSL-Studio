@@ -12,4 +12,11 @@
         <Setter Property="Padding" Value="4"/>
     </Style>
 
+    <Style x:Key="ContentDialogButton" TargetType="Button">
+        <Setter Property="Width" Value="151"/>
+        <Setter Property="Height" Value="32"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="Padding" Value="4"/>
+    </Style>
+
 </ResourceDictionary>
