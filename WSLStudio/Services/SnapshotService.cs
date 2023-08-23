@@ -26,7 +26,7 @@ public class SnapshotService : ISnapshotService
             for (var i = 1; i < snapshotsInfosLines.Length; i++)
             {
                 var snapshotsInfos = snapshotsInfosLines[i].Split(';');
-                snapshotsList.Add(new Snapshot()
+                snapshotsList.Insert(0, new Snapshot()
                 {
                     Id = Guid.Parse(snapshotsInfos[0]),
                     Name = snapshotsInfos[1],
@@ -73,7 +73,7 @@ public class SnapshotService : ISnapshotService
                 DistroSize = distribution.Size,
             };
 
-            distribution.Snapshots.Add(snapshot);
+            distribution.Snapshots.Insert(0, snapshot);
             await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
             return true;
         }

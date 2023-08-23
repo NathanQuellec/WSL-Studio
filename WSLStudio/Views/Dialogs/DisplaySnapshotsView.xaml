@@ -7,7 +7,6 @@
     xmlns:local="using:WSLStudio.Views.Dialogs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:functions="using:WSLStudio.Views.Functions"
     mc:Ignorable="d"
 
     PrimaryButtonText="Create"
@@ -15,51 +14,95 @@
     CloseButtonText="Close">
 
     <ContentDialog.Resources>
+
         <!--ContentDialog style inheritance; Issue : https://github.com/microsoft/microsoft-ui-xaml/issues/6154-->
         <Style TargetType="local:DisplaySnapshotsView" BasedOn="{StaticResource DefaultContentDialogStyle}"/>
-
         <!-- Overriding DefaultContentDialogStyle style -->
         <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
+
     </ContentDialog.Resources>
 
     <ContentDialog.TitleTemplate>
+
         <DataTemplate>
             <TextBlock Text="Snapshots :"
                        Margin="16 0 0 0"
                        FontSize="{StaticResource LargeFontSize}"/>
         </DataTemplate>
+
     </ContentDialog.TitleTemplate>
 
 
-    <Grid Margin="16">
+    <Grid Margin="16 0 16 16">
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
         <Grid.Resources>
+
             <DataTemplate x:Key="RowDetailsTemplate">
+
                 <Grid>
+
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
+
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="500"/>
+                        <ColumnDefinition Width="450"/>
+                        <ColumnDefinition Width="200"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
+
                     <TextBlock Text="Description :"
                                FontWeight="SemiBold"
                                Margin="16 8 0 0"
                                Grid.Row="0"
                                Grid.Column="0"/>
+
                     <TextBlock Text="{Binding Description}"
                                TextWrapping="Wrap"
                                TextAlignment="Justify"
+                               MaxWidth="500"
+                               HorizontalAlignment="Left"
                                Padding="0 5 5 5"
                                Margin="16 0 0 8"
                                Grid.Row="1"
                                Grid.Column="0"/>
+
+                    <Button Style="{StaticResource MinimalistButtonStyle}"
+                            Command="{Binding ElementName=ContentDialog, Path=DeleteSnapshotCommand}"
+                            HorizontalAlignment="Right"
+                            Grid.Row="0"
+                            Grid.Column="1">
+                        <FontIcon Glyph="&#xE74D;" />
+                    </Button>
+
+
                 </Grid>
+
             </DataTemplate>
+
         </Grid.Resources>
 
+        <StackPanel Grid.Row="0"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+
+            <Button Style="{StaticResource MinimalistButtonStyle}"
+                    Command="{x:Bind OpenSnapshotsFolderCommand}"
+                    CommandParameter="{Binding}"
+                    Margin="5">
+                <FontIcon Glyph="&#xE8A7;"/>
+            </Button>
+
+        </StackPanel>
+
         <controls:DataGrid x:Name="SnapshotsDataGrid"
+                           Grid.Row="1"
                            ItemsSource="{Binding Snapshots}"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
@@ -67,17 +110,20 @@
                            CanUserResizeColumns="True"
                            CanUserReorderColumns="False"
                            GridLinesVisibility="Horizontal"
-                           IsReadOnly="True"
                            HeadersVisibility="Column"
                            SelectionMode="Extended"
                            RowDetailsVisibilityMode="VisibleWhenSelected"
                            RowDetailsTemplate="{StaticResource RowDetailsTemplate}">
+
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
                 <controls:DataGridTextColumn Header="Created" Binding="{Binding CreationDate}"/>
                 <controls:DataGridTextColumn Header="Snapshot Size (GB)" Binding="{Binding Size}"/>
                 <controls:DataGridTextColumn Header="Distribution Size (GB)" Binding="{Binding DistroSize}"/>
             </controls:DataGrid.Columns>
+
         </controls:DataGrid>
+ 
     </Grid>
+
 </ContentDialog>
