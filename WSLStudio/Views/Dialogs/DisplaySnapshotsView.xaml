@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ContentDialog
+    x:Name="ContentDialog"
     x:Class="WSLStudio.Views.Dialogs.DisplaySnapshotsView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -49,8 +50,8 @@
                     </Grid.RowDefinitions>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="450"/>
-                        <ColumnDefinition Width="200"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
@@ -70,17 +71,19 @@
                                Grid.Row="1"
                                Grid.Column="0"/>
 
-                    <Button Style="{StaticResource MinimalistButtonStyle}"
-                            Command="{Binding ElementName=ContentDialog, Path=DeleteSnapshotCommand}"
-                            HorizontalAlignment="Right"
-                            Grid.Row="0"
-                            Grid.Column="1">
-                        <FontIcon Glyph="&#xE74D;" />
-                    </Button>
-
-
                 </Grid>
 
+            </DataTemplate>
+
+            <DataTemplate x:Key="DeleteSnapshotColumn">
+                <Button Style="{StaticResource MinimalistButtonStyle}"
+                        Command="{Binding ElementName=ContentDialog, Path=DeleteSnapshotCommand}"
+                        HorizontalAlignment="Right"
+                        Margin="0 0 20 0"
+                        Grid.Row="0"
+                        Grid.Column="1">
+                    <FontIcon Glyph="&#xE74D;" />
+                </Button>
             </DataTemplate>
 
         </Grid.Resources>
@@ -91,7 +94,6 @@
 
             <Button Style="{StaticResource MinimalistButtonStyle}"
                     Command="{x:Bind OpenSnapshotsFolderCommand}"
-                    CommandParameter="{Binding}"
                     Margin="5">
                 <FontIcon Glyph="&#xE8A7;"/>
             </Button>
@@ -100,6 +102,7 @@
 
         <controls:DataGrid x:Name="SnapshotsDataGrid"
                            Grid.Row="1"
+                           MaxColumnWidth="1200"
                            ItemsSource="{Binding Snapshots}"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
@@ -117,6 +120,7 @@
                 <controls:DataGridTextColumn Header="Created" Binding="{Binding CreationDate}"/>
                 <controls:DataGridTextColumn Header="Snapshot Size (GB)" Binding="{Binding Size}"/>
                 <controls:DataGridTextColumn Header="Distribution Size (GB)" Binding="{Binding DistroSize}"/>
+                <controls:DataGridTemplateColumn CellTemplate="{StaticResource DeleteSnapshotColumn}"/>
             </controls:DataGrid.Columns>
 
         </controls:DataGrid>

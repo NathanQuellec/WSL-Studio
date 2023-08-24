@@ -17,9 +17,9 @@ namespace WSLStudio.Views.Dialogs;
 public sealed partial class DisplaySnapshotsView : ContentDialog
 {
 
-    #region MyRegion
+    #region RelayCommand
 
-    public RelayCommand<Distribution> OpenSnapshotsFolderCommand { get; set; }
+    public RelayCommand OpenSnapshotsFolderCommand { get; set; }
 
     public RelayCommand DeleteSnapshotCommand { get; set; }
 
@@ -28,12 +28,13 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
     public DisplaySnapshotsView()
     {
         this.InitializeComponent();
-        OpenSnapshotsFolderCommand = new RelayCommand<Distribution>(OpenSnapshotsFolder);
+        OpenSnapshotsFolderCommand = new RelayCommand(OpenSnapshotsFolder);
         DeleteSnapshotCommand = new RelayCommand(DeleteSnapshot);
     }
 
-    private void  OpenSnapshotsFolder(Distribution distribution)
+    private void  OpenSnapshotsFolder()
     {
+        var distribution = this.DataContext as Distribution;
         var snapshotsFolderPath = Path.Combine(distribution.Path, "snapshots");
 
         try
@@ -49,8 +50,22 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
     }
 
-    public void DeleteSnapshot()
+    private void DeleteSnapshot()
     {
-        Console.WriteLine("Delete snapshot");
+        var distro = this.DataContext as Distribution;
+
+        var snapshotsFolderPath = Path.Combine(distro.Path, "snapshots");
+
+        try
+        {
+            var process = new ProcessBuilderHelper("explorer.exe")
+                .SetArguments(snapshotsFolderPath)
+                .Build();
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
 }
