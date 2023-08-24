@@ -300,7 +300,8 @@
                                         CommandParameter="{x:Bind}"
                                         Margin=" 24 8 0 0"/>
                                 <Button RelativePanel.RightOf="DisplaySnapshots" 
-                                        Margin="4 10 0 0"
+                                        Height="32"
+                                        Margin="4 8 0 0"
                                         Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroSnapshotCommand}"
                                         CommandParameter="{x:Bind}">
                                     <FontIcon Glyph="&#xE710;"

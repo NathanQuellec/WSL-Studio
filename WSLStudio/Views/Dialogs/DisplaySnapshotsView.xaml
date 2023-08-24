@@ -30,7 +30,6 @@
 
     </ContentDialog.TitleTemplate>
 
-
     <Grid Margin="16 0 16 16">
 
         <Grid.RowDefinitions>
