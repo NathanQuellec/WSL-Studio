@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.ObjectModel;
+using System.Globalization;
 using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
 using WSLStudio.Contracts.Services;
@@ -15,9 +16,9 @@ public class SnapshotService : ISnapshotService
         _wslService = wslService;
     }
 
-    public List<Snapshot> GetDistributionSnapshots(string distroPath)
+    public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
     {
-        var snapshotsList = new List<Snapshot>();
+        var snapshotsList = new ObservableCollection<Snapshot>();
         var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
 
         try
@@ -42,7 +43,7 @@ public class SnapshotService : ISnapshotService
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
-            return new List<Snapshot>();
+            return new ObservableCollection<Snapshot>();
         }
     }
 

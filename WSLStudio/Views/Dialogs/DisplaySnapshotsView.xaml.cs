@@ -16,26 +16,15 @@ using Path = System.IO.Path;
 namespace WSLStudio.Views.Dialogs;
 public sealed partial class DisplaySnapshotsView : ContentDialog
 {
-
-    #region RelayCommand
-
-    public RelayCommand OpenSnapshotsFolderCommand { get; set; }
-
-    public RelayCommand DeleteSnapshotCommand { get; set; }
-
-    #endregion
-
     public DisplaySnapshotsView()
     {
         this.InitializeComponent();
-        OpenSnapshotsFolderCommand = new RelayCommand(OpenSnapshotsFolder);
-        DeleteSnapshotCommand = new RelayCommand(DeleteSnapshot);
     }
 
-    private void  OpenSnapshotsFolder()
+    private void  OpenSnapshotsFolder(object sender, RoutedEventArgs args)
     {
         var distribution = this.DataContext as Distribution;
-        var snapshotsFolderPath = Path.Combine(distribution.Path, "snapshots");
+        var snapshotsFolderPath = Path.Combine(distribution!.Path, "snapshots");
 
         try
         {
@@ -50,22 +39,18 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
     }
 
-    private void DeleteSnapshot()
+    public void DeleteSnapshot(object sender, RoutedEventArgs args)
     {
         var distro = this.DataContext as Distribution;
-
-        var snapshotsFolderPath = Path.Combine(distro.Path, "snapshots");
-
+        var snapshotId = (sender as Button)!.Tag.ToString();
         try
         {
-            var process = new ProcessBuilderHelper("explorer.exe")
-                .SetArguments(snapshotsFolderPath)
-                .Build();
-            process.Start();
+            var snapshotToRemove = distro?.Snapshots.First(snapshot => snapshot.Id.ToString() == snapshotId);
+            distro?.Snapshots.Remove(snapshotToRemove!);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.Message);
         }
     }
 }

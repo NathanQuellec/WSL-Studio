@@ -409,7 +409,10 @@ public class DistrosListDetailsVM : ObservableObject
         {
 
             var snapshotName = (dialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
-            var snapshotDescr = (dialog.FindChild("SnapshotDescrInput") as TextBox)!.Text;
+            var snapshotDescr = (dialog.FindChild("SnapshotDescrInput") as TextBox)!.Text
+                .Replace(';', ' ')
+                .Replace('\n',' ')
+                .Replace('\r', ' '); ; // replace ';' characters to avoid error in SnapshotService::GetDistributionSnapshots
             await CreateDistroSnapshotViewModel(distribution, snapshotName, snapshotDescr);
         }
     }

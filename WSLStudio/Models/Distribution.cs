@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
@@ -21,7 +22,8 @@ public class Distribution : INotifyPropertyChanged
     public string Size { get; set; }
 
     public IList<string> Users { get; set; } = new List<string>();
-    public IList<Snapshot> Snapshots { get; set; } = new List<Snapshot>();
+
+    public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     // TODO : Replace OnPropertyChanged by SetProperty OR move to view model

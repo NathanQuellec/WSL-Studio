@@ -77,7 +77,8 @@
 
             <DataTemplate x:Key="DeleteSnapshotColumn">
                 <Button Style="{StaticResource MinimalistButtonStyle}"
-                        Command="{Binding ElementName=ContentDialog, Path=DeleteSnapshotCommand}"
+                        Tag="{Binding Id}"
+                        Click="DeleteSnapshot"
                         HorizontalAlignment="Right"
                         Margin="0 0 20 0"
                         Grid.Row="0"
@@ -93,7 +94,7 @@
                     Orientation="Horizontal">
 
             <Button Style="{StaticResource MinimalistButtonStyle}"
-                    Command="{x:Bind OpenSnapshotsFolderCommand}"
+                    Click="OpenSnapshotsFolder"
                     Margin="5">
                 <FontIcon Glyph="&#xE8A7;"/>
             </Button>
@@ -109,6 +110,7 @@
                            CanUserSortColumns="True"
                            CanUserResizeColumns="True"
                            CanUserReorderColumns="False"
+                           IsReadOnly="True"
                            GridLinesVisibility="Horizontal"
                            HeadersVisibility="Column"
                            SelectionMode="Extended"
