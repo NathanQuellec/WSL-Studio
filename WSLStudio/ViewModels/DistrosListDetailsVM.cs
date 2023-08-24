@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -365,6 +366,26 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
+    private async Task DisplaySnapshotsList(Distribution distribution)
+    {
+        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to display snapshots");
+
+        try
+        {
+            var displaySnapshots = new DisplaySnapshotsView()
+            {
+                XamlRoot = App.MainWindow.Content.XamlRoot,
+                DataContext = distribution,
+            };
+
+            await displaySnapshots.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
     private async Task CreateDistroSnapshotDialog(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
@@ -444,26 +465,6 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
             var createSnapshotInfoError = _infoBarService.FindInfoBar("CreateSnapshotInfoError");
             _infoBarService.OpenInfoBar(createSnapshotInfoError, 5000);
-        }
-    }
-
-    private async Task DisplaySnapshotsList(Distribution distribution)
-    {
-        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to display snapshots");
-
-        try
-        {
-            var displaySnapshots = new DisplaySnapshotsView()
-            {
-                XamlRoot = App.MainWindow.Content.XamlRoot,
-                DataContext = distribution,
-            };
-
-            await displaySnapshots.ShowAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
         }
     }
 }

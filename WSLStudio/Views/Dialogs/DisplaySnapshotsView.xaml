@@ -9,8 +9,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
 
-    PrimaryButtonText="Create"
-    DefaultButton="Primary"
     CloseButtonText="Close">
 
     <ContentDialog.Resources>

@@ -293,35 +293,14 @@
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                    <Button x:Name="DisplaySnapshots"
-                                            RelativePanel.RightOf="SnapshotsList"
-                                            Content="Display"
-                                            Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
-                                            CommandParameter="{x:Bind}"
-                                            Margin=" 24 0 0 0"/>
-                                <!--<Expander x:Name="snapshotsExp"
-                                          RelativePanel.RightOf="snapshotsList"
-                                          IsExpanded="False"
-                                          ExpandDirection="Down"
-                                          Header="Snapshots"
-                                          Width="144"
-                                          Margin="24 0 0 0 ">
-                                    <Expander.Content>
-                                        <ListView x:Name="SnapshotsListView" ItemsSource="{x:Bind Snapshots, Mode=TwoWay}">
-                                            <ListView.ItemTemplate>
-                                                <DataTemplate x:DataType="model:Snapshot">
-                                                    <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="{x:Bind Name}" Margin="0 0 8 0"/>
-                                                        <TextBlock Text="{x:Bind Description}" Margin="0 0 8 0"/>
-                                                        <TextBlock Text="{x:Bind CreationDate}" Margin="0 0 8 0"/>
-                                                    </StackPanel>
-                                                </DataTemplate>
-                                            </ListView.ItemTemplate>
-                                        </ListView>
-                                    </Expander.Content>
-                                </Expander>-->
+                                <Button x:Name="DisplaySnapshots"
+                                        RelativePanel.RightOf="SnapshotsList"
+                                        Content="Display"
+                                        Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
+                                        CommandParameter="{x:Bind}"
+                                        Margin=" 24 8 0 0"/>
                                 <Button RelativePanel.RightOf="DisplaySnapshots" 
-                                        Margin="4 12 0 0"
+                                        Margin="4 10 0 0"
                                         Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroSnapshotCommand}"
                                         CommandParameter="{x:Bind}">
                                     <FontIcon Glyph="&#xE710;"
