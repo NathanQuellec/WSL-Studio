@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.ApplicationInsights.DataContracts;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using Path = System.IO.Path;
@@ -109,14 +110,27 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         {
             Name = "DistroNameInput",
             Header = "Distribution Name",
+            MaxLength = 30,
             Margin = new Thickness(0,8,0,0),
         };
 
+        var distroNameErrorInfoBar = new InfoBar()
+        {
+            Name = "DistroNameErrorInfoBar",
+            Title = "Invalid : Distribution Name",
+            Severity = InfoBarSeverity.Error,
+            IsOpen = false,
+            IsClosable = false,
+            Margin = new Thickness(0,12,0,0),
+
+        };
+
         stackPanel.Children.Add(distroNameInput);
+        stackPanel.Children.Add(distroNameErrorInfoBar);
 
         var createDistroDialog = new ContentDialog()
         {
-            Title = "Create Distribution From Snapshot :",
+            Title = $"Create distribution from snapshot \"{snapshot.Name}\" :",
             PrimaryButtonText = "Create",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
@@ -128,11 +142,18 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         createDistroDialog.PrimaryButtonClick += ViewModel.CreateDistroFromSnapshot;
 
-        var buttonClicked = await createDistroDialog.ShowAsync();
-
-        if (buttonClicked != ContentDialogResult.Primary)
+        try
         {
-            this.ShowAsync();
+            var buttonClicked = await createDistroDialog.ShowAsync();
+
+            if (buttonClicked != ContentDialogResult.Primary)
+            {
+                this.ShowAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
         }
     }
 }

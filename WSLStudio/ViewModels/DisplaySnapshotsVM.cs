@@ -1,8 +1,12 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI;
+using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Helpers;
 using WSLStudio.Models;
 using WSLStudio.Services.Factories;
 
@@ -36,12 +40,13 @@ public class DisplaySnapshotsVM : ObservableObject
         {
             var distroNameInput = (sender.Content as StackPanel)?.FindChild("DistroNameInput") as TextBox;
             var snapshot = sender.DataContext as Snapshot;
+            _distrosViewModel.ValidateDistributionName(sender, args);
             await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, "Archive", snapshot!.Path);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            args.Cancel = true;
         }
-
     }
 }

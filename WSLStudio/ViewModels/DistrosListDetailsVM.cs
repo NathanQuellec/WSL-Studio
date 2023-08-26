@@ -174,7 +174,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    internal void ValidateDistributionName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var distroNameInput = sender.FindChild("DistroNameInput") as TextBox;
         distroNameInput!.ClearValue(Control.BorderBrushProperty);
@@ -197,10 +197,10 @@ public class DistrosListDetailsVM : ObservableObject
         }
         catch (ArgumentException e)
         {
-            args.Cancel = true;
             errorInfoBar.Message = e.Message;
             errorInfoBar.IsOpen = true;
             distroNameInput.BorderBrush = new SolidColorBrush(Colors.DarkRed);
+            throw;
         }
     }
 
