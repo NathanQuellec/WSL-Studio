@@ -45,7 +45,6 @@ public class DisplaySnapshotsVM : ObservableObject
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
             args.Cancel = true;
         }
     }

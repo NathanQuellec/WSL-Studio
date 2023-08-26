@@ -197,6 +197,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
         catch (ArgumentException e)
         {
+            args.Cancel = true;
             errorInfoBar.Message = e.Message;
             errorInfoBar.IsOpen = true;
             distroNameInput.BorderBrush = new SolidColorBrush(Colors.DarkRed);

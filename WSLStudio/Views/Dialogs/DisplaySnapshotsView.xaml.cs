@@ -102,6 +102,8 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         this.Hide();
 
         var button = sender as Button;
+        button!.IsEnabled = false;
+
         var snapshot = button.DataContext as Snapshot;
 
         var stackPanel = new StackPanel();
@@ -149,7 +151,9 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             if (buttonClicked != ContentDialogResult.Primary)
             {
                 this.ShowAsync();
+                button.IsEnabled = true;
             }
+
         }
         catch (Exception ex)
         {
