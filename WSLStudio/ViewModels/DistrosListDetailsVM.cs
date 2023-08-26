@@ -47,7 +47,7 @@ public class DistrosListDetailsVM : ObservableObject
 
     public AsyncRelayCommand CreateDistroCommand { get; set; }
 
-    public AsyncRelayCommand<Distribution> CreateDistroSnapshotCommand { get; set; }
+    public AsyncRelayCommand<Distribution> CreateSnapshotCommand { get; set; }
 
     public AsyncRelayCommand<Distribution> DisplaySnapshotsListCommand { get; set; }
 
@@ -71,7 +71,7 @@ public class DistrosListDetailsVM : ObservableObject
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
         CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !_isDistroCreationProcessing);
-        CreateDistroSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateDistroSnapshotDialog, (distro) => !_isSnapshotCreationProcessing);
+        CreateSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateSnapshotDialog, (distro) => !_isSnapshotCreationProcessing);
         DisplaySnapshotsListCommand = new AsyncRelayCommand<Distribution>(DisplaySnapshotsList);
 
         _distributionService.InitDistributionsList();
@@ -320,26 +320,41 @@ public class DistrosListDetailsVM : ObservableObject
 
     private void ValidateCreateDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        ValidateDistributionName(sender, args);
-        ValidateCreationMode(sender, args);
+        try
+        {
+            ValidateDistributionName(sender, args);
+            ValidateCreationMode(sender, args);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
 
     private static void ValidateCreationMode(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
-        var creationMode = sender.FindChild("DistroCreationMode") as ComboBox;
-        creationMode!.ClearValue(Control.BorderBrushProperty);
-        var creationModeErrorInfoBar = sender.FindChild("CreationModeErrorInfoBar") as InfoBar;
-        creationModeErrorInfoBar!.IsOpen = false;
-
-        if (creationMode.SelectedItem == null)
+        try
         {
-            args.Cancel = true;
-            creationModeErrorInfoBar.IsOpen = true;
-            creationMode.BorderBrush = new SolidColorBrush(Colors.DarkRed);
+            var creationMode = sender.FindChild("DistroCreationMode") as ComboBox;
+            creationMode!.ClearValue(Control.BorderBrushProperty);
+            var creationModeErrorInfoBar = sender.FindChild("CreationModeErrorInfoBar") as InfoBar;
+            creationModeErrorInfoBar!.IsOpen = false;
+
+            if (creationMode.SelectedItem == null)
+            {
+                args.Cancel = true;
+                creationModeErrorInfoBar.IsOpen = true;
+                creationMode.BorderBrush = new SolidColorBrush(Colors.DarkRed);
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+        
     }
 
-    private async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
+    internal async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
         _isDistroCreationProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
@@ -386,14 +401,14 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private async Task CreateDistroSnapshotDialog(Distribution distribution)
+    private async Task CreateSnapshotDialog(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
-        // contentdialog content set in CreateDistroSnapshotView.xaml
-        var addSnapshotDialog = new CreateDistroSnapshotView();
+        // contentdialog content set in CreateSnapshotView.xaml
+        var addSnapshotDialog = new CreateSnapshotView();
 
         var dialog = dialogService.SetTitle("Create Snapshot :")
             .AddContent(addSnapshotDialog)
@@ -413,7 +428,7 @@ public class DistrosListDetailsVM : ObservableObject
                 .Replace(';', ' ')
                 .Replace('\n',' ')
                 .Replace('\r', ' '); ; // replace ';' characters to avoid error in SnapshotService::GetDistributionSnapshots
-            await CreateDistroSnapshotViewModel(distribution, snapshotName, snapshotDescr);
+            await CreateSnapshotViewModel(distribution, snapshotName, snapshotDescr);
         }
     }
 
@@ -447,7 +462,7 @@ public class DistrosListDetailsVM : ObservableObject
     }
 
     //TODO : Refactor with CreateDistributionViewModel to avoid boilerplate code
-    private async Task CreateDistroSnapshotViewModel(Distribution distribution, string snapshotName,
+    private async Task CreateSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {
         _isSnapshotCreationProcessing = true;

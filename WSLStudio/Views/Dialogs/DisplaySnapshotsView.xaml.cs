@@ -100,16 +100,19 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
     {
         this.Hide();
 
-        var snapshotPath = (sender as Button)!.Tag;
+        var button = sender as Button;
+        var snapshot = button.DataContext as Snapshot;
 
-        var panel = new StackPanel();
+        var stackPanel = new StackPanel();
 
         var distroNameInput = new TextBox()
         {
+            Name = "DistroNameInput",
             Header = "Distribution Name",
+            Margin = new Thickness(0,8,0,0),
         };
 
-        panel.Children.Add(distroNameInput);
+        stackPanel.Children.Add(distroNameInput);
 
         var createDistroDialog = new ContentDialog()
         {
@@ -117,12 +120,19 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             PrimaryButtonText = "Create",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
-            Content = panel,
+            Content = stackPanel,
+            DataContext = snapshot,
             XamlRoot = App.MainWindow.Content.XamlRoot,
         };
 
-        await createDistroDialog.ShowAsync();
-        
-        this.ShowAsync();
+
+        createDistroDialog.PrimaryButtonClick += ViewModel.CreateDistroFromSnapshot;
+
+        var buttonClicked = await createDistroDialog.ShowAsync();
+
+        if (buttonClicked != ContentDialogResult.Primary)
+        {
+            this.ShowAsync();
+        }
     }
 }

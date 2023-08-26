@@ -21,9 +21,9 @@ using WSLStudio.ViewModels;
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace WSLStudio.Views.Dialogs;
-public sealed partial class CreateDistroSnapshotView : UserControl
+public sealed partial class CreateSnapshotView : UserControl
 {
-    public CreateDistroSnapshotView()
+    public CreateSnapshotView()
     {
         this.InitializeComponent();
     }

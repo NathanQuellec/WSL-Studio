@@ -46,6 +46,7 @@
                              Height="64"
                              Margin="0 12 0 16"/>
                     <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
                             Margin="0 24 0 0 "
                             Click="PickDockerFileFolder">
                         <FontIcon Glyph="&#xED25;" />
@@ -61,6 +62,7 @@
                              Height="64"
                              Margin="0 12 0 16"/>
                     <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
                             Margin="0 24 0 0 "
                             Click="PickArchiveFile">
                         <FontIcon Glyph="&#xED25;" />
