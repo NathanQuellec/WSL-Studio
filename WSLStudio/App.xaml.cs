@@ -119,6 +119,7 @@ public partial class App : Application
 
             // Views and ViewModels
             services.AddTransient<DistrosListDetailsVM>();
+            services.AddTransient<SnapshotsVM>();
             services.AddTransient<DistrosListDetailsView>();
 
             // Configuration

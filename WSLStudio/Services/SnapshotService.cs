@@ -80,7 +80,7 @@ public class SnapshotService : ISnapshotService
             };
 
             distribution.Snapshots.Insert(0, snapshot);
-            await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
+            await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
             return true;
         }
         catch (Exception ex)
@@ -110,7 +110,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private static async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
+    private static async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
     {
         try
         {
@@ -148,12 +148,15 @@ public class SnapshotService : ISnapshotService
     {
         try
         {
-            var snapshotsFolder = Directory.GetParent(snapshot.Path).Name;
-            var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
-            var recordsToKeep = (await File.ReadAllLinesAsync(snapshotsInfosFile))
-                .Where(line => line.Split(';')[0] != snapshot.Id.ToString());
-            await File.WriteAllLinesAsync(snapshot.Path, recordsToKeep);
+            var snapshotsFolder = Directory.GetParent(snapshot.Path)?.FullName;
 
+            if (snapshotsFolder != null)
+            {
+                var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
+                var recordsToKeep = (await File.ReadAllLinesAsync(snapshotsInfosFile))
+                    .Where(line => line.Split(';')[0] != snapshot.Id.ToString());
+                await File.WriteAllLinesAsync(snapshotsInfosFile, recordsToKeep);
+            }
         }
         catch (Exception ex)
         {

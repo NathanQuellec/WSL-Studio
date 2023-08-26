@@ -378,7 +378,7 @@ public class DistrosListDetailsVM : ObservableObject
                 DataContext = distribution,
             };
 
-            await displaySnapshots.ShowAsync();
+            displaySnapshots.ShowAsync();
         }
         catch (Exception ex)
         {

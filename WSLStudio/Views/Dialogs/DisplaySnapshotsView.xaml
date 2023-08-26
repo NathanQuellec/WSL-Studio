@@ -43,43 +43,33 @@
             <DataTemplate x:Key="RowDetailsTemplate">
 
                 <Grid>
+                    
+                    <RelativePanel>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                        <TextBlock x:Name="DescriptionHeader" 
+                                   Text="Description :"
+                                   FontWeight="SemiBold"
+                                   Margin="16 8 0 8"/>
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <TextBlock x:Name="DescriptionContent"
+                                   RelativePanel.Below="DescriptionHeader"
+                                   Text="{Binding Description}"
+                                   TextWrapping="Wrap"
+                                   TextAlignment="Justify"
+                                   Width="500"
+                                   HorizontalAlignment="Left"
+                                   Margin="16 0 16 16"/>
 
-                    <TextBlock Text="Description :"
-                               FontWeight="SemiBold"
-                               Margin="16 8 0 0"
-                               Grid.Row="0"
-                               Grid.Column="0"/>
+                        <Button x:Name="DeleteSnapshotButton" 
+                                RelativePanel.RightOf="DescriptionContent"
+                                Style="{StaticResource MinimalistButtonStyle}"
+                                Tag="{Binding Id}"
+                                Click="OpenDeleteSnapshotDialog"
+                                HorizontalAlignment="Right">
+                            <FontIcon Glyph="&#xE74D;" />
+                        </Button>
 
-                    <TextBlock Text="{Binding Description}"
-                               TextWrapping="Wrap"
-                               TextAlignment="Justify"
-                               MaxWidth="500"
-                               HorizontalAlignment="Left"
-                               Padding="0 5 5 5"
-                               Margin="16 0 0 8"
-                               Grid.Row="1"
-                               Grid.Column="0"/>
-
-                    <Button Style="{StaticResource MinimalistButtonStyle}"
-                            Tag="{Binding Id}"
-                            Click="DeleteSnapshot"
-                            HorizontalAlignment="Right"
-                            Margin="0 0 20 0"
-                            Grid.Row="0"
-                            Grid.Column="1">
-                        <FontIcon Glyph="&#xE74D;" />
-                    </Button>
+                    </RelativePanel>
 
                 </Grid>
 
