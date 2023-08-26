@@ -6,6 +6,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.WinUI.UI;
 using Microsoft.ApplicationInsights.DataContracts;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
@@ -106,46 +107,19 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         var snapshot = button.DataContext as Snapshot;
 
-        var stackPanel = new StackPanel();
-
-        var distroNameInput = new TextBox()
-        {
-            Name = "DistroNameInput",
-            Header = "Distribution Name",
-            MaxLength = 30,
-            Margin = new Thickness(0,8,0,0),
-        };
-
-        var distroNameErrorInfoBar = new InfoBar()
-        {
-            Name = "DistroNameErrorInfoBar",
-            Title = "Invalid : Distribution Name",
-            Severity = InfoBarSeverity.Error,
-            IsOpen = false,
-            IsClosable = false,
-            Margin = new Thickness(0,12,0,0),
-
-        };
-
-        stackPanel.Children.Add(distroNameInput);
-        stackPanel.Children.Add(distroNameErrorInfoBar);
-
-        var createDistroDialog = new ContentDialog()
-        {
-            Title = $"Create distribution from snapshot \"{snapshot.Name}\" :",
-            PrimaryButtonText = "Create",
-            CloseButtonText = "Cancel",
-            DefaultButton = ContentDialogButton.Primary,
-            Content = stackPanel,
-            DataContext = snapshot,
-            XamlRoot = App.MainWindow.Content.XamlRoot,
-        };
-
-
+        var createDistroDialog = new CreateDistroView();
+        createDistroDialog.Title = $"Create distribution from snapshot \"{snapshot.Name}\":";
+        createDistroDialog.DataContext = snapshot;
+        createDistroDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
         createDistroDialog.PrimaryButtonClick += ViewModel.CreateDistroFromSnapshot;
 
         try
         {
+            // Hide "Creation Mode" ComboBox control because we just want a distribution name
+            var dialogStackPanel = createDistroDialog.Content as StackPanel;
+            var creationMode = dialogStackPanel!.FindChild("DistroCreationMode") as ComboBox;
+            creationMode!.Visibility = Visibility.Collapsed;
+
             var buttonClicked = await createDistroDialog.ShowAsync();
 
             if (buttonClicked != ContentDialogResult.Primary)

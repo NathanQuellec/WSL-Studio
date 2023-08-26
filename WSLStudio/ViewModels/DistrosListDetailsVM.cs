@@ -302,9 +302,11 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
 
-        var createDistroDialog = new CreateDistroView();
+        var createDistroDialog = new CreateDistroView
+        {
+            XamlRoot = App.MainWindow.Content.XamlRoot,
+        };
 
-        createDistroDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
         createDistroDialog.PrimaryButtonClick += ValidateCreateDistribution;
 
         var buttonClicked = await createDistroDialog.ShowAsync();
@@ -406,7 +408,6 @@ public class DistrosListDetailsVM : ObservableObject
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
-        // contentdialog content set in CreateSnapshotView.xaml
         var addSnapshotDialog = new CreateSnapshotView();
 
         var dialog = dialogService.SetTitle("Create Snapshot :")
