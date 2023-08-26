@@ -5,13 +5,13 @@ using WSLStudio.Models;
 
 namespace WSLStudio.ViewModels;
 
-public class SnapshotsVM : ObservableObject
+public class DisplaySnapshotsVM : ObservableObject
 {
     private readonly ISnapshotService _snapshotService;
 
     public RelayCommand<Snapshot> DeleteSnapshotCommand { get; set; }
 
-    public SnapshotsVM(ISnapshotService snapshotService)
+    public DisplaySnapshotsVM(ISnapshotService snapshotService)
     {
         _snapshotService = snapshotService;
 

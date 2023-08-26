@@ -18,12 +18,12 @@ namespace WSLStudio.Views.Dialogs;
 public sealed partial class DisplaySnapshotsView : ContentDialog
 {
 
-    public SnapshotsVM ViewModel { get; set; }
+    public DisplaySnapshotsVM ViewModel { get; set; }
 
     public DisplaySnapshotsView()
     {
         this.InitializeComponent();
-        this.ViewModel = App.GetService<SnapshotsVM>();
+        this.ViewModel = App.GetService<DisplaySnapshotsVM>();
     }
 
     private void  OpenSnapshotsFolder(object sender, RoutedEventArgs args)

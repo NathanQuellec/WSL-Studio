@@ -15,6 +15,7 @@ using WSLStudio.Views;
 using Community.Wsl.Sdk;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
+using WSLStudio.Views.Dialogs;
 
 namespace WSLStudio;
 
@@ -119,8 +120,9 @@ public partial class App : Application
 
             // Views and ViewModels
             services.AddTransient<DistrosListDetailsVM>();
-            services.AddTransient<SnapshotsVM>();
             services.AddTransient<DistrosListDetailsView>();
+            services.AddTransient<DisplaySnapshotsVM>();
+            services.AddTransient<DisplaySnapshotsView>();
 
             // Configuration
         }).
