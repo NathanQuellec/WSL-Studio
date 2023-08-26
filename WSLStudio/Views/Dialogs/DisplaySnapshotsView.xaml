@@ -91,7 +91,8 @@
 
         <controls:DataGrid x:Name="SnapshotsDataGrid"
                            Grid.Row="1"
-                           MaxColumnWidth="1200"
+                           MinColumnWidth="140"
+                           MaxColumnWidth="500"
                            ItemsSource="{Binding Snapshots}"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"

@@ -44,7 +44,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
     }
 
-    public async void OpenDeleteSnapshotDialog(object sender, RoutedEventArgs args)
+    private async void OpenDeleteSnapshotDialog(object sender, RoutedEventArgs args)
     {
         this.Hide();
 
@@ -74,7 +74,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
     }
 
-    public void DeleteSnapshot(object sender, RoutedEventArgs args)
+    private void DeleteSnapshot(object sender, RoutedEventArgs args)
     {
         var distro = this.DataContext as Distribution;
         var snapshotId = (sender as Button)!.Tag.ToString();
