@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
@@ -35,6 +36,7 @@ public class SnapshotService : ISnapshotService
                     CreationDate = snapshotsInfos[3],
                     Size = snapshotsInfos[4],
                     DistroSize = snapshotsInfos[5],
+                    Path = snapshotsInfos[6],
                 });
             }
 
@@ -64,6 +66,7 @@ public class SnapshotService : ISnapshotService
         {
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
             decimal sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
+            snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
             var snapshot = new Snapshot()
             {
                 Id = snapshotId,
@@ -72,6 +75,7 @@ public class SnapshotService : ISnapshotService
                 CreationDate = currentDateTime,
                 Size = sizeOfSnap.ToString(CultureInfo.InvariantCulture),
                 DistroSize = distribution.Size,
+                Path = snapshotPath,
             };
 
             distribution.Snapshots.Insert(0, snapshot);
@@ -85,7 +89,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private async Task<decimal> CompressSnapshot(string snapshotPath, string destPath)
+    private static async Task<decimal> CompressSnapshot(string snapshotPath, string destPath)
     {
         try
         {
@@ -105,7 +109,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
+    private static async Task SaveDistroSnapshotInfos(string snapshotFolder, Snapshot snapshot)
     {
         try
         {
