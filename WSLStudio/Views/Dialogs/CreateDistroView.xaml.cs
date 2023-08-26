@@ -23,7 +23,7 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace WSLStudio.Views.Dialogs;
 
-public sealed partial class CreateDistroView : UserControl
+public sealed partial class CreateDistroView : ContentDialog
 {
     public CreateDistroView()
     {

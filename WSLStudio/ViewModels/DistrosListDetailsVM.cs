@@ -227,6 +227,7 @@ public class DistrosListDetailsVM : ObservableObject
         Console.WriteLine($"[INFO] Command called : ${distribution!.Name} distribution is launching ...");
 
         _distributionService.LaunchDistribution(distribution);
+
         // Publish message  (allows us to show the stop button when the start button is clicked)
         WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
@@ -236,6 +237,7 @@ public class DistrosListDetailsVM : ObservableObject
         Console.WriteLine($"[INFO] Command called : {distribution!.Name} distribution is stopping ...");
 
         _distributionService.StopDistribution(distribution);
+
         WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
     }
 
@@ -249,13 +251,18 @@ public class DistrosListDetailsVM : ObservableObject
     private void OpenDistributionWithVsCodeViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with VS Code ...");
+
         _distributionService.OpenDistributionWithVsCode(distribution);
+
     }
 
     private void OpenDistroWithWinTermViewModel(Distribution distribution)
     {
         Console.WriteLine($"[INFO] Command called : Opening {distribution.Name} with Windows Terminal ...");
+
         _distributionService.OpenDistroWithWinTerm(distribution);
+
+        //WeakReferenceMessenger.Default.Send(new ShowDistroStopButtonMessage(distribution));
     }
 
     // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
@@ -295,25 +302,16 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
 
-        var dialogService = App.GetService<IDialogBuilderService>();
-
-        // contentdialog content set in CreateDistroView.xaml
         var createDistroDialog = new CreateDistroView();
 
-        var dialog = dialogService.SetTitle("Create Distribution :")
-            .AddContent(createDistroDialog)
-            .SetPrimaryButtonText("Create")
-            .SetCloseButtonText("Cancel")
-            .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(ValidateCreateDistribution)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .Build();
+        createDistroDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
+        createDistroDialog.PrimaryButtonClick += ValidateCreateDistribution;
 
-        var buttonClicked = await dialog.ShowAsync();
+        var buttonClicked = await createDistroDialog.ShowAsync();
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var (distroName, creationMode, resourceOrigin) = GetCreateDistroFormInfos(dialog);
+            var (distroName, creationMode, resourceOrigin) = GetCreateDistroFormInfos(createDistroDialog);
 
             await CreateDistributionViewModel(distroName, creationMode, resourceOrigin);
         }

@@ -439,7 +439,7 @@ public class DistributionService : IDistributionService
                 .Build();
             process.Start();
             Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
-            distribution.RunningProcesses.Add(process);
+            distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
@@ -496,12 +496,21 @@ public class DistributionService : IDistributionService
 
     public void OpenDistroWithWinTerm(Distribution distribution)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
-            .SetRedirectStandardOutput(false)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+           // distribution?.RunningProcesses.Add(process);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+        }
     }
 }
