@@ -103,11 +103,11 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         this.Hide();
 
         var button = sender as Button;
-        button!.IsEnabled = false;
+       // button!.IsEnabled = false;
 
         var snapshot = button.DataContext as Snapshot;
 
-        var createDistroDialog = new CreateDistroView();
+        var createDistroDialog = new CreateDistributionView();
         createDistroDialog.Title = $"Create distribution from snapshot \"{snapshot.Name}\":";
         createDistroDialog.DataContext = snapshot;
         createDistroDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
@@ -125,7 +125,6 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             if (buttonClicked != ContentDialogResult.Primary)
             {
                 this.ShowAsync();
-                button.IsEnabled = true;
             }
 
         }

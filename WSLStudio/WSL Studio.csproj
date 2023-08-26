@@ -121,7 +121,7 @@
     <None Remove="Assets\WslStudioLogo.targetsize-32_altform-lightunplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-48_altform-lightunplated.png" />
     <None Remove="Views\CreateDistroSnapshotView.xaml" />
-    <None Remove="Views\CreateDistroView.xaml" />
+    <None Remove="Views\CreateDistributionView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
     <None Remove="Views\SnapshotsDataGridView.xaml" />
     <None Remove="Views\WslProcessInfoBar.xaml" />
@@ -197,7 +197,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CreateDistroView.xaml">
+    <Page Update="Views\CreateDistributionView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>

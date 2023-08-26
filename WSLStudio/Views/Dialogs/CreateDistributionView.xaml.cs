@@ -23,9 +23,9 @@ using Microsoft.UI.Xaml.Navigation;
 
 namespace WSLStudio.Views.Dialogs;
 
-public sealed partial class CreateDistroView : ContentDialog
+public sealed partial class CreateDistributionView : ContentDialog
 {
-    public CreateDistroView()
+    public CreateDistributionView()
     {
         this.InitializeComponent();
 

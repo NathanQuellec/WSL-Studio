@@ -302,7 +302,7 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for distribution creation");
 
-        var createDistroDialog = new CreateDistroView
+        var createDistroDialog = new CreateDistributionView
         {
             XamlRoot = App.MainWindow.Content.XamlRoot,
         };
@@ -408,23 +408,18 @@ public class DistrosListDetailsVM : ObservableObject
 
         var dialogService = App.GetService<IDialogBuilderService>();
 
-        var addSnapshotDialog = new CreateSnapshotView();
+        var createSnapshotDialog = new CreateSnapshotView();
 
-        var dialog = dialogService.SetTitle("Create Snapshot :")
-            .AddContent(addSnapshotDialog)
-            .SetPrimaryButtonText("Create")
-            .SetCloseButtonText("Cancel")
-            .SetDefaultButton(ContentDialogButton.Primary)
-            .SetPrimaryButtonClick(ValidateSnapshotName)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .Build();
-        var buttonClicked = await dialog.ShowAsync();
+        createSnapshotDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
+        createSnapshotDialog.PrimaryButtonClick += ValidateSnapshotName;
+
+        var buttonClicked = await createSnapshotDialog.ShowAsync();
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
 
-            var snapshotName = (dialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
-            var snapshotDescr = (dialog.FindChild("SnapshotDescrInput") as TextBox)!.Text
+            var snapshotName = (createSnapshotDialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
+            var snapshotDescr = (createSnapshotDialog.FindChild("SnapshotDescrInput") as TextBox)!.Text
                 .Replace(';', ' ')
                 .Replace('\n',' ')
                 .Replace('\r', ' '); ; // replace ';' characters to avoid error in SnapshotService::GetDistributionSnapshots
@@ -432,6 +427,7 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
+    // TODO : Refactor with ValidateDistroName
     private static void ValidateSnapshotName(ContentDialog sender, ContentDialogButtonClickEventArgs args)
     {
         var snapshotNameInput = sender.FindChild("SnapshotNameInput") as TextBox;
