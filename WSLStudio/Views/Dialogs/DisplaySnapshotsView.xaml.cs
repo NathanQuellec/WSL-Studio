@@ -55,6 +55,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             DataContext = (sender as Button)?.DataContext,
             PrimaryButtonText = "Yes",
             CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
         };
         
         deleteSnapshotDialog.PrimaryButtonCommand = ViewModel.DeleteSnapshotCommand;
@@ -66,6 +67,10 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             if (buttonClicked == ContentDialogResult.Primary)
             {
                 DeleteSnapshot(sender, args);
+            }
+            else
+            {
+                this.ShowAsync();
             }
         }
         catch (Exception ex)
@@ -89,5 +94,35 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         {
             Console.WriteLine(ex.Message);
         }
+    }
+
+    private async void OpenCreateDistroDialog(object sender, RoutedEventArgs args)
+    {
+        this.Hide();
+
+        var snapshotPath = (sender as Button)!.Tag;
+
+        var panel = new StackPanel();
+
+        var distroNameInput = new TextBox()
+        {
+            Header = "Distribution Name",
+        };
+
+        panel.Children.Add(distroNameInput);
+
+        var createDistroDialog = new ContentDialog()
+        {
+            Title = "Create Distribution From Snapshot :",
+            PrimaryButtonText = "Create",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = panel,
+            XamlRoot = App.MainWindow.Content.XamlRoot,
+        };
+
+        await createDistroDialog.ShowAsync();
+        
+        this.ShowAsync();
     }
 }

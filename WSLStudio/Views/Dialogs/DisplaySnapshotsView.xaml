@@ -60,14 +60,25 @@
                                    HorizontalAlignment="Left"
                                    Margin="16 0 16 16"/>
 
-                        <Button x:Name="DeleteSnapshotButton" 
-                                RelativePanel.RightOf="DescriptionContent"
-                                Style="{StaticResource MinimalistButtonStyle}"
-                                Tag="{Binding Id}"
-                                Click="OpenDeleteSnapshotDialog"
-                                HorizontalAlignment="Right">
-                            <FontIcon Glyph="&#xE74D;" />
-                        </Button>
+                        <StackPanel Orientation="Horizontal"
+                                    RelativePanel.RightOf="DescriptionContent">
+
+                            <Button x:Name="CreateDistroButton"
+                                    Style="{StaticResource MinimalistButtonStyle}"
+                                    Tag="{Binding Path}"
+                                    Click="OpenCreateDistroDialog">
+                                <FontIcon Glyph="&#xE72D;" />
+                            </Button>
+
+                            <Button x:Name="DeleteSnapshotButton" 
+                                    Style="{StaticResource MinimalistButtonStyle}"
+                                    Tag="{Binding Id}"
+                                    Click="OpenDeleteSnapshotDialog"
+                                    HorizontalAlignment="Right">
+                                <FontIcon Glyph="&#xE74D;" />
+                            </Button>
+
+                        </StackPanel>
 
                     </RelativePanel>
 
