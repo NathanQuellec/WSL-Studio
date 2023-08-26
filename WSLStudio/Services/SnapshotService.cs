@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
+using Newtonsoft.Json.Bson;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
 
@@ -42,9 +43,9 @@ public class SnapshotService : ISnapshotService
 
             return snapshotsList;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(ex.Message);
             return new ObservableCollection<Snapshot>();
         }
     }
@@ -65,7 +66,7 @@ public class SnapshotService : ISnapshotService
         try
         {
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
-            decimal sizeOfSnap = await CompressSnapshot(snapshotPath, snapshotFolder);
+            decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
             var snapshot = new Snapshot()
             {
@@ -82,14 +83,14 @@ public class SnapshotService : ISnapshotService
             await SaveDistroSnapshotInfos(snapshotFolder, snapshot);
             return true;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(ex.Message);
             return false;
         }
     }
 
-    private static async Task<decimal> CompressSnapshot(string snapshotPath, string destPath)
+    private static async Task<decimal> CompressSnapshot(string snapshotPath)
     {
         try
         {
@@ -129,9 +130,34 @@ public class SnapshotService : ISnapshotService
             snapshotInfos.Append('\n');
             await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine(e.Message);
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    public void DeleteSnapshotFile(Snapshot snapshot)
+    {
+        if (File.Exists(snapshot.Path))
+        {
+            File.Delete(snapshot.Path);
+        }
+    }
+
+    public async void DeleteSnapshotInfosRecord(Snapshot snapshot)
+    {
+        try
+        {
+            var snapshotsFolder = Directory.GetParent(snapshot.Path).Name;
+            var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
+            var recordsToKeep = (await File.ReadAllLinesAsync(snapshotsInfosFile))
+                .Where(line => line.Split(';')[0] != snapshot.Id.ToString());
+            await File.WriteAllLinesAsync(snapshot.Path, recordsToKeep);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }

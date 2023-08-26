@@ -22,6 +22,12 @@
     <AppxPackageDir>C:\Users\nathan\source\repos\NathanQuellec\WSLStudio\WSLStudio\bin\x64\Release\net6.0-windows10.0.19041.0\AppPackages</AppxPackageDir>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Views\ContentDialog\**" />
+    <EmbeddedResource Remove="Views\ContentDialog\**" />
+    <None Remove="Views\ContentDialog\**" />
+    <Page Remove="Views\ContentDialog\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Remove="Assets\SplashScreen.scale-100.png" />
     <Content Remove="Assets\SplashScreen.scale-125.png" />
     <Content Remove="Assets\SplashScreen.scale-150.png" />
@@ -161,7 +167,6 @@
   <ItemGroup>
     <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
-    <Folder Include="Views\ContentDialog\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -208,5 +213,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PRIResource Remove="Views\ContentDialog\**" />
+  </ItemGroup>
 
 </Project>
