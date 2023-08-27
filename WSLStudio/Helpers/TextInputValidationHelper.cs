@@ -53,9 +53,9 @@ public class TextInputValidationHelper
         return this;
     }
 
-    public TextInputValidationHelper DataAlreadyExist(IList collection)
+    public TextInputValidationHelper DataAlreadyExist(List<string> collection)
     {
-        if (collection.Contains(_textInputl))
+        if (collection.Contains(_textInputl, StringComparer.OrdinalIgnoreCase))
         {
             throw new ArgumentException($"already exists.");
         }
