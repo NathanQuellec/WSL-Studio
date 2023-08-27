@@ -122,6 +122,7 @@
     <None Remove="Assets\WslStudioLogo.targetsize-48_altform-lightunplated.png" />
     <None Remove="Views\CreateDistroSnapshotView.xaml" />
     <None Remove="Views\CreateDistributionView.xaml" />
+    <None Remove="Views\Dialogs\RenameDistributionView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
     <None Remove="Views\SnapshotsDataGridView.xaml" />
     <None Remove="Views\WslProcessInfoBar.xaml" />
@@ -216,6 +217,12 @@
   
   <ItemGroup>
     <PRIResource Remove="Views\ContentDialog\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\Dialogs\RenameDistributionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
 </Project>

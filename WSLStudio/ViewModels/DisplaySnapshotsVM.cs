@@ -38,13 +38,17 @@ public class DisplaySnapshotsVM : ObservableObject
     {
         try
         {
+            App.IsDistributionProcessing = true;
+
             var distroNameInput = (sender.Content as StackPanel)?.FindChild("DistroNameInput") as TextBox;
             var snapshot = sender.DataContext as Snapshot;
             _distrosViewModel.ValidateDistributionName(sender, args);
             await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, "Archive", snapshot!.Path);
+            App.IsDistributionProcessing = false;
         }
         catch (Exception ex)
         {
+            App.IsDistributionProcessing = false;
             args.Cancel = true;
         }
     }

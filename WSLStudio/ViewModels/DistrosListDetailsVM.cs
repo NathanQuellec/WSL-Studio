@@ -100,15 +100,15 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog to remove {distribution.Name} ...");
 
-        var dialogService = App.GetService<IDialogBuilderService>();
 
-
-        var dialog = dialogService.SetTitle($"Are you sure to remove \"{distribution.Name}\" ?")
-            .SetPrimaryButtonText("Remove")
-            .SetCloseButtonText("Cancel")
-            .SetDefaultButton(ContentDialogButton.Primary)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .Build();
+        var dialog = new ContentDialog()
+        {
+            Title = $"Are you sure to remove \"{distribution.Name}\" ?",
+            PrimaryButtonText = "Remove",
+            CloseButtonText = "Cancel",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
 
         var buttonClicked = await dialog.ShowAsync();
 
@@ -136,41 +136,39 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
 
-        var dialogService = App.GetService<IDialogBuilderService>();
-
-        var newDistroNameInput = new TextBox()
+        try
         {
-            Name = "DistroNameInput",
-            Margin = new Thickness(0, 20, 0, 15),
-            Height = 32,
-            MaxLength = 30,
-        };
+            var dialog = new RenameDistributionView()
+            {
+                Title = $"Rename \"{distribution.Name}\" :",
+                XamlRoot = App.MainWindow.Content.XamlRoot,
+            };
 
-        var renameDistroErrorInfoBar = new InfoBar()
+            dialog.PrimaryButtonClick += ValidateRenameDistribution;
+            var buttonClicked = await dialog.ShowAsync();
+
+            if (buttonClicked == ContentDialogResult.Primary)
+            {
+                var newDistroNameInput = (dialog.Content as StackPanel)!.FindChild("DistroNameInput") as TextBox;
+                RenameDistributionViewModel(distribution, newDistroNameInput!.Text);
+            }
+        }
+        catch (Exception ex)
         {
-            Name = "DistroNameErrorInfoBar",
-            Severity = InfoBarSeverity.Error,
-            Title = "Invalid : Distribution Name",
-            IsOpen = false,
-            IsClosable = false,
-        };
+            Console.WriteLine(ex.Message);
+        }
 
+    }
 
-        var dialog = dialogService.SetTitle($"Rename \"{distribution.Name}\" :")
-            .AddContent(newDistroNameInput)
-            .AddContent(renameDistroErrorInfoBar)
-            .SetPrimaryButtonText("Rename")
-            .SetCloseButtonText("Cancel")
-            .SetDefaultButton(ContentDialogButton.Primary)
-            .SetXamlRoot(App.MainWindow.Content.XamlRoot)
-            .SetPrimaryButtonClick(ValidateDistributionName)
-            .Build();
-
-        var buttonClicked = await dialog.ShowAsync();
-
-        if (buttonClicked == ContentDialogResult.Primary)
+    private void ValidateRenameDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        try
         {
-            RenameDistributionViewModel(distribution, newDistroNameInput.Text);
+            ValidateDistributionName(sender, args);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 
@@ -406,11 +404,11 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Command called : Opening ContentDialog for snapshot creation");
 
-        var dialogService = App.GetService<IDialogBuilderService>();
+        var createSnapshotDialog = new CreateSnapshotView
+        {
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
 
-        var createSnapshotDialog = new CreateSnapshotView();
-
-        createSnapshotDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
         createSnapshotDialog.PrimaryButtonClick += ValidateSnapshotName;
 
         var buttonClicked = await createSnapshotDialog.ShowAsync();

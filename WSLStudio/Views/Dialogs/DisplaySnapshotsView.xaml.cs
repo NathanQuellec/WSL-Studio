@@ -50,6 +50,12 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
     {
         this.Hide();
 
+        if (App.IsDistributionProcessing)
+        {
+            App.ShowSnapshotProcessingDialog();
+            return;
+        }
+
         var deleteSnapshotDialog = new ContentDialog()
         {
             Title = "Are you sure to delete this snapshot ?",
@@ -102,15 +108,21 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
     {
         this.Hide();
 
-        var button = sender as Button;
-       // button!.IsEnabled = false;
+        if (App.IsDistributionProcessing)
+        {
+            App.ShowSnapshotProcessingDialog();
+            return;
+        }
 
+        var button = sender as Button;
         var snapshot = button.DataContext as Snapshot;
 
-        var createDistroDialog = new CreateDistributionView();
-        createDistroDialog.Title = $"Create distribution from snapshot \"{snapshot.Name}\":";
-        createDistroDialog.DataContext = snapshot;
-        createDistroDialog.XamlRoot = App.MainWindow.Content.XamlRoot;
+        var createDistroDialog = new CreateDistributionView
+        {
+            Title = $"Create distribution from snapshot \"{snapshot.Name}\":",
+            DataContext = snapshot,
+            XamlRoot = App.MainWindow.Content.XamlRoot
+        };
         createDistroDialog.PrimaryButtonClick += ViewModel.CreateDistroFromSnapshot;
 
         try
