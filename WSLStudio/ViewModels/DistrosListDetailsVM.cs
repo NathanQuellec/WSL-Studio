@@ -26,9 +26,6 @@ public class DistrosListDetailsVM : ObservableObject
     private readonly ISnapshotService _snapshotService;
     private readonly IInfoBarService _infoBarService;
 
-    private bool _isDistroCreationProcessing = false;
-    private bool _isSnapshotCreationProcessing = false;
-
     #region RelayCommand
 
     public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
@@ -61,8 +58,6 @@ public class DistrosListDetailsVM : ObservableObject
         _snapshotService = snapshotService;
         _infoBarService = infoBarService;
 
-        _isDistroCreationProcessing = false;
-
         RemoveDistroCommand = new AsyncRelayCommand<Distribution>(RemoveDistributionDialog);
         RenameDistroCommand = new AsyncRelayCommand<Distribution>(RenameDistributionDialog);
         LaunchDistroCommand = new RelayCommand<Distribution>(LaunchDistributionViewModel);
@@ -70,8 +65,8 @@ public class DistrosListDetailsVM : ObservableObject
         OpenDistroWithFileExplorerCommand = new RelayCommand<Distribution>(OpenDistributionWithFileExplorerViewModel);
         OpenDistroWithVsCodeCommand = new RelayCommand<Distribution>(OpenDistributionWithVsCodeViewModel);
         OpenDistroWithWinTermCommand = new RelayCommand<Distribution>(OpenDistroWithWinTermViewModel);
-        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog, () => !_isDistroCreationProcessing);
-        CreateSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateSnapshotDialog, (distro) => !_isSnapshotCreationProcessing);
+        CreateDistroCommand = new AsyncRelayCommand(CreateDistributionDialog);
+        CreateSnapshotCommand = new AsyncRelayCommand<Distribution>(CreateSnapshotDialog);
         DisplaySnapshotsListCommand = new AsyncRelayCommand<Distribution>(DisplaySnapshotsList);
 
         _distributionService.InitDistributionsList();
@@ -355,14 +350,12 @@ public class DistrosListDetailsVM : ObservableObject
 
     internal async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
-        _isDistroCreationProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
         _infoBarService.OpenInfoBar(createDistroInfoProgress);
 
         try
         {
             var newDistro = await _distributionService.CreateDistribution(distroName, creationMode, resourceOrigin);
-            _isDistroCreationProcessing = false;
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoSuccess = _infoBarService.FindInfoBar("CreateDistroInfoSuccess");
             _infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
@@ -373,7 +366,6 @@ public class DistrosListDetailsVM : ObservableObject
         catch (Exception e)
         {
             Console.WriteLine($"Service failed to create distribution {distroName}: " + e.Message);
-            _isDistroCreationProcessing = false;
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
             _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
@@ -459,21 +451,18 @@ public class DistrosListDetailsVM : ObservableObject
     private async Task CreateSnapshotViewModel(Distribution distribution, string snapshotName,
         string snapshotDescr)
     {
-        _isSnapshotCreationProcessing = true;
         var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
         _infoBarService.OpenInfoBar(createSnapshotInfoProgress);
         var isSnapshotCreated = await _snapshotService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
 
         if (isSnapshotCreated)
         {
-            _isSnapshotCreationProcessing = false;
             _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
             var createSnapshotInfoSuccess = _infoBarService.FindInfoBar("CreateSnapshotInfoSuccess");
             _infoBarService.OpenInfoBar(createSnapshotInfoSuccess, 2000);
         }
         else
         {
-            _isSnapshotCreationProcessing = false;
             _infoBarService.CloseInfoBar(createSnapshotInfoProgress);
             var createSnapshotInfoError = _infoBarService.FindInfoBar("CreateSnapshotInfoError");
             _infoBarService.OpenInfoBar(createSnapshotInfoError, 5000);
