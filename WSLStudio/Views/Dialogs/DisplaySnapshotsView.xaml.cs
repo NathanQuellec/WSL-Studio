@@ -89,11 +89,13 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
     private void DeleteSnapshot(object sender, RoutedEventArgs args)
     {
+        var button = sender as Button;
         var distro = this.DataContext as Distribution;
-        var snapshotId = (sender as Button)!.Tag.ToString();
+        var snapshot = button.DataContext as Snapshot;
+
         try
         {
-            var snapshotToRemove = distro?.Snapshots.First(snapshot => snapshot.Id.ToString() == snapshotId);
+            var snapshotToRemove = distro?.Snapshots.First(snap => snap.Id.ToString() == snapshot.Id.ToString());
             distro?.Snapshots.Remove(snapshotToRemove!);
 
             this.ShowAsync();

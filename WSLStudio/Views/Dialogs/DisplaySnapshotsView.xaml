@@ -65,14 +65,12 @@
 
                             <Button x:Name="CreateDistroButton"
                                     Style="{StaticResource MinimalistButtonStyle}"
-                                    Tag="{Binding Path}"
                                     Click="OpenCreateDistroDialog">
                                 <FontIcon Glyph="&#xE72D;" />
                             </Button>
 
                             <Button x:Name="DeleteSnapshotButton" 
                                     Style="{StaticResource MinimalistButtonStyle}"
-                                    Tag="{Binding Id}"
                                     Click="OpenDeleteSnapshotDialog"
                                     HorizontalAlignment="Right">
                                 <FontIcon Glyph="&#xE74D;" />
