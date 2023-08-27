@@ -302,6 +302,12 @@ public class DistrosListDetailsVM : ObservableObject
 
         createDistroDialog.PrimaryButtonClick += ValidateCreateDistribution;
 
+        if (App.IsDistributionProcessing)
+        {
+            App.ShowSnapshotProcessingDialog();
+            return;
+        }
+
         var buttonClicked = await createDistroDialog.ShowAsync();
 
         if (buttonClicked == ContentDialogResult.Primary)
@@ -350,6 +356,7 @@ public class DistrosListDetailsVM : ObservableObject
 
     internal async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
     {
+        App.IsDistributionProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
         _infoBarService.OpenInfoBar(createDistroInfoProgress);
 
@@ -360,6 +367,7 @@ public class DistrosListDetailsVM : ObservableObject
             var createDistroInfoSuccess = _infoBarService.FindInfoBar("CreateDistroInfoSuccess");
             _infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
             Distros.Add(newDistro);
+            App.IsDistributionProcessing = false;
 
         }
       
@@ -369,6 +377,7 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
             _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
+            App.IsDistributionProcessing = false;
         }
     }
 
