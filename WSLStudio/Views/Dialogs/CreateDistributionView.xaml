@@ -38,6 +38,7 @@
                       Height="96">
                     <TextBox Header="Docker Hub repository :"
                              x:Name="DockerHubInput"
+                             PlaceholderText="Example : eclipse/angular:latest"
                              Height="64"
                              Margin="0 12 0 16"/>
                 </Grid>
@@ -64,6 +65,7 @@
                       Height="96">
                     <TextBox Header="Archive file path :"
                              x:Name="ArchiveInput"
+                             PlaceholderText="Only .tar or .tar.gz files"
                              Height="64"
                              Margin="0 12 0 16"/>
                     <Button HorizontalAlignment="Right"

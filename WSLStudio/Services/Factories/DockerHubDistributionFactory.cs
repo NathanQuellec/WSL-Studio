@@ -20,9 +20,17 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         var docker = new DockerHelper();
 
+        var imageTag = "latest";
+
+        // check if user specify a tag in the image name input
+        if (resourceOrigin.Contains(':'))
+        {
+            imageTag = resourceOrigin.Split(':').Last();
+        }
+
         try
         {
-            await docker.PullImageFromDockerHub(imageName);
+            await docker.PullImageFromDockerHub(imageName, imageTag);
             var container = await docker.CreateDockerContainer(imageName, containerName);
             await docker.ExportDockerContainer(containerName, tarLocation);
             await ImportDistribution(distroName, installDir, tarLocation);

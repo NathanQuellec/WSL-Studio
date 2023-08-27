@@ -90,7 +90,7 @@ public class DockerHelper
         }
     }
 
-    public async Task PullImageFromDockerHub(string imageName)
+    public async Task PullImageFromDockerHub(string imageName, string imageTag)
     {
         try
         {
@@ -98,7 +98,7 @@ public class DockerHelper
             var imageCreateParameters = new ImagesCreateParameters()
             {
                 FromImage = imageName,
-                Tag = "latest"
+                Tag = imageTag
             };
 
             var progress = new Progress<JSONMessage>();
