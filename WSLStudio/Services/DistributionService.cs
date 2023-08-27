@@ -8,6 +8,7 @@ using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
@@ -20,6 +21,14 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Zip;
+using Ionic.Zip;
+using WinRT;
+using ZipEntry = ICSharpCode.SharpZipLib.Zip.ZipEntry;
+using ZipFile = ICSharpCode.SharpZipLib.Zip.ZipFile;
+using ZipOutputStream = ICSharpCode.SharpZipLib.Zip.ZipOutputStream;
 
 
 namespace WSLStudio.Services;
@@ -32,15 +41,18 @@ public class DistributionService : IDistributionService
     private static readonly object _lock = new object();
 
     private readonly IList<Distribution> _distros;
-
     private readonly WslApi _wslApi;
 
-    public DistributionService()
+    private readonly ISnapshotService _snapshotService;
+
+    public DistributionService(ISnapshotService snapshotService)
     {
         _distros = new List<Distribution>();
         _wslApi = new WslApi();
+        _snapshotService = snapshotService;
     }
 
+    // TODO : Refactor InitDistributionsList using parallel task
     public async Task InitDistributionsList()
     {
         try
@@ -67,8 +79,8 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                    var isRunning = await CheckRunningDistribution(distroName);
-                    if (!isRunning)
+                    var isDistroRunning = await CheckRunningDistribution(distroName);
+                    if (!isDistroRunning)
                     {
                         await BackgroundLaunchDistribution(distroName);
                         await WaitForRunningDistribution(distroName);
@@ -84,6 +96,7 @@ public class DistributionService : IDistributionService
                         OsVersion = GetOsInfos(distroName, "VERSION"),
                         Size = GetSize(distroPath),
                         Users = GetDistributionUsers(distroName),
+                        Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
 
                     this._distros.Add(distro);
@@ -94,9 +107,6 @@ public class DistributionService : IDistributionService
             }
 
             lxssSubKeys.Close();
-
-            //await this.SetAllDistributionsInfos();
-
         }
         catch (Exception ex)
         {
@@ -161,8 +171,8 @@ public class DistributionService : IDistributionService
         {
             var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
             var diskFile = new FileInfo(diskLocation);
-            var sizeInGB = (double)diskFile.Length / 1024 / 1024 / 1024;
-            return Math.Round(sizeInGB, 2).ToString();
+            var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
+            return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
         }
     }
 
@@ -212,12 +222,14 @@ public class DistributionService : IDistributionService
         }
     }
 
+    
+
     public IEnumerable<Distribution> GetAllDistributions()
     {
         return _distros;
     }
 
-    private static Task<string> CreateDistributionFolder(string distroName)
+    private static string CreateDistributionFolder(string distroName)
     {
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
@@ -235,52 +247,47 @@ public class DistributionService : IDistributionService
             Directory.CreateDirectory(distroFolder);
         }
 
-        return Task.FromResult(distroFolder);
+        return distroFolder;
     }
 
-    public async Task<Distribution?> CreateDistribution(string creationMode, string distroName, string resourceOrigin)
+    public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
-
-        var distroFolder = await CreateDistributionFolder(distroName);
-
-        DistributionFactory factory = creationMode switch
+        try
         {
-            "Dockerfile" => new DockerfileDistributionFactory(),
-            "Archive" => new ArchiveDistributionFactory(),
-            "Docker Hub" => new DockerHubDistributionFactory(),
-            _ => throw new NotImplementedException(),
-        };
 
-        var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+            var distroFolder = CreateDistributionFolder(distroName);
 
-        if (newDistro == null)
-        {
-            return null;
-        }
-
-        // set the id of our model with the id of the new distro generated by wsl 
-        // TODO : getters for distro id,path and wsl version
-        // TODO : refactor
-        foreach (var distro in _wslApi.GetDistributionList())
-        {
-            if (distro.DistroName == newDistro.Name)
+            DistributionFactory factory = creationMode switch
             {
-                // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                await BackgroundLaunchDistribution(newDistro.Name);
-                await WaitForRunningDistribution(newDistro.Name);
+                "Dockerfile" => new DockerfileDistributionFactory(),
+                "Archive" => new ArchiveDistributionFactory(),
+                "Docker Hub" => new DockerHubDistributionFactory(),
+                _ => throw new NullReferenceException(),
+            };
 
-                newDistro.Id = distro.DistroId;
-                newDistro.Path = distro.BasePath;
-                newDistro.WslVersion = distro.WslVersion;
-                newDistro.OsName = GetOsInfos(distroName, "NAME");
-                newDistro.OsVersion = GetOsInfos(distroName, "VERSION");
-                newDistro.Size = GetSize(distro.BasePath);
-                newDistro.Users = GetDistributionUsers(distroName);
-            }
+            var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+            var distro = _wslApi
+                .GetDistributionList()
+                .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
+
+
+            newDistro.Id = distro.DistroId;
+            newDistro.Path = distro.BasePath;
+            newDistro.WslVersion = distro.WslVersion;
+            newDistro.OsName = GetOsInfos(distroName, "NAME");
+            newDistro.OsVersion = GetOsInfos(distroName, "VERSION");
+            newDistro.Size = GetSize(distro.BasePath);
+            newDistro.Users = GetDistributionUsers(distroName);
+
+            this._distros.Add(newDistro);
+
+            return newDistro;
         }
-        this._distros.Add(newDistro);
-
-        return newDistro;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw;
+        }
     }
 
     public void RemoveDistribution(Distribution distribution)
@@ -432,7 +439,7 @@ public class DistributionService : IDistributionService
                 .Build();
             process.Start();
             Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
-            distribution.RunningProcesses.Add(process);
+            distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
@@ -470,8 +477,6 @@ public class DistributionService : IDistributionService
         }
     }
 
-    // TODO: Check why opening distro file system invoke sometimes an error. 
-
     public void OpenDistributionFileSystem(Distribution distribution)
     {
         var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
@@ -491,12 +496,21 @@ public class DistributionService : IDistributionService
 
     public void OpenDistroWithWinTerm(Distribution distribution)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
-            .SetRedirectStandardOutput(false)
-            .SetUseShellExecute(false)
-            .SetCreateNoWindow(true)
-            .Build();
-        process.Start();
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+           // distribution?.RunningProcesses.Add(process);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+        }
     }
 }

@@ -21,11 +21,11 @@ using Microsoft.UI.Xaml.Navigation;
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WSLStudio.Views;
+namespace WSLStudio.Views.Dialogs;
 
-public sealed partial class CreateDistroDialogView : UserControl
+public sealed partial class CreateDistributionView : ContentDialog
 {
-    public CreateDistroDialogView()
+    public CreateDistributionView()
     {
         this.InitializeComponent();
 

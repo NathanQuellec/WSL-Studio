@@ -26,7 +26,7 @@ public class ArchiveDistributionFactory : DistributionFactory
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
-            return null;
+            throw;
         }
     }
 }

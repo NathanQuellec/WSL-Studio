@@ -15,6 +15,7 @@ using WSLStudio.Views;
 using Community.Wsl.Sdk;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
+using WSLStudio.Views.Dialogs;
 
 namespace WSLStudio;
 
@@ -26,6 +27,8 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/dependency-injection
     // https://docs.microsoft.com/dotnet/core/extensions/configuration
     // https://docs.microsoft.com/dotnet/core/extensions/logging
+
+    public static bool IsDistributionProcessing { get; set; } = false;
 
     public IHost Host
     {
@@ -47,16 +50,25 @@ public partial class App : Application
 
     public static async Task NoWslDialog()
     {
-        var contentDialog = App.GetService<IDialogBuilderService>()
-            .SetTitle("Impossible to detect WSL")
-            .SetContent("Check if WSL is supported or installed on your system")
-            .SetCloseButtonText("Ok")
-            .SetDefaultButton(ContentDialogButton.Close)
-            .SetXamlRoot(MainWindow.Content.XamlRoot)
-            .Build();
+        try
+        {
+            var dialog = new ContentDialog()
+            {
+                Title = "WSL is not detected on the system",
+                Content = "Check if WSL is supported or installed on your system.",
+                CloseButtonText = "Ok",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = MainWindow.Content.XamlRoot,
+            };
 
-        await contentDialog.ShowAsync();
-        MainWindow.Close();
+            await dialog.ShowAsync();
+            MainWindow.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            MainWindow.Close();
+        }
     }
 
     public static void ShowNoWslDialog()
@@ -70,16 +82,25 @@ public partial class App : Application
 
     public static async Task VirtualizationDisabled()
     {
-        var contentDialog = App.GetService<IDialogBuilderService>()
-            .SetTitle("Virtualization Disabled in Firmware")
-            .SetContent("Enable the optional 'Virtual Computer Platform' component and ensure that virtualization is enabled in the BIOS.")
-            .SetCloseButtonText("Ok")
-            .SetDefaultButton(ContentDialogButton.Close)
-            .SetXamlRoot(MainWindow.Content.XamlRoot)
-            .Build();
+        try
+        {
+            var dialog = new ContentDialog()
+            {
+                Title = "Virtualization Disabled in Firmware",
+                Content = "Enable the optional 'Virtual Computer Platform' component and ensure that virtualization is enabled in the BIOS.",
+                CloseButtonText = "Ok",
+                DefaultButton = ContentDialogButton.Close,
+                XamlRoot = MainWindow.Content.XamlRoot,
+            };
 
-        await contentDialog.ShowAsync();
-        MainWindow.Close();
+            await dialog.ShowAsync();
+            MainWindow.Close();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            MainWindow.Close();
+        }
     }
 
     public static void ShowVirtualizationDisabledDialog()
@@ -87,6 +108,25 @@ public partial class App : Application
         if (MainWindow.Content is FrameworkElement fe)
         {
             fe.Loaded += (ss, se) => VirtualizationDisabled();
+        }
+    }
+
+    public static async void ShowSnapshotProcessingDialog()
+    {
+        try
+        {
+            var dialog = new ContentDialog()
+            {
+                Title = "WSL Studio is currently creating a distribution",
+                CloseButtonText = "Close",
+                XamlRoot = App.MainWindow.Content.XamlRoot,
+            };
+
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 
@@ -107,9 +147,9 @@ public partial class App : Application
             services.AddSingleton<IActivationService, ActivationService>();
             services.AddSingleton<IPageService, PageService>();
             services.AddSingleton<INavigationService, NavigationService>();
-            services.AddTransient<IDialogBuilderService, DialogBuilderService>();
             services.AddTransient<IInfoBarService, InfoBarService>();
             services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<ISnapshotService, SnapshotService>();
             services.AddSingleton<IWslService, WslService>();
             
 
@@ -117,8 +157,10 @@ public partial class App : Application
             services.AddSingleton<IFileService, FileService>();
 
             // Views and ViewModels
-            services.AddTransient<DistrosListDetailsViewModel>();
-            services.AddTransient<DistrosListDetailsView>();
+            services.AddSingleton<DistrosListDetailsVM>();
+            services.AddSingleton<DistrosListDetailsView>();
+            services.AddSingleton<DisplaySnapshotsVM>();
+            services.AddSingleton<DisplaySnapshotsView>();
 
             // Configuration
         }).

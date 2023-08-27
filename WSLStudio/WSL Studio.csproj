@@ -22,6 +22,12 @@
     <AppxPackageDir>C:\Users\nathan\source\repos\NathanQuellec\WSLStudio\WSLStudio\bin\x64\Release\net6.0-windows10.0.19041.0\AppPackages</AppxPackageDir>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Views\ContentDialog\**" />
+    <EmbeddedResource Remove="Views\ContentDialog\**" />
+    <None Remove="Views\ContentDialog\**" />
+    <Page Remove="Views\ContentDialog\**" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Remove="Assets\SplashScreen.scale-100.png" />
     <Content Remove="Assets\SplashScreen.scale-125.png" />
     <Content Remove="Assets\SplashScreen.scale-150.png" />
@@ -114,8 +120,12 @@
     <None Remove="Assets\WslStudioLogo.targetsize-256_altform-unplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-32_altform-lightunplated.png" />
     <None Remove="Assets\WslStudioLogo.targetsize-48_altform-lightunplated.png" />
-    <None Remove="Views\CreateDistroDialogView.xaml" />
+    <None Remove="Views\CreateDistroSnapshotView.xaml" />
+    <None Remove="Views\CreateDistributionView.xaml" />
+    <None Remove="Views\Dialogs\RenameDistributionView.xaml" />
     <None Remove="Views\DistrosList.xaml" />
+    <None Remove="Views\SnapshotsDataGridView.xaml" />
+    <None Remove="Views\WslProcessInfoBar.xaml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -132,10 +142,11 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
     <PackageReference Include="Docker.DotNet" Version="3.125.12" />
+    <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221116.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
+    <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="SonarAnalyzer.CSharp" Version="8.50.0.58025">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -169,7 +180,25 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Page Update="Views\CreateDistroDialogView.xaml">
+    <Page Update="Views\SnapshotsDataGridView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\WslProcessInfoBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\CreateDistroSnapshotView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Views\CreateDistributionView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
@@ -185,5 +214,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DefineConstants>DISABLE_XAML_GENERATED_MAIN</DefineConstants>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PRIResource Remove="Views\ContentDialog\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Page Update="Views\Dialogs\RenameDistributionView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
 
 </Project>

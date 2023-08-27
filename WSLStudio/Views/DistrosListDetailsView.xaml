@@ -9,7 +9,6 @@
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:local="using:WSLStudio.Views"
     xmlns:functions="using:WSLStudio.Views.Functions"
-    xmlns:viewmodels="using:WSLStudio.ViewModels"
     xmlns:model="using:WSLStudio.Models"
     xmlns:test="System.Windows.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -42,6 +41,7 @@
 
 
         <controls:ListDetailsView
+                x:Name="DistrosListDetails"
                 Margin="0 10 0 0"
                 Grid.Row="1"
                 BackButtonBehavior="Automatic"
@@ -56,8 +56,7 @@
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
                                 <MenuFlyoutItem Text="Rename"
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RenameDistroCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.RenameDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8AC;"/>
@@ -65,8 +64,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with File Explorer"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithFileExplorerCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xEC50;"/>
@@ -74,8 +72,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with VS Code"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithVsCodeCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithVsCodeCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE943;"/>
@@ -83,8 +80,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Open with Windows Terminal"
-                                                Command="{Binding ElementName=Page,
-                                                                  Path=ViewModel.OpenDistroWithWinTermCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithWinTermCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE756;"/>
@@ -92,8 +88,7 @@
                                 </MenuFlyoutItem>
 
                                 <MenuFlyoutItem Text="Remove" 
-                                                Command="{Binding ElementName=Page, 
-                                                                  Path=ViewModel.RemoveDistroCommand}"
+                                                Command="{Binding ElementName=Page, Path=ViewModel.RemoveDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE74D;"/>
@@ -113,8 +108,8 @@
                             <!--  Specify Binding ElementName property to Page for accessing access ViewModel elements -->
                             <Button x:Name="LaunchButton"
                                     Margin="0 4 0 0 "
-                                    Command="{Binding ElementName=Page,
-                                                          Path=ViewModel.LaunchDistroCommand}"
+                                    Style="{StaticResource MinimalistButtonStyle}"
+                                    Command="{Binding ElementName=Page,Path=ViewModel.LaunchDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Play"/>
                             </Button>
@@ -129,15 +124,15 @@
                                     Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
                                     RelativePanel.RightOf="LaunchButton"
                                     Visibility="Collapsed"
-                                    Command="{Binding ElementName=Page, 
-                                                          Path=ViewModel.StopDistroCommand}"
+                                    Style="{StaticResource MinimalistButtonStyle}"
+                                    Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Stop"/>
                             </Button>
 
                             <TextBlock x:Name="DistroName" 
                                        Style="{StaticResource BodyTextBlockStyle}"
-                                       Text="{Binding Path=Name, Mode=TwoWay}"
+                                       Text="{x:Bind Name, Mode=TwoWay}"
                                        FontSize="16"
                                        RelativePanel.RightOf="StopButton"
                                        Margin="5"/>
@@ -152,7 +147,7 @@
 
                     <ScrollViewer>
                             <Grid Background="{ThemeResource LayerFillColorAltBrush}"
-                              CornerRadius="5">
+                                  CornerRadius="5">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
@@ -166,54 +161,54 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-
+                                
                                 <!--<StackPanel Orientation="Horizontal"
                                             Margin="0 0 0 24"
                                             Grid.Column="1"
                                             Grid.Row="0">
                                 
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="CPU : "
-                                               FontSize="16"
-                                               Margin="8"/>
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="32 %"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="8"/>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal">
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="Memory : "
-                                               FontSize="16"
-                                               Margin="8"/>
-                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                               Text="64 %"
-                                               FontSize="16"
-                                               FontWeight="SemiBold"
-                                               Margin="8"/>
-                                </StackPanel>
-                            </StackPanel>-->
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="CPU : "
+                                                   FontSize="16"
+                                                   Margin="8"/>
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="32 %"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Margin="8"/>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="Memory : "
+                                                   FontSize="16"
+                                                   Margin="8"/>
+                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                                   Text="64 %"
+                                                   FontSize="16"
+                                                   FontWeight="SemiBold"
+                                                   Margin="8"/>
+                                    </StackPanel>
+                                </StackPanel>-->
 
                             <TextBlock Style="{StaticResource TitleTextBlockStyle}"
                                        Text="Distribution details"
                                        FontSize="24"
                                        FontWeight="SemiBold"
                                        TextWrapping="Wrap"
-                                       Margin="40 24 0 0"/>
+                                       Margin="40 24 0 8"/>
                             <RelativePanel Grid.Column="0"
                                            Width="Auto"
                                            Grid.Row="1"
                                            Margin="40 24">
-                                <TextBlock x:Name="osName" 
+                                <TextBlock x:Name="OsName" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Name : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            TextWrapping="Wrap"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="osName"
+                                           RelativePanel.RightOf="OsName"
                                            Text="{x:Bind OsName}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "
@@ -222,13 +217,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="2"
                                            Margin="40 24">
-                                <TextBlock x:Name="osVersion" 
+                                <TextBlock x:Name="OsVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="osVersion"
+                                           RelativePanel.RightOf="OsVersion"
                                            Text="{x:Bind OsVersion}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -237,13 +232,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="3"
                                            Margin="40 24">
-                                <TextBlock x:Name="distroSize" 
+                                <TextBlock x:Name="DistroSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Size : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="distroSize"
+                                           RelativePanel.RightOf="DistroSize"
                                            Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -252,13 +247,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="4"
                                            Margin="40 24">
-                                <TextBlock x:Name="wslVersion" 
+                                <TextBlock x:Name="WslVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="WSL Version : "
                                            FontSize="16"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                           RelativePanel.RightOf="wslVersion"
+                                           RelativePanel.RightOf="WslVersion"
                                            Text="{x:Bind WslVersion}"
                                            FontSize="16"
                                            Margin="12 0 0 0 "/>
@@ -267,13 +262,13 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="5"
                                            Margin="40 16">
-                                <TextBlock x:Name="usersList" 
+                                <TextBlock x:Name="UsersList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Users : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Expander RelativePanel.RightOf="usersList"
+                                <Expander RelativePanel.RightOf="UsersList"
                                           IsExpanded="False"
                                           ExpandDirection="Down"
                                           Header="Users"
@@ -292,25 +287,23 @@
                             <RelativePanel Grid.Column="0"
                                            Grid.Row="6"
                                            Margin="40 16">
-                                <TextBlock x:Name="snapshotsList" 
+                                <TextBlock x:Name="SnapshotsList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Snapshots : "
                                            FontSize="16"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Expander x:Name="snapshotsExp"
-                                          RelativePanel.RightOf="snapshotsList"
-                                          IsExpanded="False"
-                                          ExpandDirection="Down"
-                                          Header="Snapshots"
-                                          Width="144"
-                                          Margin="24 0 0 0 ">
-                                    <Expander.Content>
-                                        <ListView ItemsSource="{x:Bind Users}"/>
-                                    </Expander.Content>
-                                </Expander>
-                                <Button RelativePanel.RightOf="snapshotsExp" 
-                                        Margin="4 12 0 0">
+                                <Button x:Name="DisplaySnapshots"
+                                        RelativePanel.RightOf="SnapshotsList"
+                                        Content="Display"
+                                        Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
+                                        CommandParameter="{x:Bind}"
+                                        Margin=" 24 8 0 0"/>
+                                <Button RelativePanel.RightOf="DisplaySnapshots" 
+                                        Height="32"
+                                        Margin="4 8 0 0"
+                                        Command="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}"
+                                        CommandParameter="{x:Bind}">
                                     <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
                                 </Button>
@@ -327,10 +320,10 @@
                           CornerRadius="5">
                         <StackPanel HorizontalAlignment="Center"
                                 VerticalAlignment="Center">
-                        <TextBlock Text="{Binding}"
-                                   FontSize="24"
-                                   Margin="0,0, 0, 48"/>
-                    </StackPanel>
+                            <TextBlock Text="{Binding}"
+                                       FontSize="24"
+                                       Margin="0,0, 0, 48"/>
+                        </StackPanel>
                     </Grid>
                 </DataTemplate>
             </controls:ListDetailsView.NoSelectionContentTemplate>
@@ -339,55 +332,12 @@
                 <CommandBar>
                     <AppBarButton Icon="Add" 
                                   Label="Add"
-                                  Command="{Binding ElementName=Page,
-                                                    Path=ViewModel.CreateDistroCommand}"/>
+                                  Command="{Binding ElementName=Page, Path=ViewModel.CreateDistroCommand}"/>
                 </CommandBar>
             </controls:ListDetailsView.ListCommandBar>
         </controls:ListDetailsView>
 
-        <InfoBar x:Name="RemoveDistroInfoSuccess"
-                 VerticalAlignment="Bottom"
-                 Grid.Row="1"
-                 Severity="Success"
-                 Title="WSL Studio has successfully removed the distribution from the system."
-                 IsOpen="False"
-                 Height="100"
-                 Width="450"/>
-
-        <InfoBar x:Name="CreateNewDistroInfoProgress"
-                 VerticalAlignment="Bottom"
-                 Grid.Row="1"
-                 Severity="Informational"
-                 Title="WSL Studio is currently creating your distribution"
-                 IsOpen="False"
-                 IsClosable="False"
-                 Height="100"
-                 Width="450">
-            <InfoBar.Content>
-                <ProgressBar IsIndeterminate="True" 
-                             Margin="0,0,20,6" 
-                             MaxWidth="200"/>
-            </InfoBar.Content>
-        </InfoBar>
-
-        <InfoBar x:Name="CreateNewDistroInfoError"
-                 VerticalAlignment="Bottom"
-                 Grid.Row="1"
-                 Severity="Error"
-                 Title="WSL Studio has failed to create your distribution"
-                 Message="Docker is either not running or has failed to build the image."
-                 IsOpen="False"
-                 Height="100"
-                 Width="600"/>
-
-        <InfoBar x:Name="CreateNewDistroInfoSuccess"
-                 VerticalAlignment="Bottom"
-                 Grid.Row="1"
-                 Severity="Success"
-                 Title="WSL Studio has successfully create your distribution"
-                 IsOpen="False"
-                 Height="100"
-                 Width="450"/>
+        <local:WslProcessInfoBar Grid.Row="1"/>
 
     </Grid>
 </Page>
