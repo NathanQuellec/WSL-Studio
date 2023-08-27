@@ -79,12 +79,12 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                    var isDistroRunning = await CheckRunningDistribution(distroName);
+                    /*var isDistroRunning = await CheckRunningDistribution(distroName);
                     if (!isDistroRunning)
                     {
-                        await BackgroundLaunchDistribution(distroName);
-                        await WaitForRunningDistribution(distroName);
-                    }
+                      //  await BackgroundLaunchDistribution(distroName);
+                      //  await WaitForRunningDistribution(distroName);
+                    }*/
                    
                     var distro = new Distribution()
                     {
@@ -92,12 +92,14 @@ public class DistributionService : IDistributionService
                         Name = distroName,
                         Path = distroPath,
                         WslVersion = wslVersion,
-                        OsName = GetOsInfos(distroName, "NAME"),
-                        OsVersion = GetOsInfos(distroName, "VERSION"),
-                        Size = GetSize(distroPath),
-                        Users = GetDistributionUsers(distroName),
-                        Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
+                      //  OsName = GetOsInfos(distroName, "NAME"),
+                     //   OsVersion = GetOsInfos(distroName, "VERSION"),
+                      //  Size = GetSize(distroPath),
+                      //  Users = GetDistributionUsers(distroName),
+                       // Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
+
+                    GetTestInfos(distro);
 
                     this._distros.Add(distro);
                     Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
@@ -163,6 +165,15 @@ public class DistributionService : IDistributionService
             Console.WriteLine("Cannot get os infos from os-release file : " + e.Message);
             return "Unknown";
         }
+    }
+
+    private static string GetTestInfos(Distribution distro)
+    {
+        var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
+        FileStream writer = new FileStream(distroImage, FileMode.Open, FileAccess.Write, FileShare.Read);
+        using var vhdxStream = File.Open(distroImage, FileMode.Open ,FileAccess.Read);
+     //   var cd = new 
+        return "";
     }
 
     private static string GetSize(string distroPath)

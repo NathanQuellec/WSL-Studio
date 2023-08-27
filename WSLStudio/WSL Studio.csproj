@@ -141,6 +141,7 @@
     <PackageReference Include="CommunityToolkit.Common" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.0.0" />
     <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
+    <PackageReference Include="DiscUtils" Version="0.16.13" />
     <PackageReference Include="Docker.DotNet" Version="3.125.12" />
     <PackageReference Include="DotNetZip" Version="1.16.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
