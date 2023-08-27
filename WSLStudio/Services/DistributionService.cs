@@ -21,11 +21,20 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+using DiscUtils;
+using DiscUtils.Dmg;
+using DiscUtils.Iso9660;
+using DiscUtils.Streams;
+using DiscUtils.Vhdx;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Zip;
 using Ionic.Zip;
+using Microsoft.CST.RecursiveExtractor;
+using Microsoft.CST.RecursiveExtractor.Extractors;
+using SharpCompress;
 using WinRT;
+using Disk = DiscUtils.Dmg.Disk;
 using ZipEntry = ICSharpCode.SharpZipLib.Zip.ZipEntry;
 using ZipFile = ICSharpCode.SharpZipLib.Zip.ZipFile;
 using ZipOutputStream = ICSharpCode.SharpZipLib.Zip.ZipOutputStream;
@@ -167,13 +176,15 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static string GetTestInfos(Distribution distro)
+    private static void GetTestInfos(Distribution distro)
     {
         var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
-        FileStream writer = new FileStream(distroImage, FileMode.Open, FileAccess.Write, FileShare.Read);
-        using var vhdxStream = File.Open(distroImage, FileMode.Open ,FileAccess.Read);
-     //   var cd = new 
-        return "";
+        using var file = new DiskImageFile(distroImage, FileAccess.Read);
+
+        var content = file.OpenContent(null, Ownership.None);
+
+
+
     }
 
     private static string GetSize(string distroPath)
