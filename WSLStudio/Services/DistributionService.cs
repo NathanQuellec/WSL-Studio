@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using ABI.Windows.UI.Text;
 using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
 using Docker.DotNet;
@@ -21,11 +22,21 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
+using DiscUtils;
+using DiscUtils.Dmg;
+using DiscUtils.Ext;
+using DiscUtils.Iso9660;
+using DiscUtils.Streams;
+using DiscUtils.Vhdx;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Zip;
 using Ionic.Zip;
+using Microsoft.CST.RecursiveExtractor;
+using Microsoft.CST.RecursiveExtractor.Extractors;
+using SharpCompress;
 using WinRT;
+using Disk = DiscUtils.Dmg.Disk;
 using ZipEntry = ICSharpCode.SharpZipLib.Zip.ZipEntry;
 using ZipFile = ICSharpCode.SharpZipLib.Zip.ZipFile;
 using ZipOutputStream = ICSharpCode.SharpZipLib.Zip.ZipOutputStream;
@@ -77,12 +88,14 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                   var isDistroRunning = await CheckRunningDistribution(distroName);
+
+                    /*var isDistroRunning = await CheckRunningDistribution(distroName);
+
                     if (!isDistroRunning)
                     {
-                        await BackgroundLaunchDistribution(distroName);
-                        await WaitForRunningDistribution(distroName);
-                    }
+                      //  await BackgroundLaunchDistribution(distroName);
+                      //  await WaitForRunningDistribution(distroName);
+                    }*/
                    
                     var distro = new Distribution()
                     {
@@ -90,12 +103,14 @@ public class DistributionService : IDistributionService
                         Name = distroName,
                         Path = distroPath,
                         WslVersion = wslVersion,
-                        OsName = GetOsInfos(distroName, "NAME"),
-                        OsVersion = GetOsInfos(distroName, "VERSION"),
-                        Size = GetSize(distroPath),
-                        Users = GetDistributionUsers(distroName),
-                        Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
+                      //  OsName = GetOsInfos(distroName, "NAME"),
+                     //   OsVersion = GetOsInfos(distroName, "VERSION"),
+                      //  Size = GetSize(distroPath),
+                      //  Users = GetDistributionUsers(distroName),
+                       // Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
+
+                    GetTestInfos(distro);
 
                     this._distros.Add(distro);
                     Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
@@ -161,6 +176,20 @@ public class DistributionService : IDistributionService
             Console.WriteLine("Cannot get os infos from os-release file : " + e.Message);
             return "Unknown";
         }
+    }
+
+    private static void GetTestInfos(Distribution distro)
+    {
+        var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
+        using var file = new DiskImageFile(distroImage, FileAccess.Read);
+
+        var content = file.OpenContent(null, Ownership.None);
+        var ext4 = new ExtFileSystem(content);
+        var fileData = ext4.OpenFile("usr\\lib\\os-release", FileMode.Open);
+        var buffer = new byte[fileData.Length];
+        var fileRead = fileData.Read(buffer, 0, buffer.Length);
+        var encore = Encoding.UTF8.GetString(buffer);
+
     }
 
     private static string GetSize(string distroPath)
