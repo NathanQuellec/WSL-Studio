@@ -81,7 +81,7 @@ public class DistributionService : IDistributionService
                     if (!isDistroRunning)
                     {
                         await BackgroundLaunchDistribution(distroName);
-                       // await WaitForRunningDistribution(distroName);
+                        await WaitForRunningDistribution(distroName);
                     }
                    
                     var distro = new Distribution()
