@@ -77,12 +77,12 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                 //   var isDistroRunning = await CheckRunningDistribution(distroName);
-                    //if (!isDistroRunning)
-                  //  {
-                       // await BackgroundLaunchDistribution(distroName);
-                      //  await WaitForRunningDistribution(distroName);
-                    //}
+                   var isDistroRunning = await CheckRunningDistribution(distroName);
+                    if (!isDistroRunning)
+                    {
+                        await BackgroundLaunchDistribution(distroName);
+                       // await WaitForRunningDistribution(distroName);
+                    }
                    
                     var distro = new Distribution()
                     {
@@ -234,23 +234,31 @@ public class DistributionService : IDistributionService
 
     private static string CreateDistributionFolder(string distroName)
     {
-        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-        var appPath = Path.Combine(roamingPath, APP_FOLDER);
-
-        if (!Directory.Exists(appPath))
+        try
         {
-            Directory.CreateDirectory(appPath);
+            var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+
+            var appPath = Path.Combine(roamingPath, APP_FOLDER);
+
+            if (!Directory.Exists(appPath))
+            {
+                Directory.CreateDirectory(appPath);
+            }
+
+            var distroFolder = Path.Combine(appPath, distroName);
+
+            if (!Directory.Exists(distroFolder))
+            {
+                Directory.CreateDirectory(distroFolder);
+            }
+
+            return distroFolder;
         }
-
-        var distroFolder = Path.Combine(appPath, distroName);
-
-        if (!Directory.Exists(distroFolder))
+        catch (Exception ex)
         {
-            Directory.CreateDirectory(distroFolder);
+            Console.WriteLine(ex.Message);
+            return "";
         }
-
-        return distroFolder;
     }
 
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
@@ -398,11 +406,19 @@ public class DistributionService : IDistributionService
 
     private async Task WaitForRunningDistribution(string distroName)
     {
-        var isDistroRunning = await CheckRunningDistribution(distroName);
-        if (!isDistroRunning)
+        try
         {
-            await WaitForRunningDistribution(distroName);
+            var isDistroRunning = await CheckRunningDistribution(distroName);
+            if (!isDistroRunning)
+            {
+                await WaitForRunningDistribution(distroName);
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        
     }
 
     /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
