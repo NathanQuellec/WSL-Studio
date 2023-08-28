@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using ABI.Windows.UI.Text;
 using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
 using Docker.DotNet;
@@ -23,6 +24,7 @@ using WSLStudio.Services.Factories;
 using CommunityToolkit.WinUI.Helpers;
 using DiscUtils;
 using DiscUtils.Dmg;
+using DiscUtils.Ext;
 using DiscUtils.Iso9660;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
@@ -181,25 +183,13 @@ public class DistributionService : IDistributionService
         var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
         using var file = new DiskImageFile(distroImage, FileAccess.Read);
 
-        byte[] fileType = new byte[64*1024];
-        byte[] header1 = new byte[64 * 1024];
-        byte[] header2 = new byte[64 * 1024];
-        byte[] region1 = new byte[64 * 1024];
-        byte[] region2 = new byte[64 * 1024];
-        byte[] reserved = new byte[680 * 1024];
-
-        var shift = fileType.Length;
-
         var content = file.OpenContent(null, Ownership.None);
+        var ext4 = new ExtFileSystem(content);
+        var fileData = ext4.OpenFile("usr\\lib\\os-release", FileMode.Open);
+        var buffer = new byte[fileData.Length];
+        var fileRead = fileData.Read(buffer, 0, buffer.Length);
+        var encore = Encoding.UTF8.GetString(buffer);
 
-
-        byte[] data = new byte[shift+region1.Length];
-        var read = content.Read(data, shift, header1.Length);
-
-        var encode = UnicodeEncoding.Unicode.GetString(data,0,4096);
-        
-        var l = data.Length;
-        
     }
 
     private static string GetSize(string distroPath)
