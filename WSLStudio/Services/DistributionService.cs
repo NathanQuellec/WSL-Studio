@@ -38,8 +38,6 @@ public class DistributionService : IDistributionService
     private const string WSL_UNC_PATH = @"\\wsl.localhost";
     private const string APP_FOLDER = "WslStudio";
 
-    private static readonly object _lock = new object();
-
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
 
@@ -79,12 +77,12 @@ public class DistributionService : IDistributionService
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
                     // launch distro in the background to get access to distro file system infos (os name,version,etc)
-                    var isDistroRunning = await CheckRunningDistribution(distroName);
-                    if (!isDistroRunning)
-                    {
-                        await BackgroundLaunchDistribution(distroName);
-                        await WaitForRunningDistribution(distroName);
-                    }
+                 //   var isDistroRunning = await CheckRunningDistribution(distroName);
+                    //if (!isDistroRunning)
+                  //  {
+                       // await BackgroundLaunchDistribution(distroName);
+                      //  await WaitForRunningDistribution(distroName);
+                    //}
                    
                     var distro = new Distribution()
                     {
@@ -167,12 +165,17 @@ public class DistributionService : IDistributionService
 
     private static string GetSize(string distroPath)
     {
-        lock (_lock)
+        try
         {
             var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
             var diskFile = new FileInfo(diskLocation);
             var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
             return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return "0";
         }
     }
 
