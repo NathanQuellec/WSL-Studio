@@ -181,10 +181,25 @@ public class DistributionService : IDistributionService
         var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
         using var file = new DiskImageFile(distroImage, FileAccess.Read);
 
+        byte[] fileType = new byte[64*1024];
+        byte[] header1 = new byte[64 * 1024];
+        byte[] header2 = new byte[64 * 1024];
+        byte[] region1 = new byte[64 * 1024];
+        byte[] region2 = new byte[64 * 1024];
+        byte[] reserved = new byte[680 * 1024];
+
+        var shift = fileType.Length;
+
         var content = file.OpenContent(null, Ownership.None);
 
 
+        byte[] data = new byte[shift+region1.Length];
+        var read = content.Read(data, shift, header1.Length);
 
+        var encode = UnicodeEncoding.Unicode.GetString(data,0,4096);
+        
+        var l = data.Length;
+        
     }
 
     private static string GetSize(string distroPath)
