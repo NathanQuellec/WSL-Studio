@@ -144,7 +144,6 @@
     <PackageReference Include="DiscUtils" Version="0.16.13" />
     <PackageReference Include="Docker.DotNet" Version="3.125.12" />
     <PackageReference Include="DotNetZip" Version="1.16.0" />
-    <PackageReference Include="Microsoft.CST.RecursiveExtractor" Version="1.2.17" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.221116.1" />
     <PackageReference Include="Microsoft.Xaml.Behaviors.WinUI.Managed" Version="2.0.9" />

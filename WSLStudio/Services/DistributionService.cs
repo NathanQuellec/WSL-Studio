@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Management.Automation;
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using System.Diagnostics;
@@ -11,42 +10,23 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using ABI.Windows.UI.Text;
-using ColorCode.Compilation.Languages;
 using Community.Wsl.Sdk;
-using Docker.DotNet;
-using Docker.DotNet.Models;
 using WSLStudio.Helpers;
-using Microsoft.UI.Xaml;
 using Microsoft.Win32;
-using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
-using CommunityToolkit.WinUI.Helpers;
 using DiscUtils;
 using DiscUtils.Dmg;
 using DiscUtils.Ext;
-using DiscUtils.Iso9660;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
-using ICSharpCode.SharpZipLib.Core;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Zip;
-using Ionic.Zip;
-using Microsoft.CST.RecursiveExtractor;
-using Microsoft.CST.RecursiveExtractor.Extractors;
-using SharpCompress;
-using WinRT;
-using Disk = DiscUtils.Dmg.Disk;
-using ZipEntry = ICSharpCode.SharpZipLib.Zip.ZipEntry;
-using ZipFile = ICSharpCode.SharpZipLib.Zip.ZipFile;
-using ZipOutputStream = ICSharpCode.SharpZipLib.Zip.ZipOutputStream;
 
 
 namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private const string WSL_UNC_PATH = @"\\wsl.localhost";
+    private const string WSL_UNC_PATH = @"\\wsl$";
     private const string APP_FOLDER = "WslStudio";
 
     private readonly IList<Distribution> _distros;
@@ -87,30 +67,20 @@ public class DistributionService : IDistributionService
                     var distroPath = (string)distroSubkeys.GetValue("BasePath");
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
-                    // launch distro in the background to get access to distro file system infos (os name,version,etc)
-
-                    /*var isDistroRunning = await CheckRunningDistribution(distroName);
-
-                    if (!isDistroRunning)
-                    {
-                      //  await BackgroundLaunchDistribution(distroName);
-                      //  await WaitForRunningDistribution(distroName);
-                    }*/
-                   
                     var distro = new Distribution()
                     {
                         Id = Guid.Parse(subKey),
                         Name = distroName,
                         Path = distroPath,
                         WslVersion = wslVersion,
-                      //  OsName = GetOsInfos(distroName, "NAME"),
-                     //   OsVersion = GetOsInfos(distroName, "VERSION"),
-                      //  Size = GetSize(distroPath),
                       //  Users = GetDistributionUsers(distroName),
                        // Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
 
-                    GetTestInfos(distro);
+                    distro.OsName = GetOsInfos(distro, "NAME");
+                    distro.OsVersion = GetOsInfos(distro, "VERSION");
+                    distro.Size = GetSize(distroPath);
+
 
                     this._distros.Add(distro);
                     Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
@@ -127,12 +97,45 @@ public class DistributionService : IDistributionService
         }
     }
 
-
-    // TODO : Fix unknown os version field
-    private static string GetOsInfos(string distroName, string field)
+    private static string GetOsInfos(Distribution distro, string field)
     {
-        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
+        
+        var osInfosFile = Path.Combine("etc","os-release");
+        var osInfosFileFallBack = Path.Combine("usr", "lib", "os-release");
+
+        string osInfos;
+        try
+        {
+            osInfos = GetOsInfosFromExt4(distro.Path, osInfosFile, osInfosPattern);
+        }
+        catch (FileNotFoundException ex)
+        {
+            // following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
+            Console.WriteLine("Didn't find /etc/os-release, retry with fallback file");
+            osInfos = GetOsInfosFromExt4(distro.Path, osInfosFileFallBack, osInfosPattern);
+        }
+        catch (IOException ex)
+        {
+            /*  if we cannot read ext4.dhdx, that means the distribution is running
+                and we can get os-release file from the file system located at \\wsl$\distroname\...
+             */
+            Console.WriteLine("Another process is already reading ext4.vhdx");
+            osInfos = GetOsInfosFromFileSystem(distro.Name, osInfosPattern);
+        }
+        catch (Exception ex)
+        {
+            osInfos = "Unknown";
+        }
+
+        return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
+
+    }
+
+    private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
+    {
+
+        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
 
         try
         {
@@ -146,50 +149,44 @@ public class DistributionService : IDistributionService
 
             Console.WriteLine("----------------GET OS INFOS----------------");
             using var streamReader = new StreamReader(osInfosFilePath);
-            var osInfos = "";
-            while (!streamReader.EndOfStream)
-            {
-                var line = streamReader.ReadLine();
-                var osInfosRegex = Regex.Match(line, osInfosPattern);
-                if (osInfosRegex.Success)
-                {
-                    osInfos = osInfosRegex.Groups[2].Value;
-                }
-
-            }
-            streamReader.Close();
+            var osInfos = Regex.Match(streamReader.ReadToEnd(), osInfosPattern).Groups[2].Value;
 
             return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
         }
-        catch (FileNotFoundException e)
+        catch (Exception ex)
         {
-            Console.WriteLine("os-release file doesn't exist : " + e.Message);
-            return "Unknown";
-        }
-        catch (IOException e)
-        {
-            Console.WriteLine("Cannot open or read os-release file : " + e.Message);
-            return "Unknown";
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("Cannot get os infos from os-release file : " + e.Message);
+            Console.WriteLine("Cannot get os infos from os-release file : " + ex.Message);
             return "Unknown";
         }
     }
 
-    private static void GetTestInfos(Distribution distro)
+    private static string GetOsInfosFromExt4(string distroPath, string osInfosFilePath, string osInfosPattern)
     {
-        var distroImage =  Path.Combine($"{distro.Path}", "ext4.vhdx");
-        using var file = new DiskImageFile(distroImage, FileAccess.Read);
+        var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
+        try
+        {
 
-        var content = file.OpenContent(null, Ownership.None);
-        var ext4 = new ExtFileSystem(content);
-        var fileData = ext4.OpenFile("usr\\lib\\os-release", FileMode.Open);
-        var buffer = new byte[fileData.Length];
-        var fileRead = fileData.Read(buffer, 0, buffer.Length);
-        var encore = Encoding.UTF8.GetString(buffer);
+            var wslImageHelper = new WslImageHelper(wslImagePath);
+            var fileContent = wslImageHelper.ReadFile(osInfosFilePath);
+            var osInfos = Regex.Match(fileContent, osInfosPattern)
+                .Groups[2].Value;
 
+            return osInfos;
+        }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine("Didn't find /usr/lib/os-release");
+            throw;
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine("Another process is already reading ext4.vhdx");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
     }
 
     private static string GetSize(string distroPath)
@@ -310,14 +307,15 @@ public class DistributionService : IDistributionService
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
+            TerminateDistribution(newDistro);
 
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
-            newDistro.OsName = GetOsInfos(distroName, "NAME");
-            newDistro.OsVersion = GetOsInfos(distroName, "VERSION");
-            newDistro.Size = GetSize(distro.BasePath);
-            newDistro.Users = GetDistributionUsers(distroName);
+            newDistro.OsName = GetOsInfos(newDistro, "NAME");
+            newDistro.OsVersion = GetOsInfos(newDistro, "VERSION");
+            newDistro.Size = GetSize(newDistro.Path);
+            newDistro.Users = GetDistributionUsers(newDistro.Name);
 
             this._distros.Add(newDistro);
 
@@ -406,7 +404,7 @@ public class DistributionService : IDistributionService
         }
     }*/
 
-    private static async Task<bool> CheckRunningDistribution(string distroName)
+    private static bool CheckRunningDistribution(string distroName)
     {
         try
         {
@@ -419,7 +417,7 @@ public class DistributionService : IDistributionService
             process.Start();
 
             var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            await process.WaitForExitAsync();
+            process.WaitForExit();
             var sanitizedOutput = output.Replace("\0", "")
                 .Replace("\r", "");  // remove special character
             var runningDistros = sanitizedOutput.Split("\n");
@@ -430,48 +428,6 @@ public class DistributionService : IDistributionService
         {
             Console.WriteLine($"[ERROR] Process start failed for distro {distroName}, reason : {ex}");
             return false;
-        }
-    }
-
-    private async Task WaitForRunningDistribution(string distroName)
-    {
-        try
-        {
-            var isDistroRunning = await CheckRunningDistribution(distroName);
-            if (!isDistroRunning)
-            {
-                await WaitForRunningDistribution(distroName);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-        
-    }
-
-    /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
-        Because a distribution need to be running to use its file system, 
-        we quickly start and stop the corresponding distribution to avoid an error  
-    **/
-    private Task BackgroundLaunchDistribution(string distroName)
-    {
-        try
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl -d {distroName}")
-                .SetCreateNoWindow(true)
-                .SetUseShellExecute(false)
-                .Build();
-            process.Start();
-
-            return Task.CompletedTask;
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distroName}, reason : {ex}");
-            return Task.FromException(ex);
         }
     }
 
@@ -525,6 +481,24 @@ public class DistributionService : IDistributionService
         }
     }
 
+    private void TerminateDistribution(Distribution distribution)
+    {
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/wsl -t {distribution.Name}")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
+    }
+
     public void OpenDistributionFileSystem(Distribution distribution)
     {
         var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
@@ -537,7 +511,7 @@ public class DistributionService : IDistributionService
     public void OpenDistributionWithVsCode(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl ~ -d {distribution?.Name} code .")
+            .SetArguments($"/c wsl ~ -d {distribution.Name} code .")
             .Build();
         process.Start();
     }

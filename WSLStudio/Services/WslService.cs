@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Management;
 using Community.Wsl.Sdk;
 using Microsoft.Win32;
 using WSLStudio.Contracts.Services;
