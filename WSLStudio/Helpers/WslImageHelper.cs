@@ -17,8 +17,9 @@ public class WslImageHelper
         _vhdxImagePath = vhdxImagePath;
     }
 
-    /**
-     * Read a specific file from a wsl image (ext4.vhdx) and return the results in ASCII
+    /** <summary>
+     *  Read a specific file from a wsl image (ext4.vhdx) and return the results in ASCII
+     * </summary>
      */
     public string ReadFile(string fileToExtract) 
     {
@@ -50,9 +51,19 @@ public class WslImageHelper
 
             return fileText;
         }
+        catch (FileNotFoundException ex)
+        {
+            Console.WriteLine("File not found : " + ex.Message);
+            throw;
+        }
+        catch (IOException ex)
+        {
+            Console.WriteLine("Cannot read distribution image file : " + ex.Message);
+            throw;
+        }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine(ex);
             throw;
         }
     }

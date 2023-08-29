@@ -41,7 +41,7 @@ public class DistributionService : IDistributionService
         _snapshotService = snapshotService;
     }
 
-    // TODO : Refactor InitDistributionsList using parallel task
+    // TODO : Refactor InitDistributionsList
     public async Task InitDistributionsList()
     {
         try
@@ -81,14 +81,10 @@ public class DistributionService : IDistributionService
                     distro.OsVersion = GetOsInfos(distro, "VERSION");
                     distro.Size = GetSize(distroPath);
 
-
                     this._distros.Add(distro);
-                    Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
                 }
-
                 distroSubkeys.Close();
             }
-
             lxssSubKeys.Close();
         }
         catch (Exception ex)
@@ -100,11 +96,10 @@ public class DistributionService : IDistributionService
     private static string GetOsInfos(Distribution distro, string field)
     {
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
-        
         var osInfosFile = Path.Combine("etc","os-release");
         var osInfosFileFallBack = Path.Combine("usr", "lib", "os-release");
-
         string osInfos;
+
         try
         {
             osInfos = GetOsInfosFromExt4(distro.Path, osInfosFile, osInfosPattern);
@@ -112,7 +107,9 @@ public class DistributionService : IDistributionService
         catch (FileNotFoundException ex)
         {
             // following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
+
             Console.WriteLine("Didn't find /etc/os-release, retry with fallback file");
+
             osInfos = GetOsInfosFromExt4(distro.Path, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
@@ -120,50 +117,25 @@ public class DistributionService : IDistributionService
             /*  if we cannot read ext4.dhdx, that means the distribution is running
                 and we can get os-release file from the file system located at \\wsl$\distroname\...
              */
+
             Console.WriteLine("Another process is already reading ext4.vhdx");
+
             osInfos = GetOsInfosFromFileSystem(distro.Name, osInfosPattern);
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
+
             osInfos = "Unknown";
         }
 
         return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
-
-    }
-
-    private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
-    {
-
-        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
-
-        try
-        {
-            var osInfosFile = new FileInfo(osInfosFilePath);
-
-            if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
-            {
-                // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
-                Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
-                osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
-            }
-
-            Console.WriteLine("----------------GET OS INFOS----------------");
-            using var streamReader = new StreamReader(osInfosFilePath);
-            var osInfos = Regex.Match(streamReader.ReadToEnd(), osInfosPattern).Groups[2].Value;
-
-            return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Cannot get os infos from os-release file : " + ex.Message);
-            return "Unknown";
-        }
     }
 
     private static string GetOsInfosFromExt4(string distroPath, string osInfosFilePath, string osInfosPattern)
     {
         var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
+
         try
         {
 
@@ -191,6 +163,33 @@ public class DistributionService : IDistributionService
         }
     }
 
+    private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
+    {
+        var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
+
+        try
+        {
+            var osInfosFile = new FileInfo(osInfosFilePath);
+
+            if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
+                Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
+                osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
+            }
+
+            using var streamReader = new StreamReader(osInfosFilePath);
+            var osInfos = Regex.Match(streamReader.ReadToEnd(), osInfosPattern).Groups[2].Value;
+
+            return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Cannot get os infos from os-release file : " + ex.Message);
+            return "Unknown";
+        }
+    }
+
     private static string GetSize(string distroPath)
     {
         try
@@ -198,11 +197,13 @@ public class DistributionService : IDistributionService
             var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
             var diskFile = new FileInfo(diskLocation);
             var sizeInGB = (decimal)diskFile.Length / 1024 / 1024 / 1024;
+
             return Math.Round(sizeInGB, 2).ToString(CultureInfo.InvariantCulture);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+
             return "0";
         }
     }
