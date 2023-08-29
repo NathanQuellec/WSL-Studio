@@ -201,11 +201,11 @@ public class DistributionService : IDistributionService
     {
         Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-        var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+        using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
         foreach (var subKey in lxsSubKeys.GetSubKeyNames())
         {
-            if (subKey != $"{{{distribution.Id.ToString()}}}")
+            if (subKey != $"{{{distribution.Id}}}")
             {
                 continue;
             }
@@ -216,7 +216,6 @@ public class DistributionService : IDistributionService
             distroSubkeys.SetValue("DistributionName", newDistroName);
             Console.WriteLine($"OK {subKey}");
             distroSubkeys.Close();
-            lxsSubKeys.Close();
             //this.RenameDistributionFolder(distribution.Name, newDistroName);
             return true;
         }
@@ -270,6 +269,54 @@ public class DistributionService : IDistributionService
 
     }
 
+    private static async Task<bool> CheckRunningDistribution(Distribution distribution)
+    {
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments("/c wsl --list --running --quiet")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            await process.WaitForExitAsync();
+            var sanitizedOutput = output.Replace("\0", "").Replace("\r", "");  // remove special character
+            var runningDistros = sanitizedOutput.Split("\n");
+
+            return runningDistros.Contains(distribution.Name);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            return false;
+        }
+    }
+
+    /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
+        Because a distribution need to be running to use its file system, 
+        we quickly start and stop the corresponding distribution to avoid an error  
+    **/
+    private static void BackgroundLaunchDistribution(Distribution distribution)
+    {
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments($"/c wsl -d {distribution?.Name}")
+                .SetCreateNoWindow(true)
+                .SetUseShellExecute(false)
+                .Build();
+            process.Start();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+        }
+    }
+
     public async void StopDistribution(Distribution distribution)
     {
         if (distribution.RunningProcesses.Count == 0)
@@ -313,17 +360,32 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.Message);
         }
     }
 
-    public void OpenDistributionFileSystem(Distribution distribution)
+    public async void OpenDistributionFileSystem(Distribution distribution)
     {
         var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
-        var processBuilder = new ProcessBuilderHelper("explorer.exe")
-            .SetArguments(distroPath)
-            .Build();
-        processBuilder.Start();
+        try
+        {
+            var distroIsRunning = await CheckRunningDistribution(distribution);
+
+            if (!distroIsRunning)
+            {
+                BackgroundLaunchDistribution(distribution);
+            }
+
+            var processBuilder = new ProcessBuilderHelper("explorer.exe")
+                .SetArguments(distroPath)
+                .Build();
+            processBuilder.Start();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        
     }
 
     public void OpenDistributionWithVsCode(Distribution distribution)
