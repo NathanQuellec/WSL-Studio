@@ -26,7 +26,7 @@ namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private const string WSL_UNC_PATH = @"\\wsl$";
+    private const string WSL_UNC_PATH = @"\\wsl.localhost";
     private const string APP_FOLDER = "WslStudio";
 
     private readonly IList<Distribution> _distros;
@@ -93,6 +93,14 @@ public class DistributionService : IDistributionService
         }
     }
 
+    /*  To get distributions infos, we try at first to read the image "ext4.vhdx"
+        and open the file /etc/os-release.
+        If the 
+
+        if we cannot read ext4.dhdx, that means the distribution is running
+                and we can get os-release file from the file system located at \\wsl$\distroname\...
+    */
+
     private static string GetOsInfos(Distribution distro, string field)
     {
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
@@ -106,10 +114,9 @@ public class DistributionService : IDistributionService
         }
         catch (FileNotFoundException ex)
         {
-            // following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
+            // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
 
             Console.WriteLine("Didn't find /etc/os-release, retry with fallback file");
-
             osInfos = GetOsInfosFromExt4(distro.Path, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
@@ -119,13 +126,11 @@ public class DistributionService : IDistributionService
              */
 
             Console.WriteLine("Another process is already reading ext4.vhdx");
-
             osInfos = GetOsInfosFromFileSystem(distro.Name, osInfosPattern);
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-
             osInfos = "Unknown";
         }
 
@@ -203,7 +208,6 @@ public class DistributionService : IDistributionService
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-
             return "0";
         }
     }
