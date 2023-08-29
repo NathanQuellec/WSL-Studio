@@ -20,13 +20,14 @@ using DiscUtils.Dmg;
 using DiscUtils.Ext;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
+using System.IO;
 
 
 namespace WSLStudio.Services;
 
 public class DistributionService : IDistributionService
 {
-    private const string WSL_UNC_PATH = @"\\wsl.localhost";
+    private const string WSL_UNC_PATH = @"\\wsl$";
     private const string APP_FOLDER = "WslStudio";
 
     private readonly IList<Distribution> _distros;
@@ -42,7 +43,7 @@ public class DistributionService : IDistributionService
     }
 
     // TODO : Refactor InitDistributionsList
-    public async Task InitDistributionsList()
+    public void InitDistributionsList()
     {
         try
         {
@@ -80,6 +81,7 @@ public class DistributionService : IDistributionService
                     distro.OsName = GetOsInfos(distro, "NAME");
                     distro.OsVersion = GetOsInfos(distro, "VERSION");
                     distro.Size = GetSize(distroPath);
+                    distro.Users = GetDistributionUsers(distro);
 
                     this._distros.Add(distro);
                 }
@@ -116,7 +118,7 @@ public class DistributionService : IDistributionService
         {
             // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
 
-            Console.WriteLine("Didn't find /etc/os-release, retry with fallback file");
+            Console.WriteLine("Didn't find /etc/os-release, retry with fallback file : " + ex.Message);
             osInfos = GetOsInfosFromExt4(distro.Path, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
@@ -125,7 +127,7 @@ public class DistributionService : IDistributionService
                 and we can get os-release file from the file system located at \\wsl$\distroname\...
              */
 
-            Console.WriteLine("Another process is already reading ext4.vhdx");
+            Console.WriteLine("Another process is already reading ext4.vhdx : " + ex.Message);
             osInfos = GetOsInfosFromFileSystem(distro.Name, osInfosPattern);
         }
         catch (Exception ex)
@@ -153,12 +155,12 @@ public class DistributionService : IDistributionService
         }
         catch (FileNotFoundException ex)
         {
-            Console.WriteLine("Didn't find /usr/lib/os-release");
+            Console.WriteLine("Didn't find /usr/lib/os-release : " + ex.Message);
             throw;
         }
         catch (IOException ex)
         {
-            Console.WriteLine("Another process is already reading ext4.vhdx");
+            Console.WriteLine("Another process is already reading ext4.vhdx : " + ex.Message);
             throw;
         }
         catch (Exception ex)
@@ -184,7 +186,8 @@ public class DistributionService : IDistributionService
             }
 
             using var streamReader = new StreamReader(osInfosFilePath);
-            var osInfos = Regex.Match(streamReader.ReadToEnd(), osInfosPattern).Groups[2].Value;
+            var content = streamReader.ReadToEnd();
+            var osInfos = Regex.Match(content, osInfosPattern).Groups[2].Value;
 
             return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
         }
@@ -212,39 +215,82 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static List<string> GetDistributionUsers(string distroName)
+    private static List<string> GetDistributionUsers(Distribution distribution)
+    {
+        const string userShellPattern = @"/bin/(.*?)sh$";
+        var usersList = new List<string>();
+
+        try
+        {
+            usersList = GetUsersFromExt4(distribution.Path, userShellPattern);
+
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine("Cannot get users from ext4.vhdx image file : " + e.Message);
+            usersList = GetUsersFromFileSystem(distribution.Name, userShellPattern);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Cannot get list of users : " + e.Message);
+            usersList.Add("Unknown");
+        }
+
+        return usersList;
+    }
+
+    private static List<string> GetUsersFromExt4(string distroPath, string userShellPattern)
+    {
+        var passwdFilePath = Path.Combine("etc", "passwd");
+        var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
+
+        try
+        {
+            var wslImageHelper = new WslImageHelper(wslImagePath);
+            var fileContent = wslImageHelper.ReadFile(passwdFilePath);
+            var lines = fileContent.Split('\n');
+
+            var users = lines
+                .Where(line => Regex.Match(line, userShellPattern).Success)
+                .Select(line => line.Split(':')[0])
+                .ToList();
+
+            return users;
+        }
+        catch (IOException e)
+        {
+            Console.WriteLine("Cannot read ext4.vhdx image file : " + e.Message);
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
+            return new List<string>() { "Unknown" };
+        }
+    }
+
+    private static List<string> GetUsersFromFileSystem(string distroName, string userShellPattern)
     {
         var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
-        var userShellPattern = @"/bin/(.*?)sh$";
         var usersList = new List<string>();
 
         try
         {
             using var streamReader = new StreamReader(passwdFilePath);
-
-            while (!streamReader.EndOfStream)
-            {
-                var line = streamReader.ReadLine();
-                var userShellRegex = Regex.Match(line, userShellPattern);
-
-                // get first column of passwd file when matching regex (i.e. get user field)
-                if (userShellRegex.Success)
-                {
-                    usersList.Add(line.Split(':')[0]);
-                }
-            }
-            streamReader.Close();
-            return usersList;
+            var users = streamReader.ReadToEnd()
+                .Split("\n")
+                .Where(line => Regex.Match(line, userShellPattern).Success)
+                .Select(line => line.Split(':')[0])
+                .ToList();
+            
+            return users;
         }
         catch (Exception e)
         {
             Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
-            usersList.Add("Unknown");
-            return usersList;
+            return new List<string>() { "Unknown" };
         }
     }
-
-    
 
     public IEnumerable<Distribution> GetAllDistributions()
     {
@@ -308,7 +354,7 @@ public class DistributionService : IDistributionService
             newDistro.OsName = GetOsInfos(newDistro, "NAME");
             newDistro.OsVersion = GetOsInfos(newDistro, "VERSION");
             newDistro.Size = GetSize(newDistro.Path);
-            newDistro.Users = GetDistributionUsers(newDistro.Name);
+            //newDistro.Users = GetDistributionUsers(newDistro.Name);
 
             this._distros.Add(newDistro);
 

@@ -33,9 +33,9 @@ public class WslImageHelper
             using var ext4Stream = new ExtFileSystem(vhdxStream);
             using SparseStream fileStream = ext4Stream.OpenFile(fileToExtract, FileMode.Open);
 
-            int bytesToRead = (int)fileStream.Length;
-            byte[] buffer = new byte[bytesToRead];
-            int pos = 0;
+            var bytesToRead = (int)fileStream.Length;
+            var buffer = new byte[bytesToRead];
+            var pos = 0;
 
             /*
                Stream.Read can read less than the number of bytes requested by the third parameter, 
@@ -43,7 +43,7 @@ public class WslImageHelper
             */
             while (pos < bytesToRead)
             {
-                int bytesRead = fileStream.Read(buffer, pos, bytesToRead - pos);
+                var bytesRead = fileStream.Read(buffer, pos, bytesToRead - pos);
                 pos += bytesRead;
             }
 
