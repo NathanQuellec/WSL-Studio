@@ -1,5 +1,4 @@
-﻿using ColorCode.Styling;
-using WSLStudio.Helpers;
+﻿using WSLStudio.Helpers;
 
 namespace WSLStudio;
 

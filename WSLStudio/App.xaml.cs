@@ -149,9 +149,10 @@ public partial class App : Application
             services.AddSingleton<INavigationService, NavigationService>();
             services.AddTransient<IInfoBarService, InfoBarService>();
             services.AddSingleton<IDistributionService, DistributionService>();
+            services.AddSingleton<IDistributionInfosService, DistributionInfosService>();
             services.AddSingleton<ISnapshotService, SnapshotService>();
             services.AddSingleton<IWslService, WslService>();
-            
+
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

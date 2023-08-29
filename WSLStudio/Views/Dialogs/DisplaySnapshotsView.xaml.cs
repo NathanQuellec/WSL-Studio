@@ -7,7 +7,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI;
-using Microsoft.ApplicationInsights.DataContracts;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using Path = System.IO.Path;

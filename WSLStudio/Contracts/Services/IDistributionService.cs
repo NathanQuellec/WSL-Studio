@@ -4,7 +4,7 @@ namespace WSLStudio.Contracts.Services;
 
 public interface IDistributionService
 {
-    Task InitDistributionsList();
+    void InitDistributionsList();
     IEnumerable<Distribution> GetAllDistributions();
     Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin);
     void RemoveDistribution(Distribution distribution);
