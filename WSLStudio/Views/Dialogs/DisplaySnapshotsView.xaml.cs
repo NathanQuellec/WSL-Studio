@@ -74,7 +74,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             var buttonClicked = await deleteSnapshotDialog.ShowAsync();
             if (buttonClicked == ContentDialogResult.Primary)
             {
-                DeleteSnapshot(sender, args);
+                DeleteSnapshot(snapshot);
             }
             else
             {
@@ -87,11 +87,9 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
     }
 
-    private void DeleteSnapshot(object sender, RoutedEventArgs args)
+    private void DeleteSnapshot(Snapshot snapshot)
     {
-        var button = sender as Button;
         var distro = this.DataContext as Distribution;
-        var snapshot = button.DataContext as Snapshot;
 
         try
         {
@@ -117,11 +115,11 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
 
         var button = sender as Button;
-        var snapshot = button.DataContext as Snapshot;
+        var snapshot = button?.DataContext as Snapshot;
 
         var createDistroDialog = new CreateDistributionView
         {
-            Title = $"Create distribution from snapshot \"{snapshot.Name}\":",
+            Title = $"Create distribution from snapshot \"{snapshot!.Name}\":",
             DataContext = snapshot,
             XamlRoot = App.MainWindow.Content.XamlRoot
         };

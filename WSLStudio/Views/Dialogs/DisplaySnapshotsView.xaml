@@ -66,6 +66,9 @@
                             <Button x:Name="CreateDistroButton"
                                     Style="{StaticResource MinimalistButtonStyle}"
                                     Click="OpenCreateDistroDialog">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip Content="Create Distribution"/>
+                                </ToolTipService.ToolTip>
                                 <FontIcon Glyph="&#xE72D;" />
                             </Button>
 
@@ -73,6 +76,9 @@
                                     Style="{StaticResource MinimalistButtonStyle}"
                                     Click="OpenDeleteSnapshotDialog"
                                     HorizontalAlignment="Right">
+                                <ToolTipService.ToolTip>
+                                    <ToolTip Content="Delete Snapshot"/>
+                                </ToolTipService.ToolTip>
                                 <FontIcon Glyph="&#xE74D;" />
                             </Button>
 
@@ -93,6 +99,9 @@
             <Button Style="{StaticResource MinimalistButtonStyle}"
                     Click="OpenSnapshotsFolder"
                     Margin="5">
+                <ToolTipService.ToolTip>
+                    <ToolTip Content="Open Snapshots Folder"/>
+                </ToolTipService.ToolTip>
                 <FontIcon Glyph="&#xE8A7;"/>
             </Button>
 
