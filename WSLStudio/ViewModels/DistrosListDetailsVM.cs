@@ -71,7 +71,6 @@ public class DistrosListDetailsVM : ObservableObject
 
         _distributionService.InitDistributionsList();
         PopulateDistributionsCollection();
-        
     }
 
     private void PopulateDistributionsCollection()

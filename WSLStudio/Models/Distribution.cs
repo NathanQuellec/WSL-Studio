@@ -25,7 +25,6 @@ public class Distribution : INotifyPropertyChanged
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
-    // TODO : Replace OnPropertyChanged by SetProperty OR move to view model
     private string _name;
     public string Name
     {
