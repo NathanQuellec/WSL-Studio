@@ -220,8 +220,6 @@ public class DistributionService : IDistributionService
 
         try
         {
-
-            Console.WriteLine("----------------GET USERS LIST----------------");
             using var streamReader = new StreamReader(passwdFilePath);
 
             while (!streamReader.EndOfStream)
@@ -236,18 +234,6 @@ public class DistributionService : IDistributionService
                 }
             }
             streamReader.Close();
-            return usersList;
-        }
-        catch (FileNotFoundException e)
-        {
-            Console.WriteLine("/etc/passwd file doesn't exist : " + e.Message);
-            usersList.Add("Unknown");
-            return usersList;
-        }
-        catch (IOException e)
-        {
-            Console.WriteLine("Cannot open or read /etc/passwd file : " + e.Message);
-            usersList.Add("Unknown");
             return usersList;
         }
         catch (Exception e)
