@@ -48,6 +48,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
     private async void OpenDeleteSnapshotDialog(object sender, RoutedEventArgs args)
     {
         this.Hide();
+        var snapshot = (sender as Button)?.DataContext as Snapshot;
 
         if (App.IsDistributionProcessing)
         {
@@ -57,9 +58,9 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         var deleteSnapshotDialog = new ContentDialog()
         {
-            Title = "Are you sure to delete this snapshot ?",
+            Title = $"Are you sure to delete snapshot \"{snapshot!.Name}\" ?",
             XamlRoot = App.MainWindow.Content.XamlRoot,
-            DataContext = (sender as Button)?.DataContext,
+            DataContext = snapshot,
             PrimaryButtonText = "Yes",
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
