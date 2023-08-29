@@ -143,6 +143,7 @@ public class DistributionService : IDistributionService
 
             if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
+                // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
                 Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
                 osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
             }
@@ -185,6 +186,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             throw;
         }
     }
@@ -403,33 +405,6 @@ public class DistributionService : IDistributionService
             Console.WriteLine("Error renaming directory: " + e.Message);
         }
     }*/
-
-    private static bool CheckRunningDistribution(string distroName)
-    {
-        try
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments("/c wsl --list --running --quiet")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
-
-            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            process.WaitForExit();
-            var sanitizedOutput = output.Replace("\0", "")
-                .Replace("\r", "");  // remove special character
-            var runningDistros = sanitizedOutput.Split("\n");
-
-            return runningDistros.Contains(distroName);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distroName}, reason : {ex}");
-            return false;
-        }
-    }
 
     public void LaunchDistribution(Distribution distribution)
     {
