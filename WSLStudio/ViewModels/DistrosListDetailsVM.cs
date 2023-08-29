@@ -71,7 +71,6 @@ public class DistrosListDetailsVM : ObservableObject
 
         _distributionService.InitDistributionsList();
         PopulateDistributionsCollection();
-        
     }
 
     private void PopulateDistributionsCollection()
@@ -416,7 +415,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-
+            WeakReferenceMessenger.Default.Send(new HideDistroStopButtonMessage(distribution));
             var snapshotName = (createSnapshotDialog.FindChild("SnapshotNameInput") as TextBox)!.Text;
             var snapshotDescr = (createSnapshotDialog.FindChild("SnapshotDescrInput") as TextBox)!.Text
                 .Replace(';', ' ')

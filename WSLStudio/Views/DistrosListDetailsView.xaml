@@ -51,7 +51,8 @@
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
         
-                    <StackPanel BorderThickness="1">
+                    <StackPanel BorderThickness="1"
+                                Height="80">
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
@@ -98,20 +99,25 @@
                             </MenuFlyout>
                         </StackPanel.Resources>
 
-
                         <RelativePanel ContextFlyout="{StaticResource DistroMenuFlyout}"
+                                       Height="80"
                                        BorderThickness="1"
                                        VerticalAlignment="Center"
                                        Background="Transparent"
                                        Margin="0 8 0 12">
 
+                            <ToolTipService.ToolTip>
+                                <ToolTip Content="Right-Click"></ToolTip>
+                            </ToolTipService.ToolTip>
+
                             <!--  Specify Binding ElementName property to Page for accessing access ViewModel elements -->
                             <Button x:Name="LaunchButton"
-                                    Margin="0 4 0 0 "
                                     Style="{StaticResource MinimalistButtonStyle}"
+                                    Margin="0 12 0 0 "
                                     Command="{Binding ElementName=Page,Path=ViewModel.LaunchDistroCommand}"
                                     CommandParameter="{x:Bind}">
-                                <SymbolIcon Symbol="Play"/>
+                                <FontIcon Glyph="&#xE768;"
+                                          FontSize="24"/>
                             </Button>
 
                             <!-- Button with unique tag. Example : Tag=Remove_Debian for the Debian distro Item.
@@ -120,23 +126,23 @@
                                      
                             -->
                             <Button x:Name="StopButton"
-                                    Margin="0 4 0 0 "
-                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
                                     RelativePanel.RightOf="LaunchButton"
-                                    Visibility="Collapsed"
                                     Style="{StaticResource MinimalistButtonStyle}"
+                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
+                                    Visibility="Collapsed"
+                                    Margin="0 14 0 0 "
                                     Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
                                     CommandParameter="{x:Bind}">
                                 <SymbolIcon Symbol="Stop"/>
                             </Button>
 
                             <TextBlock x:Name="DistroName" 
+                                       RelativePanel.RightOf="StopButton"
                                        Style="{StaticResource BodyTextBlockStyle}"
                                        Text="{x:Bind Name, Mode=TwoWay}"
-                                       FontSize="16"
-                                       RelativePanel.RightOf="StopButton"
-                                       Margin="5"/>
-
+                                       FontSize="18"
+                                       VerticalAlignment="Center"
+                                       Margin="5 14 0 0"/>
                         </RelativePanel>
                     </StackPanel>
                 </DataTemplate>
@@ -193,7 +199,7 @@
 
                             <TextBlock Style="{StaticResource TitleTextBlockStyle}"
                                        Text="Distribution details"
-                                       FontSize="24"
+                                       FontSize="{StaticResource LargeFontSize}"
                                        FontWeight="SemiBold"
                                        TextWrapping="Wrap"
                                        Margin="40 24 0 8"/>
@@ -204,13 +210,13 @@
                                 <TextBlock x:Name="OsName" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Name : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"
                                            TextWrapping="Wrap"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="OsName"
                                            Text="{x:Bind OsName}"
-                                           FontSize="16"
+                                           FontSize="18"
                                            Margin="12 0 0 0 "
                                            TextWrapping="Wrap"/>
                             </RelativePanel>
@@ -220,12 +226,12 @@
                                 <TextBlock x:Name="OsVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="OS Version : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="OsVersion"
                                            Text="{x:Bind OsVersion}"
-                                           FontSize="16"
+                                           FontSize="18"
                                            Margin="12 0 0 0 "/>
                             </RelativePanel>
 
@@ -235,12 +241,12 @@
                                 <TextBlock x:Name="DistroSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Size : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="DistroSize"
                                            Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
-                                           FontSize="16"
+                                           FontSize="18"
                                            Margin="12 0 0 0 "/>
                             </RelativePanel>
 
@@ -250,12 +256,12 @@
                                 <TextBlock x:Name="WslVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="WSL Version : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="WslVersion"
                                            Text="{x:Bind WslVersion}"
-                                           FontSize="16"
+                                           FontSize="18"
                                            Margin="12 0 0 0 "/>
                             </RelativePanel>
 
@@ -265,7 +271,7 @@
                                 <TextBlock x:Name="UsersList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Users : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
                                 <Expander RelativePanel.RightOf="UsersList"
@@ -290,7 +296,7 @@
                                 <TextBlock x:Name="SnapshotsList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Snapshots : "
-                                           FontSize="16"
+                                           FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
                                 <Button x:Name="DisplaySnapshots"

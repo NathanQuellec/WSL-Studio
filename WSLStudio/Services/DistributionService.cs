@@ -34,6 +34,7 @@ public class DistributionService : IDistributionService
     private readonly WslApi _wslApi;
 
     private readonly IDistributionInfosService _distroInfosService;
+    private readonly  ISnapshotService _snapshotService;
 
     public DistributionService(ISnapshotService snapshotService, IDistributionInfosService distroInfosService)
     {
@@ -41,6 +42,7 @@ public class DistributionService : IDistributionService
         _wslApi = new WslApi();
 
         _distroInfosService = distroInfosService;
+        _snapshotService = snapshotService;
     }
 
     // TODO : Refactor InitDistributionsList
@@ -75,14 +77,13 @@ public class DistributionService : IDistributionService
                         Name = distroName,
                         Path = distroPath,
                         WslVersion = wslVersion,
-                      //  Users = GetDistributionUsers(distroName),
-                       // Snapshots = _snapshotService.GetDistributionSnapshots(distroPath),
                     };
 
                     distro.OsName = _distroInfosService.GetOsInfos(distro, "NAME");
                     distro.OsVersion = _distroInfosService.GetOsInfos(distro, "VERSION");
                     distro.Size = _distroInfosService.GetSize(distroPath);
                     distro.Users = _distroInfosService.GetDistributionUsers(distro);
+                    distro.Snapshots = _snapshotService.GetDistributionSnapshots(distroPath);
 
                     this._distros.Add(distro);
                 }

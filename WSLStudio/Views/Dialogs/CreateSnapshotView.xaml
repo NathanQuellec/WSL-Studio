@@ -24,17 +24,23 @@
                  Height="64"/>
 
         <TextBox x:Name="SnapshotDescrInput" 
-                 Header="Description : (Optional)"
+                 Header="Description :"
+                 PlaceholderText="Optional"
                  TextWrapping="Wrap"
                  IsSpellCheckEnabled="True"
                  Margin="0 12 0 16"
                  MinHeight="64"/>
-
+        <InfoBar x:Name="StopRunningDistrosInfoBar"
+                 Severity="Informational"
+                 Title="This will stop all running instances of this distribution"
+                 IsOpen="True"
+                 IsClosable="False"/>
         <InfoBar x:Name="SnapshotNameErrorInfoBar"
                  Severity="Error"
                  Title="Invalid Snapshot Name"
                  IsOpen="False"
                  IsClosable="False"
                  Margin="0 12 0 0"/>
+
     </StackPanel>
 </ContentDialog>
