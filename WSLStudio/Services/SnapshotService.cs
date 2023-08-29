@@ -54,6 +54,7 @@ public class SnapshotService : ISnapshotService
 
         var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
         var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
+
         if (!Directory.Exists(snapshotFolder))
         {
             Directory.CreateDirectory(snapshotFolder);
@@ -80,11 +81,13 @@ public class SnapshotService : ISnapshotService
 
             distribution.Snapshots.Insert(0, snapshot);
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
+
             return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+
             return false;
         }
     }
@@ -94,12 +97,15 @@ public class SnapshotService : ISnapshotService
         try
         {
             var compressedFilePath = snapshotPath + ".gz";
+
             await using Stream s = new GZipOutputStream(File.Create(compressedFilePath));
             await using var fs = File.OpenRead(snapshotPath);
             await fs.CopyToAsync(s, 4096, CancellationToken.None);
             fs.Close();
+
             File.Delete(snapshotPath);
             var sizeInGB = (decimal)s.Length / 1024 / 1024 / 1024;
+
             return Math.Round(sizeInGB, 2);
         }
         catch (Exception ex)
