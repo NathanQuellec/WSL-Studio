@@ -211,36 +211,49 @@ public class DistributionService : IDistributionService
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
+    // TODO : Refactor
     public bool RenameDistribution(Distribution distribution, string newDistroName)
     {
         Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-        using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
-        foreach (var subKey in lxsSubKeys.GetSubKeyNames())
+        try
         {
-            if (subKey != $"{{{distribution.Id}}}")
+            using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+            foreach (var subKey in lxsSubKeys.GetSubKeyNames())
             {
-                continue;
+                if (subKey != $"{{{distribution.Id}}}")
+                {
+                    continue;
+                }
+
+                var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
+
+                distroSubkeys.SetValue("DistributionName", newDistroName);
+                distroSubkeys.Close();
+                // TODO : Change distro path
+                RenameDistributionFolder(distribution, newDistroName);
+
+                distribution.Name = newDistroName;
+                distribution.Path = distribution.Path.Replace(distribution.Name, newDistroName); // rename distro name in distro path
+
+                return true;
             }
 
-            var distroRegPath = Path.Combine(lxssRegPath, subKey);
-            var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-
-            distroSubkeys.SetValue("DistributionName", newDistroName);
-            distroSubkeys.Close();
-
-            this.RenameDistributionFolder(distribution, newDistroName);
-            distribution.Name = newDistroName;
-
-            return true;
+            lxsSubKeys.Close();
+          //  TerminateDistribution(newDistroName);
+            return false;
         }
-        lxsSubKeys.Close();
-        TerminateDistribution(newDistroName);
-        return false;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
+        }
     }
 
-    public void RenameDistributionFolder(Distribution distribution, string newDistroName)
+    private async void RenameDistributionFolder(Distribution distribution, string newDistroName)
     {
         var distroPath = Path.Combine(Roaming, APP_FOLDER, distribution.Name);
         var newDistroPath = Path.Combine(Roaming, APP_FOLDER, newDistroName);
@@ -249,7 +262,7 @@ public class DistributionService : IDistributionService
         {
             if (Directory.Exists(distroPath))
             {
-                TerminateDistribution(newDistroName);
+                await TerminateDistribution(newDistroName);
                 Directory.Move(distroPath, newDistroPath);
                 Console.WriteLine("Directory renamed successfully.");
             }
@@ -362,7 +375,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static void TerminateDistribution(string distroName)
+    private static async Task TerminateDistribution(string distroName)
     {
         try
         {
@@ -373,6 +386,7 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
+            await process.WaitForExitAsync();
         }
         catch (Exception ex)
         {

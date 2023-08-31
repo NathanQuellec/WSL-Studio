@@ -201,16 +201,23 @@ public class DistrosListDetailsVM : ObservableObject
     {
         Console.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
-        var isDistroRenamed = _distributionService.RenameDistribution(distribution, newDistroName);
-        if (!isDistroRenamed)
+        try
         {
-            return;
-        }
+            var isDistroRenamed = _distributionService.RenameDistribution(distribution, newDistroName);
+            if (!isDistroRenamed)
+            {
+                return;
+            }
 
-        var index = Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
-        if (index != -1)
+            var index = Distros.ToList().FindIndex(distro => distro.Name == distribution.Name);
+            if (index != -1)
+            {
+                Distros.ElementAt(index).Name = newDistroName;
+            }
+        }
+        catch (Exception ex)
         {
-            Distros.ElementAt(index).Name = newDistroName;
+            Console.WriteLine(ex.Message);
         }
     }
 
