@@ -29,6 +29,7 @@ public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
     private const string APP_FOLDER = "WslStudio";
+    private static readonly string Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
@@ -107,9 +108,7 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-            var appPath = Path.Combine(roamingPath, APP_FOLDER);
+            var appPath = Path.Combine(Roaming, APP_FOLDER);
 
             if (!Directory.Exists(appPath))
             {
@@ -136,8 +135,12 @@ public class DistributionService : IDistributionService
     {
         try
         {
-
             var distroFolder = CreateDistributionFolder(distroName);
+
+            if (!Directory.Exists(distroFolder))
+            {
+                throw new DirectoryNotFoundException();
+            }
 
             DistributionFactory factory = creationMode switch
             {
@@ -148,11 +151,12 @@ public class DistributionService : IDistributionService
             };
 
             var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+
             var distro = _wslApi
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
-            TerminateDistribution(newDistro);
+            TerminateDistribution(newDistro.Name); // to read ext4 file
 
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
@@ -168,12 +172,13 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.Message);
+            RemoveDistributionFolder(new Distribution(){Name = distroName});
             throw;
         }
     }
 
-    public void RemoveDistribution(Distribution distribution)
+    public async Task RemoveDistribution(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
@@ -181,17 +186,27 @@ public class DistributionService : IDistributionService
             .Build();
         process.Start();
 
-        if (distribution != null)
+        await process.WaitForExitAsync();
+
+        if (process.HasExited)
         {
             _distros.Remove(distribution);
+            RemoveDistributionFolder(distribution);
             Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
-        }
-        else
-        {
-            throw new ArgumentNullException();
         }
     }
 
+    public void RemoveDistributionFolder(Distribution distribution)
+    {
+        var distroPath = Directory.GetParent(distribution.Path).FullName;
+
+        if (Directory.Exists(distroPath))
+        {
+            Directory.Delete(distroPath, true);
+        }
+    }
+
+    
     /**
      * Rename distro name in the Windows Registry.
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
@@ -201,39 +216,49 @@ public class DistributionService : IDistributionService
     {
         Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
-        using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
-        foreach (var subKey in lxsSubKeys.GetSubKeyNames())
+        try
         {
-            if (subKey != $"{{{distribution.Id}}}")
+            using var lxsSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
+
+            foreach (var subKey in lxsSubKeys.GetSubKeyNames())
             {
-                continue;
+                if (subKey != $"{{{distribution.Id}}}")
+                {
+                    continue;
+                }
+
+                var distroRegPath = Path.Combine(lxssRegPath, subKey);
+                var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
+
+                distroSubkeys.SetValue("DistributionName", newDistroName);
+                distroSubkeys.Close();
+
+                distribution.Name = newDistroName;
+                TerminateDistribution(distribution.Name); // solve open file system error just after renaming distro
+                return true;
             }
 
-            var distroRegPath = Path.Combine(lxssRegPath, subKey);
-            var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-            Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
-            distroSubkeys.SetValue("DistributionName", newDistroName);
-            Console.WriteLine($"OK {subKey}");
-            distroSubkeys.Close();
-            //this.RenameDistributionFolder(distribution.Name, newDistroName);
-            return true;
+            lxsSubKeys.Close();
+            return false;
         }
-        lxsSubKeys.Close();
-        return false;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
+        }
     }
 
-    // TODO : Rename distro folder
-    /*public void RenameDistributionFolder(string distroName, string newDistroName)
+    /*private async void RenameDistributionFolder(Distribution distribution, string newDistroName)
     {
-        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var distroPath = Path.Combine(roamingPath, APP_FOLDER, distroName);
-        var newDistroPath = Path.Combine(roamingPath, APP_FOLDER, newDistroName);
+        var distroPath = Path.Combine(Roaming, APP_FOLDER, distribution.Name);
+        var newDistroPath = Path.Combine(Roaming, APP_FOLDER, newDistroName);
 
         try
         {
             if (Directory.Exists(distroPath))
             {
+                await TerminateDistribution(newDistroName);
                 Directory.Move(distroPath, newDistroPath);
                 Console.WriteLine("Directory renamed successfully.");
             }
@@ -247,7 +272,7 @@ public class DistributionService : IDistributionService
             Console.WriteLine("Error renaming directory: " + e.Message);
         }
     }*/
-
+    
     public void LaunchDistribution(Distribution distribution)
     {
         try
@@ -346,17 +371,18 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private void TerminateDistribution(Distribution distribution)
+    private static async void TerminateDistribution(string distroName)
     {
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/wsl -t {distribution.Name}")
+                .SetArguments($"/c wsl --terminate {distroName}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(false)
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
+            await process.WaitForExitAsync();
         }
         catch (Exception ex)
         {
@@ -366,7 +392,7 @@ public class DistributionService : IDistributionService
 
     public async void OpenDistributionFileSystem(Distribution distribution)
     {
-        var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
+        var distroFileSystem = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
         try
         {
             var distroIsRunning = await CheckRunningDistribution(distribution);
@@ -377,7 +403,7 @@ public class DistributionService : IDistributionService
             }
 
             var processBuilder = new ProcessBuilderHelper("explorer.exe")
-                .SetArguments(distroPath)
+                .SetArguments(distroFileSystem)
                 .Build();
             processBuilder.Start();
         }

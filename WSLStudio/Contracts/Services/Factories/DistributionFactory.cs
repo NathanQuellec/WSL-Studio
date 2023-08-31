@@ -21,10 +21,20 @@ public abstract class DistributionFactory
 
             process.Start();
             await process.WaitForExitAsync();
+            RemoveDistributionArchive(tarLocation);
         }
         catch (Exception ex)
         {
             Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
+        }
+    }
+
+    private static void RemoveDistributionArchive(string tarLocation)
+    {
+        if (File.Exists(tarLocation))
+        {
+            File.Delete(tarLocation);
+            Console.WriteLine("Temporary archive has been successfully deleted");
         }
     }
 }

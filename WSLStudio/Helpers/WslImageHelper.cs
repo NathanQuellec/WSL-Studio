@@ -30,8 +30,8 @@ public class WslImageHelper
             using SparseStream vhdxStream = vhdxFile.OpenContent(null, Ownership.None);
 
             // get ext4 object based on vhdx stream, and open the specified file
-            using var ext4Stream = new ExtFileSystem(vhdxStream);
-            using SparseStream fileStream = ext4Stream.OpenFile(fileToExtract, FileMode.Open);
+            using var ext4File = new ExtFileSystem(vhdxStream);
+            using SparseStream fileStream = ext4File.OpenFile(fileToExtract, FileMode.Open);
 
             var bytesToRead = (int)fileStream.Length;
             var buffer = new byte[bytesToRead];
@@ -48,6 +48,9 @@ public class WslImageHelper
             }
 
             var fileText = Encoding.UTF8.GetString(buffer);
+
+            fileStream.Close();
+            vhdxStream.Close();
 
             return fileText;
         }
