@@ -29,6 +29,7 @@ public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
     private const string APP_FOLDER = "WslStudio";
+    private static readonly string Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
@@ -107,9 +108,7 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-            var appPath = Path.Combine(roamingPath, APP_FOLDER);
+            var appPath = Path.Combine(Roaming, APP_FOLDER);
 
             if (!Directory.Exists(appPath))
             {
@@ -136,8 +135,12 @@ public class DistributionService : IDistributionService
     {
         try
         {
-
             var distroFolder = CreateDistributionFolder(distroName);
+
+            if (!Directory.Exists(distroFolder))
+            {
+                throw new DirectoryNotFoundException();
+            }
 
             DistributionFactory factory = creationMode switch
             {
@@ -148,6 +151,7 @@ public class DistributionService : IDistributionService
             };
 
             var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
+
             var distro = _wslApi
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
@@ -168,7 +172,8 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Console.WriteLine(ex.Message);
+            RemoveDistributionFolder(distroName);
             throw;
         }
     }
@@ -186,18 +191,18 @@ public class DistributionService : IDistributionService
         if (process.HasExited)
         {
             _distros.Remove(distribution);
-            RemoveDistributionFolder(distribution);
+            RemoveDistributionFolder(distribution.Name);
             Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
         }
     }
 
-    public void RemoveDistributionFolder(Distribution distribution)
+    public void RemoveDistributionFolder(string distroName)
     {
-        var distroFolder = Directory.GetParent(distribution.Path)!.FullName;
+        var distroPath = Path.Combine(Roaming, APP_FOLDER, distroName);
 
-        if (Directory.Exists(distroFolder))
+        if (Directory.Exists(distroPath))
         {
-            Directory.Delete(distroFolder, true);
+            Directory.Delete(distroPath, true);
         }
     }
 
@@ -235,12 +240,10 @@ public class DistributionService : IDistributionService
         return false;
     }
 
-    // TODO : Rename distro folder
-    public async void RenameDistributionFolder(Distribution distribution, string newDistroName)
+    public void RenameDistributionFolder(Distribution distribution, string newDistroName)
     {
-        var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var distroPath = Path.Combine(roamingPath, APP_FOLDER, distribution.Name); // wrong path for store distros
-        var newDistroPath = Path.Combine(roamingPath, APP_FOLDER, newDistroName);
+        var distroPath = Path.Combine(Roaming, APP_FOLDER, distribution.Name);
+        var newDistroPath = Path.Combine(Roaming, APP_FOLDER, newDistroName);
 
         try
         {
