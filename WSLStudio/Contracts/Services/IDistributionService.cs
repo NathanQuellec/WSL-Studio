@@ -7,7 +7,7 @@ public interface IDistributionService
     void InitDistributionsList();
     IEnumerable<Distribution> GetAllDistributions();
     Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin);
-    void RemoveDistribution(Distribution distribution);
+    Task RemoveDistribution(Distribution distribution);
     bool RenameDistribution(Distribution distribution, string newDistroName);
     void LaunchDistribution(Distribution distribution);
     void StopDistribution(Distribution distribution);

@@ -152,7 +152,7 @@ public class DistributionService : IDistributionService
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
-            TerminateDistribution(newDistro);
+            TerminateDistribution(newDistro.Name); // to read ext4 file
 
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
@@ -173,7 +173,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void RemoveDistribution(Distribution distribution)
+    public async Task RemoveDistribution(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution?.Name}")
@@ -181,14 +181,23 @@ public class DistributionService : IDistributionService
             .Build();
         process.Start();
 
-        if (distribution != null)
+        await process.WaitForExitAsync();
+
+        if (process.HasExited)
         {
             _distros.Remove(distribution);
+            RemoveDistributionFolder(distribution);
             Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
         }
-        else
+    }
+
+    public void RemoveDistributionFolder(Distribution distribution)
+    {
+        var distroFolder = Directory.GetParent(distribution.Path)!.FullName;
+
+        if (Directory.Exists(distroFolder))
         {
-            throw new ArgumentNullException();
+            Directory.Delete(distroFolder, true);
         }
     }
 
@@ -212,28 +221,32 @@ public class DistributionService : IDistributionService
 
             var distroRegPath = Path.Combine(lxssRegPath, subKey);
             var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
-            Console.WriteLine(distroSubkeys.GetValue("DistributionName"));
+
             distroSubkeys.SetValue("DistributionName", newDistroName);
-            Console.WriteLine($"OK {subKey}");
             distroSubkeys.Close();
-            //this.RenameDistributionFolder(distribution.Name, newDistroName);
+
+            this.RenameDistributionFolder(distribution, newDistroName);
+            distribution.Name = newDistroName;
+
             return true;
         }
         lxsSubKeys.Close();
+        TerminateDistribution(newDistroName);
         return false;
     }
 
     // TODO : Rename distro folder
-    /*public void RenameDistributionFolder(string distroName, string newDistroName)
+    public async void RenameDistributionFolder(Distribution distribution, string newDistroName)
     {
         var roamingPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var distroPath = Path.Combine(roamingPath, APP_FOLDER, distroName);
+        var distroPath = Path.Combine(roamingPath, APP_FOLDER, distribution.Name); // wrong path for store distros
         var newDistroPath = Path.Combine(roamingPath, APP_FOLDER, newDistroName);
 
         try
         {
             if (Directory.Exists(distroPath))
             {
+                TerminateDistribution(newDistroName);
                 Directory.Move(distroPath, newDistroPath);
                 Console.WriteLine("Directory renamed successfully.");
             }
@@ -246,7 +259,7 @@ public class DistributionService : IDistributionService
         {
             Console.WriteLine("Error renaming directory: " + e.Message);
         }
-    }*/
+    }
 
     public void LaunchDistribution(Distribution distribution)
     {
@@ -346,12 +359,12 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private void TerminateDistribution(Distribution distribution)
+    private static void TerminateDistribution(string distroName)
     {
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/wsl -t {distribution.Name}")
+                .SetArguments($"/c wsl --terminate {distroName}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(false)
                 .SetCreateNoWindow(true)
