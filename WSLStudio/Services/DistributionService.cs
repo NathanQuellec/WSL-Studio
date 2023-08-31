@@ -173,7 +173,7 @@ public class DistributionService : IDistributionService
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            RemoveDistributionFolder(distroName);
+            RemoveDistributionFolder(new Distribution(){Name = distroName});
             throw;
         }
     }
@@ -191,14 +191,14 @@ public class DistributionService : IDistributionService
         if (process.HasExited)
         {
             _distros.Remove(distribution);
-            RemoveDistributionFolder(distribution.Name);
+            RemoveDistributionFolder(distribution);
             Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
         }
     }
 
-    public void RemoveDistributionFolder(string distroName)
+    public void RemoveDistributionFolder(Distribution distribution)
     {
-        var distroPath = Path.Combine(Roaming, APP_FOLDER, distroName);
+        var distroPath = Directory.GetParent(distribution.Path).FullName;
 
         if (Directory.Exists(distroPath))
         {
@@ -206,12 +206,12 @@ public class DistributionService : IDistributionService
         }
     }
 
+    
     /**
      * Rename distro name in the Windows Registry.
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
-    // TODO : Refactor
     public bool RenameDistribution(Distribution distribution, string newDistroName)
     {
         Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
@@ -233,17 +233,13 @@ public class DistributionService : IDistributionService
 
                 distroSubkeys.SetValue("DistributionName", newDistroName);
                 distroSubkeys.Close();
-                // TODO : Change distro path
-                RenameDistributionFolder(distribution, newDistroName);
 
                 distribution.Name = newDistroName;
-                distribution.Path = distribution.Path.Replace(distribution.Name, newDistroName); // rename distro name in distro path
 
                 return true;
             }
 
             lxsSubKeys.Close();
-          //  TerminateDistribution(newDistroName);
             return false;
         }
         catch (Exception ex)
@@ -253,7 +249,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private async void RenameDistributionFolder(Distribution distribution, string newDistroName)
+    /*private async void RenameDistributionFolder(Distribution distribution, string newDistroName)
     {
         var distroPath = Path.Combine(Roaming, APP_FOLDER, distribution.Name);
         var newDistroPath = Path.Combine(Roaming, APP_FOLDER, newDistroName);
@@ -275,8 +271,8 @@ public class DistributionService : IDistributionService
         {
             Console.WriteLine("Error renaming directory: " + e.Message);
         }
-    }
-
+    }*/
+    
     public void LaunchDistribution(Distribution distribution)
     {
         try
