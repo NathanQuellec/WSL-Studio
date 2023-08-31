@@ -235,7 +235,7 @@ public class DistributionService : IDistributionService
                 distroSubkeys.Close();
 
                 distribution.Name = newDistroName;
-
+                TerminateDistribution(distribution.Name); // solve open file system error just after renaming distro
                 return true;
             }
 
@@ -371,7 +371,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static async Task TerminateDistribution(string distroName)
+    private static async void TerminateDistribution(string distroName)
     {
         try
         {
@@ -392,7 +392,7 @@ public class DistributionService : IDistributionService
 
     public async void OpenDistributionFileSystem(Distribution distribution)
     {
-        var distroPath = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
+        var distroFileSystem = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
         try
         {
             var distroIsRunning = await CheckRunningDistribution(distribution);
@@ -403,7 +403,7 @@ public class DistributionService : IDistributionService
             }
 
             var processBuilder = new ProcessBuilderHelper("explorer.exe")
-                .SetArguments(distroPath)
+                .SetArguments(distroFileSystem)
                 .Build();
             processBuilder.Start();
         }
