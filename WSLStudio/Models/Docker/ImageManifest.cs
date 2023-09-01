@@ -1,0 +1,34 @@
+﻿using System.Management.Automation;
+using System.Reflection.Emit;
+using System.Text.Json.Serialization;
+using Docker.DotNet.Models;
+using Newtonsoft.Json;
+
+namespace WSLStudio.Models.Docker;
+
+public class ImageManifest
+{
+    [JsonProperty("schemaVersion")]
+    public int SchemaVersion { get; set; }
+
+    [JsonProperty("mediaType")]
+    public string MediaType { get; set; }
+
+    [JsonProperty("config")]
+    public Config Config { get; set; }
+
+    [JsonProperty("layers")]
+    public List<Config> Layers { get; set; }
+}
+
+public class Config
+{
+    [JsonProperty("mediaType")]
+    public string MediaType { get; set; }
+
+    [JsonProperty("size")]
+    public int Size { get; set; }
+
+    [JsonProperty("digest")]
+    public string Digest { get; set; }
+}

@@ -1,6 +1,10 @@
-﻿using Docker.DotNet;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using Docker.DotNet;
 using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
+using WSLStudio.Models.Docker;
 
 namespace WSLStudio.Helpers;
 
@@ -10,6 +14,8 @@ public class DockerHelper
     private readonly DockerClient _dockerClient;
 
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
+    private static readonly string DockerRegistry = "registry.hub.docker.com";
+   // private static readonly string DockerAuthToken = "auth.docker.io";
 
     public DockerHelper()
     {
@@ -206,4 +212,41 @@ public class DockerHelper
             Console.WriteLine(ex);
         }
     }
+
+    public async Task<AuthToken?> GetAuthToken()
+    {
+        var uriString =
+            @"https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/openjdk:pull";
+        var uri = new Uri(uriString);
+
+        using var httpClient = new HttpClient();
+        using var httpResponse = await httpClient.GetAsync(uri);
+        using var content = httpResponse.Content;
+
+        var authToken = content.ReadFromJsonAsync<AuthToken>().Result;
+
+        GetImageManifest(authToken);
+
+        return authToken;
+    }
+
+    public async Task<ImageManifest?> GetImageManifest(AuthToken authToken)
+    {
+        var uriString = $@"https://registry.hub.docker.com/v2/library/openjdk/manifests/latest";
+        var uri = new Uri(uriString);
+
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+
+        using var httpResponse = await httpClient.GetAsync(uri);
+        using var content = httpResponse.Content;
+
+      //  var imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
+        var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
+
+        return imageManifest;
+    }
+
+
 }

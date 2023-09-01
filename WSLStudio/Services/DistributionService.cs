@@ -51,6 +51,11 @@ public class DistributionService : IDistributionService
     {
         try
         {
+            ///// to remove //////////////////////////////////////////////////////////
+            var docker = new DockerHelper();
+            docker.GetAuthToken();
+            //var manifest = docker.GetDockerImageManifest(token.Result);
+
             var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
             var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
