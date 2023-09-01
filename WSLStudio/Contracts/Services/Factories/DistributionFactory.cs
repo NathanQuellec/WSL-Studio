@@ -21,7 +21,6 @@ public abstract class DistributionFactory
 
             process.Start();
             await process.WaitForExitAsync();
-            RemoveDistributionArchive(tarLocation);
         }
         catch (Exception ex)
         {
@@ -29,7 +28,7 @@ public abstract class DistributionFactory
         }
     }
 
-    private static void RemoveDistributionArchive(string tarLocation)
+    public static void RemoveDistributionArchive(string tarLocation)
     {
         if (File.Exists(tarLocation))
         {

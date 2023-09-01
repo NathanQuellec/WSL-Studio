@@ -29,6 +29,7 @@ public class DockerfileDistributionFactory : DistributionFactory
             var container = await docker.CreateDockerContainer(imageName, containerName);
             await docker.ExportDockerContainer(containerName, tarLocation);
             await ImportDistribution(distroName, installDir, tarLocation);
+            RemoveDistributionArchive(tarLocation);
             await docker.RemoveDockerContainer(container!.ID);
             await docker.RemoveDockerImage(imageName);
 
