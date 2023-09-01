@@ -245,7 +245,27 @@ public class DockerHelper
       //  var imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
         var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
 
+        //GetLayer(authToken, imageManifest.Layers[0].Digest);
         return imageManifest;
+    }
+
+    public async Task GetLayer(AuthToken authToken, string layerDigest)
+    {
+        var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "layer.tar.gz");
+        var uriString = $@"https://registry.hub.docker.com/v2/library/openjdk/blobs/{layerDigest}";
+        
+        var uri = new Uri(uriString);
+
+        using var httpClient = new HttpClient();
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
+
+        using var httpResponse = await httpClient.GetAsync(uri);
+        using var content = httpResponse.Content; 
+        await using var layerStream = await content.ReadAsStreamAsync();
+
+        var layerFile = File.Create(destPath);
+        await layerStream.CopyToAsync(layerFile);
+        layerFile.Close();
     }
 
 
