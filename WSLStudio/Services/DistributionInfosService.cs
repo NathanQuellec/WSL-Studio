@@ -13,6 +13,7 @@ namespace WSLStudio.Services;
 public class DistributionInfosService : IDistributionInfosService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
+    private readonly object _lock = new object();
 
     /*  To get distributions infos, we try at first to read the image "ext4.vhdx" and open the file /etc/os-release.
         If we cannot read ext4.dhdx, that means the distribution is runningand we can get os-release file from the 
@@ -85,14 +86,13 @@ public class DistributionInfosService : IDistributionInfosService
         }
     }
 
-    private string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
+    private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
     {
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
 
         try
         {
             var osInfosFile = new FileInfo(osInfosFilePath);
-
             if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
@@ -100,8 +100,8 @@ public class DistributionInfosService : IDistributionInfosService
                 osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
             }
 
-            using var streamReader = new StreamReader(osInfosFilePath);
-            var content = streamReader.ReadToEnd();
+           // using var streamReader = new StreamReader(osInfosFilePath);
+            var content = File.ReadAllText(osInfosFilePath);
             var osInfos = Regex.Match(content, osInfosPattern).Groups[2].Value;
 
             return (string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos);
