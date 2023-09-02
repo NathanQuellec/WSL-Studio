@@ -216,7 +216,7 @@ public class DockerHelper
     public async Task<AuthToken?> GetAuthToken()
     {
         var uriString =
-            @"https://auth.docker.io/token?service=registry.docker.io&scope=repository:library/openjdk:pull";
+            @"https://auth.docker.io/token?service=registry.docker.io&scope=repository:alpinelinux/ansible:pull";
         var uri = new Uri(uriString);
 
         using var httpClient = new HttpClient();
@@ -232,7 +232,7 @@ public class DockerHelper
 
     public async Task<ImageManifest?> GetImageManifest(AuthToken authToken)
     {
-        var uriString = $@"https://registry.hub.docker.com/v2/library/openjdk/manifests/latest";
+        var uriString = $@"https://registry.hub.docker.com/v2/alpinelinux/ansible/manifests/latest";
         var uri = new Uri(uriString);
 
         using var httpClient = new HttpClient();
@@ -245,15 +245,16 @@ public class DockerHelper
       //  var imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
         var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
 
-        //GetLayer(authToken, imageManifest.Layers[0].Digest);
+      //  GetLayer(authToken, imageManifest.Layers[1].Digest);
         return imageManifest;
     }
 
     public async Task GetLayer(AuthToken authToken, string layerDigest)
     {
-        var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "layer.tar.gz");
-        var uriString = $@"https://registry.hub.docker.com/v2/library/openjdk/blobs/{layerDigest}";
+        var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "layer2.tar.gz");
+        var uriString = $@"https://registry.hub.docker.com/v2/alpinelinux/ansible/blobs/{layerDigest}";
         
+
         var uri = new Uri(uriString);
 
         using var httpClient = new HttpClient();
@@ -266,6 +267,8 @@ public class DockerHelper
         var layerFile = File.Create(destPath);
         await layerStream.CopyToAsync(layerFile);
         layerFile.Close();
+
+        //TarEntry entry = new TarEntry()
     }
 
 

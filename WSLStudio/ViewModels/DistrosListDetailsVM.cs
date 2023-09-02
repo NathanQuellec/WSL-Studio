@@ -383,6 +383,7 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
             _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
+            // TODO : Remove folder
             App.IsDistributionProcessing = false;
         }
     }
