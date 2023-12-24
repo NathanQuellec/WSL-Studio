@@ -197,13 +197,13 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private void RenameDistributionViewModel(Distribution distribution, string newDistroName)
+    private async Task RenameDistributionViewModel(Distribution distribution, string newDistroName)
     {
         Console.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
         try
         {
-            var isDistroRenamed = _distributionService.RenameDistribution(distribution, newDistroName);
+            var isDistroRenamed = await _distributionService.RenameDistribution(distribution, newDistroName);
             if (!isDistroRenamed)
             {
                 return;

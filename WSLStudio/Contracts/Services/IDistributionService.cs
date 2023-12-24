@@ -9,7 +9,7 @@ public interface IDistributionService
     Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin);
     Task RemoveDistribution(Distribution distribution);
     void RemoveDistributionFolder(Distribution distribution);
-    bool RenameDistribution(Distribution distribution, string newDistroName);
+    Task<bool> RenameDistribution(Distribution distribution, string newDistroName);
     void LaunchDistribution(Distribution distribution);
     void StopDistribution(Distribution distribution);
     void OpenDistributionFileSystem(Distribution distribution);

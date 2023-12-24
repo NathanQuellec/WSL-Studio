@@ -1,10 +1,21 @@
-﻿using System.Net;
+﻿using System.IO.Compression;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Models.Docker;
+using System;
+using System.Reflection.Emit;
+using TarArchive = SharpCompress.Archives.Tar.TarArchive;
+using TarArchiveEntry = SharpCompress.Archives.Tar.TarArchiveEntry;
+
+using SharpCompress.Archives;
+using SharpCompress.Common;
+using SharpCompress.Common.Tar;
+using SharpCompress.Common.Rar;
 
 namespace WSLStudio.Helpers;
 
@@ -35,11 +46,10 @@ public class DockerHelper
 
         foreach (var file in files)
         {
-            //Replacing slashes as KyleGobel suggested and removing leading /
             string tarName = file.Substring(directory.Length).Replace('\\', '/').TrimStart('/');
 
             //Let's create the entry header
-            var entry = TarEntry.CreateTarEntry(tarName);
+            var entry = ICSharpCode.SharpZipLib.Tar.TarEntry.CreateTarEntry(tarName);
             using var fileStream = File.OpenRead(file);
             entry.Size = fileStream.Length;
             archive.PutNextEntry(entry);
@@ -213,10 +223,10 @@ public class DockerHelper
         }
     }
 
-    public async Task<AuthToken?> GetAuthToken()
+    public async Task<AuthToken?> GetAuthToken(string image)
     {
         var uriString =
-            @"https://auth.docker.io/token?service=registry.docker.io&scope=repository:alpinelinux/ansible:pull";
+            $@"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{image}:pull";
         var uri = new Uri(uriString);
 
         using var httpClient = new HttpClient();
@@ -225,14 +235,12 @@ public class DockerHelper
 
         var authToken = content.ReadFromJsonAsync<AuthToken>().Result;
 
-        GetImageManifest(authToken);
-
         return authToken;
     }
 
-    public async Task<ImageManifest?> GetImageManifest(AuthToken authToken)
+    public async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string image)
     {
-        var uriString = $@"https://registry.hub.docker.com/v2/alpinelinux/ansible/manifests/latest";
+        var uriString = $@"https://registry.hub.docker.com/v2/{image}/manifests/latest";
         var uri = new Uri(uriString);
 
         using var httpClient = new HttpClient();
@@ -245,30 +253,40 @@ public class DockerHelper
       //  var imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
         var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
 
-      //  GetLayer(authToken, imageManifest.Layers[1].Digest);
         return imageManifest;
     }
 
-    public async Task GetLayer(AuthToken authToken, string layerDigest)
+    public async Task<List<string>> GetLayers(AuthToken authToken, ImageManifest imageManifest, string image)
     {
-        var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "layer2.tar.gz");
-        var uriString = $@"https://registry.hub.docker.com/v2/alpinelinux/ansible/blobs/{layerDigest}";
-        
-
-        var uri = new Uri(uriString);
-
+        var layers = imageManifest.Layers;
+        //var digests = layers.Select(layer => layer.Digest);
         using var httpClient = new HttpClient();
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
+        httpClient.Timeout = TimeSpan.FromSeconds(300);
 
-        using var httpResponse = await httpClient.GetAsync(uri);
-        using var content = httpResponse.Content; 
-        await using var layerStream = await content.ReadAsStreamAsync();
+        var layersPath = new List<string>();
 
-        var layerFile = File.Create(destPath);
-        await layerStream.CopyToAsync(layerFile);
-        layerFile.Close();
+        foreach (var layer in layers)
+        {
+            var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", $"{layer.Digest.Split(':')[1]}.tar.gz");
+            layersPath.Add(destPath);
 
-        //TarEntry entry = new TarEntry()
+            var uriString = $@"https://registry.hub.docker.com/v2/{image}/blobs/{layer.Digest}";
+
+            var uri = new Uri(uriString);
+            using var httpResponse = await httpClient.GetAsync(uri);
+            using var content = httpResponse.Content;
+            await using var layerStream = await content.ReadAsStreamAsync();
+
+            var layerFile = File.Create(destPath);
+            await layerStream.CopyToAsync(layerFile);
+            layerFile.Close();
+        }
+
+        return layersPath;
+
+
+        
     }
 
 

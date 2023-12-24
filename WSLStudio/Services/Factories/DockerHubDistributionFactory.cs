@@ -30,13 +30,29 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         try
         {
-            await docker.PullImageFromDockerHub(imageName, imageTag);
+            /*await docker.PullImageFromDockerHub(imageName, imageTag);
             var container = await docker.CreateDockerContainer(imageName, containerName);
             await docker.ExportDockerContainer(containerName, tarLocation);
             await ImportDistribution(distroName, installDir, tarLocation);
             RemoveDistributionArchive(tarLocation);
             await docker.RemoveDockerContainer(container!.ID);
-            await docker.RemoveDockerImage(imageName);
+            await docker.RemoveDockerImage(imageName);*/
+            var imageToken = await docker.GetAuthToken(imageName);
+            var imageManifest = await docker.GetImageManifest(imageToken, imageName);
+            var imageLayers = await docker.GetLayers(imageToken, imageManifest, imageName);
+
+            var tarPathList = new List<string>();
+            foreach (var layer in imageLayers)
+            {
+                var tarFilePath = await ArchiveHelper.DecompressArchive(layer);
+                tarPathList.Add(tarFilePath);
+            }
+
+            var newArchPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "distro.tar");
+            File.Delete(newArchPath);
+            await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
+
+            await ImportDistribution(distroName, installDir, newArchPath);
 
             Console.WriteLine("[INFO] Distribution creation from Docker Hub succeed.");
 
