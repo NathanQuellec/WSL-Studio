@@ -10,44 +10,50 @@ namespace WSLStudio.Helpers;
 
 public static class ArchiveHelper
 {
+    // we merge multiple tar by removing EOF marker for each, except for the last one.
+    // the new archive is just the result of all archives data with only one EOF marker.
     public static async Task MergeArchive(List<string> tarPathList, string destPath)
     {
-        using var mergedArchive = File.Open(destPath, FileMode.Append);
-        for (int i = 0; i < tarPathList.Count - 1; i++)
+        try
         {
-            using var currentTarFile = File.OpenRead(tarPathList[i]);
-            using var memoryStream = new MemoryStream();
-            await currentTarFile.CopyToAsync(memoryStream);
-            var bytesArray = memoryStream.ToArray();
-            bytesArray = bytesArray.SkipLast(1024).ToArray(); // remove archive end marker
-            await mergedArchive.WriteAsync(bytesArray);
-            currentTarFile.Dispose();
+            using var mergedArchive = File.Open(destPath, FileMode.Append);
+            for (var i = 0; i < tarPathList.Count - 1; i++)
+            {
+                using var tarFile = File.Open(tarPathList[i], FileMode.Open, FileAccess.ReadWrite);
+                var tarFileSize = tarFile.Length;
+                tarFile.SetLength(tarFileSize - 1024);  // remove archive's eof marker
+                await tarFile.CopyToAsync(mergedArchive);
+            }
+            using var lastTarFile = File.Open(tarPathList.Last(), FileMode.Open, FileAccess.ReadWrite);
+            await lastTarFile.CopyToAsync(mergedArchive);
         }
-        using var mem2 = new MemoryStream();
-        using var lastTarFile = File.OpenRead(tarPathList.Last());
-        await lastTarFile.CopyToAsync(mem2); // TOO LONG CHECK FILESTREAM
-        var arr2 = mem2.ToArray();
-        await mergedArchive.WriteAsync(arr2, 0, arr2.Length);
-        mergedArchive.Close();
-        lastTarFile.Close();
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
        
-    /**<summary>Decompress .tar.gz file to get a .tar file and return path of the new file</summary> **/
-
-    public static async Task<string> DecompressArchive(string path)
+    public static async Task<string?> DecompressArchive(string path)
     {
-        await using var tarGzFile = File.OpenRead(path);
-        var gzipInputStream = new GZipInputStream(tarGzFile);
+        try
+        {
+            await using var tarGzFile = File.OpenRead(path);
+            var newTarFilePath = path.Replace(".gz", " ").Trim();  // remove gz extension
+            using var newTarFile = File.Create(newTarFilePath);
 
-        var newTarFilePath = path.Replace(".gz", " ").Trim();  // remove gz extension
-        var newTarFile = File.Create(newTarFilePath);
+            await using var tarGzExtract = new GZipStream(tarGzFile, CompressionMode.Decompress);
+            await tarGzExtract.CopyToAsync(newTarFile);
 
-        await using var tarGzExtract = new GZipStream(tarGzFile, CompressionMode.Decompress);
-        await tarGzExtract.CopyToAsync(newTarFile);
+            tarGzFile.Close();
+            newTarFile.Close();
+            File.Delete(path);
 
-        newTarFile.Close();
-        tarGzFile.Close();
-        File.Delete(path);
-        return newTarFilePath;
+            return newTarFilePath;
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            return null;
+        }
     }
 }
