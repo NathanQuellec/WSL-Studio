@@ -13,6 +13,8 @@ public class DockerHubDistributionFactory : DistributionFactory
     {
         var containerName = $"wsl-studio-{distroName.ToLower()}";
         var imageName = resourceOrigin;
+        var imageTag = "latest"; // default tag
+
         var distroTarFile = $"{distroName}.tar.gz";
 
         var tarLocation = Path.Combine(targetFolder, distroTarFile);
@@ -20,12 +22,13 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         var docker = new DockerHelper();
 
-        var imageTag = "latest";
 
         // check if user specify a tag in the image name input
         if (resourceOrigin.Contains(':'))
         {
-            imageTag = resourceOrigin.Split(':').Last();
+            var imageElements = resourceOrigin.Split(':');
+            imageName = imageElements.First();
+            imageTag = imageElements.Last();
         }
 
         try
@@ -37,9 +40,9 @@ public class DockerHubDistributionFactory : DistributionFactory
             RemoveDistributionArchive(tarLocation);
             await docker.RemoveDockerContainer(container!.ID);
             await docker.RemoveDockerImage(imageName);*/
-            var imageToken = await docker.GetAuthToken(imageName);
-            var imageManifest = await docker.GetImageManifest(imageToken, imageName);
-            var imageLayers = await docker.GetLayers(imageToken, imageManifest, imageName);
+            var imageToken = await DockerHelper.GetAuthToken(imageName);
+            var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
+            var imageLayers = await DockerHelper.GetLayers(imageToken, imageManifest, imageName);
 
             var tarPathList = new List<string>();
             foreach (var layer in imageLayers)
