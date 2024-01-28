@@ -16,6 +16,7 @@ using Community.Wsl.Sdk;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Views.Dialogs;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace WSLStudio;
 
@@ -30,6 +31,12 @@ public partial class App : Application
 
     public static bool IsDistributionProcessing { get; set; } = false;
 
+    private static readonly string ROAMING_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    private const string APP_FOLDER_NAME = "WslStudio";
+    private const string TMP_FOLDER_NAME = ".tmp";
+    private const string LOG_FOLDER_NAME = ".log";
+
+    public static string appFolderPath { get; set; }
     public IHost Host
     {
         get;
@@ -47,6 +54,59 @@ public partial class App : Application
     }
 
     public static WindowEx MainWindow { get; } = new MainWindow();
+
+    private static void CreateAppFolder()
+    {
+        try
+        {
+            var appPath = Path.Combine(ROAMING_PATH, APP_FOLDER_NAME);
+            appFolderPath = appPath;
+
+            if (!Directory.Exists(appPath))
+            {
+                Directory.CreateDirectory(appPath);
+               
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private static void CreateTmpFolder()
+    {
+        try
+        {
+            var appPath = Path.Combine(appFolderPath, TMP_FOLDER_NAME);
+
+            if (!Directory.Exists(appPath))
+            {
+                Directory.CreateDirectory(appPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private static void CreateLogFolder()
+    {
+        try
+        {
+            var appPath = Path.Combine(appFolderPath, LOG_FOLDER_NAME);
+
+            if (!Directory.Exists(appPath))
+            {
+                Directory.CreateDirectory(appPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
 
     public static async Task NoWslDialog()
     {
@@ -192,5 +252,9 @@ public partial class App : Application
         {
             ShowVirtualizationDisabledDialog();
         }
+
+        CreateAppFolder();
+        CreateTmpFolder();
+        CreateLogFolder();
     }
 }

@@ -11,16 +11,12 @@ public class DockerHubDistributionFactory : DistributionFactory
 {
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
-        var containerName = $"wsl-studio-{distroName.ToLower()}";
         var imageName = resourceOrigin;
         var imageTag = "latest"; // default tag
 
         var distroTarFile = $"{distroName}.tar.gz";
 
-        var tarLocation = Path.Combine(targetFolder, distroTarFile);
         var installDir = Path.Combine(targetFolder, "installDir");
-
-        var docker = new DockerHelper();
 
 
         // check if user specify a tag in the image name input

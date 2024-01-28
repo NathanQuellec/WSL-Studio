@@ -28,8 +28,6 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
-    private const string APP_FOLDER = "WslStudio";
-    private static readonly string Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
@@ -109,14 +107,8 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var appPath = Path.Combine(Roaming, APP_FOLDER);
 
-            if (!Directory.Exists(appPath))
-            {
-                Directory.CreateDirectory(appPath);
-            }
-
-            var distroFolder = Path.Combine(appPath, distroName);
+            var distroFolder = Path.Combine(App.appFolderPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {
