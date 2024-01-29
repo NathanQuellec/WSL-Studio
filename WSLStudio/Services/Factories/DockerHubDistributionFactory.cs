@@ -48,10 +48,11 @@ public class DockerHubDistributionFactory : DistributionFactory
             }
 
             var newArchPath = Path.Combine(App.tmpDirPath,"distro.tar");
-            File.Delete(newArchPath); // TODO REMOVE
+           // File.Delete(newArchPath); // TODO REMOVE
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
             await ImportDistribution(distroName, installDir, newArchPath);
+            FilesHelper.RemoveDirContent(App.tmpDirPath);
 
             Console.WriteLine("[INFO] Distribution creation from Docker Hub succeed.");
 
@@ -63,11 +64,13 @@ public class DockerHubDistributionFactory : DistributionFactory
         catch (DockerApiException ex)
         {
             Console.WriteLine(ex.ToString());
+            FilesHelper.RemoveDirContent(App.tmpDirPath);
             throw;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            FilesHelper.RemoveDirContent(App.tmpDirPath);
             throw;
         }
     }
