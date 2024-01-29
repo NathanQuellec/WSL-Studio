@@ -47,7 +47,7 @@ public class DockerHubDistributionFactory : DistributionFactory
                 tarPathList.Add(tarFilePath);
             }
 
-            var newArchPath = Path.Combine(App.tmpFolderPath,"distro.tar");
+            var newArchPath = Path.Combine(App.tmpDirPath,"distro.tar");
             File.Delete(newArchPath); // TODO REMOVE
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 

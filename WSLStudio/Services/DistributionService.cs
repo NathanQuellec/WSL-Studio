@@ -103,32 +103,12 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    private static string CreateDistributionFolder(string distroName)
-    {
-        try
-        {
-
-            var distroFolder = Path.Combine(App.appFolderPath, distroName);
-
-            if (!Directory.Exists(distroFolder))
-            {
-                Directory.CreateDirectory(distroFolder);
-            }
-
-            return distroFolder;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return "";
-        }
-    }
-
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
         try
         {
-            var distroFolder = CreateDistributionFolder(distroName);
+            //var distroFolder = CreateDistributionFolder(distroName);
+            var distroFolder = FilesHelper.CreateDirectory(App.appDirPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {

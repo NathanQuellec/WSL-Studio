@@ -36,9 +36,10 @@ public partial class App : Application
     private const string TMP_FOLDER_NAME = ".tmp";
     private const string LOG_FOLDER_NAME = ".log";
 
-    public static string appFolderPath { get; set; }
-    public static string tmpFolderPath { get; set; }
-    public static string logFolderPath { get; set; }
+    public static string? appDirPath { get; set; }
+    public static string? tmpDirPath { get; set; }
+    public static string? logDirPath { get; set; }
+
     public IHost Host
     {
         get;
@@ -57,57 +58,19 @@ public partial class App : Application
 
     public static WindowEx MainWindow { get; } = new MainWindow();
 
-    private static void CreateAppFolder()
+    private static void CreateAppFolders()
     {
-        try
-        {
-            var appPath = Path.Combine(ROAMING_PATH, APP_FOLDER_NAME);
-            appFolderPath = appPath;
+        appDirPath = FilesHelper.CreateDirectory(ROAMING_PATH, APP_FOLDER_NAME);
 
-            if (!Directory.Exists(appPath))
-            {
-                Directory.CreateDirectory(appPath);
-               
-            }
-        }
-        catch (Exception ex)
+        if (appDirPath == null)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine("[ERROR] Cannot create app folder");
+            MainWindow.Close();
         }
-    }
-
-    private static void CreateTmpFolder()
-    {
-        try
+        else
         {
-            var tmpPath = Path.Combine(appFolderPath, TMP_FOLDER_NAME);
-            tmpFolderPath = tmpPath;
-
-            if (!Directory.Exists(tmpPath))
-            {
-                Directory.CreateDirectory(tmpPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-    }
-
-    private static void CreateLogFolder()
-    {
-        try
-        {
-            var logPath = Path.Combine(appFolderPath, LOG_FOLDER_NAME);
-
-            if (!Directory.Exists(logPath))
-            {
-                Directory.CreateDirectory(logPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
+            tmpDirPath = FilesHelper.CreateDirectory(appDirPath, TMP_FOLDER_NAME);
+            logDirPath = FilesHelper.CreateDirectory(appDirPath, LOG_FOLDER_NAME);
         }
     }
 
@@ -140,7 +103,6 @@ public partial class App : Application
         {
             fe.Loaded += (ss, se) => NoWslDialog();
         }
-
     }
 
     public static async Task VirtualizationDisabled()
@@ -256,8 +218,6 @@ public partial class App : Application
             ShowVirtualizationDisabledDialog();
         }
 
-        CreateAppFolder();
-        CreateTmpFolder();
-        CreateLogFolder();
+        CreateAppFolders();
     }
 }
