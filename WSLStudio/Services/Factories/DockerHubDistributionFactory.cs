@@ -47,8 +47,8 @@ public class DockerHubDistributionFactory : DistributionFactory
                 tarPathList.Add(tarFilePath);
             }
 
-            var newArchPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", "distro.tar");
-            File.Delete(newArchPath);
+            var newArchPath = Path.Combine(App.tmpFolderPath,"distro.tar");
+            File.Delete(newArchPath); // TODO REMOVE
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
             await ImportDistribution(distroName, installDir, newArchPath);

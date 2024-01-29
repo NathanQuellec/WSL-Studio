@@ -37,6 +37,8 @@ public partial class App : Application
     private const string LOG_FOLDER_NAME = ".log";
 
     public static string appFolderPath { get; set; }
+    public static string tmpFolderPath { get; set; }
+    public static string logFolderPath { get; set; }
     public IHost Host
     {
         get;
@@ -78,11 +80,12 @@ public partial class App : Application
     {
         try
         {
-            var appPath = Path.Combine(appFolderPath, TMP_FOLDER_NAME);
+            var tmpPath = Path.Combine(appFolderPath, TMP_FOLDER_NAME);
+            tmpFolderPath = tmpPath;
 
-            if (!Directory.Exists(appPath))
+            if (!Directory.Exists(tmpPath))
             {
-                Directory.CreateDirectory(appPath);
+                Directory.CreateDirectory(tmpPath);
             }
         }
         catch (Exception ex)
@@ -95,11 +98,11 @@ public partial class App : Application
     {
         try
         {
-            var appPath = Path.Combine(appFolderPath, LOG_FOLDER_NAME);
+            var logPath = Path.Combine(appFolderPath, LOG_FOLDER_NAME);
 
-            if (!Directory.Exists(appPath))
+            if (!Directory.Exists(logPath))
             {
-                Directory.CreateDirectory(appPath);
+                Directory.CreateDirectory(logPath);
             }
         }
         catch (Exception ex)

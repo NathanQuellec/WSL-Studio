@@ -284,7 +284,7 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "WslStudio", $"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.tmpFolderPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
                 var uriString = $@"{DOCKER_REGISTRY}/{image}/blobs/{layer.Digest}";
