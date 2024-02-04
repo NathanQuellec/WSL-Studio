@@ -8,7 +8,8 @@ public interface IDistributionService
     IEnumerable<Distribution> GetAllDistributions();
     Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin);
     Task RemoveDistribution(Distribution distribution);
-    bool RenameDistribution(Distribution distribution, string newDistroName);
+    void RemoveDistributionFolder(Distribution distribution);
+    Task<bool> RenameDistribution(Distribution distribution, string newDistroName);
     void LaunchDistribution(Distribution distribution);
     void StopDistribution(Distribution distribution);
     void OpenDistributionFileSystem(Distribution distribution);

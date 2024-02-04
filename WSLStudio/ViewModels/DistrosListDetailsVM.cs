@@ -197,13 +197,13 @@ public class DistrosListDetailsVM : ObservableObject
         }
     }
 
-    private void RenameDistributionViewModel(Distribution distribution, string newDistroName)
+    private async Task RenameDistributionViewModel(Distribution distribution, string newDistroName)
     {
         Console.WriteLine($"[INFO] Renaming {distribution.Name} for {newDistroName}");
 
         try
         {
-            var isDistroRenamed = _distributionService.RenameDistribution(distribution, newDistroName);
+            var isDistroRenamed = await _distributionService.RenameDistribution(distribution, newDistroName);
             if (!isDistroRenamed)
             {
                 return;
@@ -383,6 +383,7 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
             _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
+            // TODO : Remove folder
             App.IsDistributionProcessing = false;
         }
     }
@@ -399,7 +400,7 @@ public class DistrosListDetailsVM : ObservableObject
                 DataContext = distribution,
             };
 
-            displaySnapshots.ShowAsync();
+            await displaySnapshots.ShowAsync();
         }
         catch (Exception ex)
         {

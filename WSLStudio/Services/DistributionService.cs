@@ -28,8 +28,6 @@ namespace WSLStudio.Services;
 public class DistributionService : IDistributionService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
-    private const string APP_FOLDER = "WslStudio";
-    private static readonly string Roaming = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
     private readonly IList<Distribution> _distros;
     private readonly WslApi _wslApi;
@@ -50,7 +48,8 @@ public class DistributionService : IDistributionService
     public void InitDistributionsList()
     {
         try
-        {
+        {     
+
             var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
             var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
 
@@ -104,38 +103,12 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
-    private static string CreateDistributionFolder(string distroName)
-    {
-        try
-        {
-            var appPath = Path.Combine(Roaming, APP_FOLDER);
-
-            if (!Directory.Exists(appPath))
-            {
-                Directory.CreateDirectory(appPath);
-            }
-
-            var distroFolder = Path.Combine(appPath, distroName);
-
-            if (!Directory.Exists(distroFolder))
-            {
-                Directory.CreateDirectory(distroFolder);
-            }
-
-            return distroFolder;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return "";
-        }
-    }
-
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
         try
         {
-            var distroFolder = CreateDistributionFolder(distroName);
+            //var distroFolder = CreateDistributionFolder(distroName);
+            var distroFolder = FilesHelper.CreateDirectory(App.appDirPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {
@@ -156,7 +129,7 @@ public class DistributionService : IDistributionService
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
-            TerminateDistribution(newDistro.Name); // to read ext4 file
+            await TerminateDistribution(newDistro.Name); // to read ext4 file
 
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
@@ -212,7 +185,7 @@ public class DistributionService : IDistributionService
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
-    public bool RenameDistribution(Distribution distribution, string newDistroName)
+    public async Task<bool> RenameDistribution(Distribution distribution, string newDistroName)
     {
         Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
@@ -235,7 +208,7 @@ public class DistributionService : IDistributionService
                 distroSubkeys.Close();
 
                 distribution.Name = newDistroName;
-                TerminateDistribution(distribution.Name); // solve open file system error just after renaming distro
+                await TerminateDistribution(distribution.Name); // solve open file system error just after renaming distro
                 return true;
             }
 
@@ -371,7 +344,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    private static async void TerminateDistribution(string distroName)
+    private static async Task TerminateDistribution(string distroName)
     {
         try
         {

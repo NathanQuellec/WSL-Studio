@@ -16,6 +16,7 @@ using Community.Wsl.Sdk;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Views.Dialogs;
+using CommunityToolkit.WinUI.UI.Controls;
 
 namespace WSLStudio;
 
@@ -29,6 +30,15 @@ public partial class App : Application
     // https://docs.microsoft.com/dotnet/core/extensions/logging
 
     public static bool IsDistributionProcessing { get; set; } = false;
+
+    private static readonly string ROAMING_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+    private const string APP_FOLDER_NAME = "WslStudio";
+    private const string TMP_FOLDER_NAME = ".tmp";
+    private const string LOG_FOLDER_NAME = ".log";
+
+    public static string? appDirPath { get; set; }
+    public static string? tmpDirPath { get; set; }
+    public static string? logDirPath { get; set; }
 
     public IHost Host
     {
@@ -47,6 +57,22 @@ public partial class App : Application
     }
 
     public static WindowEx MainWindow { get; } = new MainWindow();
+
+    private static void CreateAppFolders()
+    {
+        appDirPath = FilesHelper.CreateDirectory(ROAMING_PATH, APP_FOLDER_NAME);
+
+        if (appDirPath == null)
+        {
+            Console.WriteLine("[ERROR] Cannot create app folder");
+            MainWindow.Close();
+        }
+        else
+        {
+            tmpDirPath = FilesHelper.CreateDirectory(appDirPath, TMP_FOLDER_NAME);
+            logDirPath = FilesHelper.CreateDirectory(appDirPath, LOG_FOLDER_NAME);
+        }
+    }
 
     public static async Task NoWslDialog()
     {
@@ -77,7 +103,6 @@ public partial class App : Application
         {
             fe.Loaded += (ss, se) => NoWslDialog();
         }
-
     }
 
     public static async Task VirtualizationDisabled()
@@ -192,5 +217,7 @@ public partial class App : Application
         {
             ShowVirtualizationDisabledDialog();
         }
+
+        CreateAppFolders();
     }
 }

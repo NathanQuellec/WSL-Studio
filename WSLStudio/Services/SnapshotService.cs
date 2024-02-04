@@ -5,6 +5,7 @@ using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
+using WSLStudio.Helpers;
 
 namespace WSLStudio.Services;
 
@@ -53,18 +54,13 @@ public class SnapshotService : ISnapshotService
     {
 
         var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
-        var snapshotFolder = Path.Combine(distribution.Path, "snapshots");
-
-        if (!Directory.Exists(snapshotFolder))
-        {
-            Directory.CreateDirectory(snapshotFolder);
-        }
+        var snapshotFolder = FilesHelper.CreateDirectory(distribution.Path, "snapshots");
 
         var snapshotId = Guid.NewGuid();
-        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
 
         try
         {
+            var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
             await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
             decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
