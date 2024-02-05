@@ -2,45 +2,85 @@
 'https://plantuml.com/class-diagram
 
 !theme vibrant
-IDistributionService <|-- DistributionService
-DistributionService --> DistributionFactory
-IWslService <|-- WslService
 
-IDialogBuilderService <|-- DialogBuilderService
-IInfoBarService <|-- InfoBarService
+DockerHelper --> AuthToken
+DockerHelper --> ImageManifest
+DockerHelper --> App
 
 DistributionFactory <|-- ArchiveDistributionFactory
 DistributionFactory <|-- DockerfileDistributionFactory
-DistributionFactory --> ProcessBuilderHelper
-DockerfileDistributionFactory --> DockerHelper
 DistributionFactory <|-- DockerHubDistributionFactory
-DockerHubDistributionFactory --> DockerHelper
+DistributionFactory --> ProcessBuilderHelper
 
+ArchiveDistributionFactory --> Distribution
+DockerfileDistributionFactory --> DockerHelper
+DockerfileDistributionFactory --> Distribution
+DockerHubDistributionFactory --> DockerHelper
+DockerHubDistributionFactory --> Distribution
+DockerHubDistributionFactory --> FilesHelper
+DockerHubDistributionFactory --> ArchiveHelper
+DockerHubDistributionFactory --> App
+
+IDistributionService <|-- DistributionService
 DistributionService o-- Distribution
 DistributionService --> ProcessBuilderHelper
+DistributionService --> FilesHelper
+DistributionService --> DistributionFactory
+DistributionService --> ArchiveDistributionFactory
+DistributionService --> DockerfileDistributionFactory
+DistributionService --> DockerHubDistributionFactory
+DistributionService --> IDistributionInfosService
+DistributionService --> ISnapshotService
 
-DistrosListDetailsVM ..> IDialogBuilderService
+IDistributionInfosService <|-- DistributionInfosService
+DistributionInfosService --> WslImageHelper
+DistributionInfosService --> Distribution
+
+ISnapshotService <|-- SnapshotService
+SnapshotService --> FilesHelper
+SnapshotService --> Distribution
+SnapshotService --> Snapshot
+
+IInfoBarService <|-- InfoBarService
+
+IWslService <|-- WslService
+WslService --> ProcessBuilderHelper
+
+Distribution o-- Snapshot
+ImageManifest o-- Config
+
+DistrosListDetailsVM ..> TextInputValidationHelper
 DistrosListDetailsVM ..> IInfoBarService
 DistrosListDetailsVM ..> IDistributionService
-DistrosListDetailsView ..> DistrosListDetailsVM
+DistrosListDetailsVM --> Distribution
 DistrosListDetailsVM --> App
 DistrosListDetailsVM --> CreateDistroDialogView
+DistrosListDetailsVM --> ISnapshotService
+
+DisplaySnapshotsVM --> Snapshot
+DisplaySnapshotsVM ..> ISnapshotService
+DisplaySnapshotsVM --> App
+
+DistrosListDetailsView ..> DistrosListDetailsVM
+
+DisplaySnapshotsView --> ProcessBuilderHelper
+DisplaySnapshotsView ..> DisplaySnapshotsVM
+DisplaySnapshotsView --> Snapshot
+
 
 App ..> IWslService
-App ..> IDialogBuilderService
-App --> MainWindow
+App --> FilesHelper
 
-class Distribution
-{
-    + <<property>> Id: Guid
-    + <<property>> Path: string
-    + <<property>> IsDefault: bool
-    + <<property>> WslVersion: int
-    + <<property>> Name: string
-    + <<event>> PropertyChanged: PropertyChangedEventHandler?
-    # <<virtual>> OnPropertyChanged(propertyName: string?)
+
+'--------------Helpers--------------'
+class ArchiveHelper{
+    + {static} MergeArchive(tarPathList: List<string> , destPath: string): Task
+    + {static} DecompressArchive(path: string): Task<string?>
 }
-
+class FilesHelper{
+    + {static} CreateDirectory(parentDirPath: string, dirName: string): string?
+    + {static} RemoveDirContent(dirPath: string)
+}
 class ProcessBuilderHelper
 {
     - _process: Process
@@ -55,15 +95,91 @@ class ProcessBuilderHelper
 
 class DockerHelper {
   - _dockerClient: DockerClient
+  - DOCKER_NAMED_PIPE: string
+  - DOCKER_REGISTRY: string
   + DockerHelper()
   + {static} CreateTarballForDockerfileDirectory(directory: string): Stream
   + BuildDockerImage(workingDirectory: string, imageName: string): Task
-  + PullImageFromDockerHub(imageName: string): Task
+  + PullImageFromDockerHub(imageName: string, imageTag: string): Task
   + CreateDockerContainer(imageName: string, containerName: string): Task<CreateContainerResponse?>
   + ExportDockerContainer(containerName: string, targetPath: string): Task
   + RemoveDockerImage(imageName: string): Task
+  + RemoveDockerContainer(containerId: string): Task
+  + {static} GetAuthToken(imageName: string): Task<AuthToken?>
+  + {static} GetImageManifest(authToken: AuthToken, imageName: string, imageTag: string): Task<ImageManifest?>
+  + {static} GetLayers(authToken: AuthToken, imageManifest: ImageManifest, imageName: string): Task<List<string>?>
 }
 
+class TextInputValidationHelper
+{
+    - _textInput: string
+    + TextInputValidationHelper(textInput: string)
+    + NotNullOrWhiteSpace(): TextInputValidationHelper
+    + IncludeWhiteSpaceChar(): TextInputValidationHelper
+    + MinimumLength(): TextInputValidationHelper
+    + InvalidCharacters(): TextInputValidationHelper
+    + DataAlreadyExist(): TextInputValidationHelper
+}
+
+class WslImageHelper {
+  - _vhdxImagePath: string
+  + WslImageHelper(vhdxImagePath: string)
+  + ReadFile(fileToExtract: string): string
+}
+
+'--------------Models--------------'
+
+class Distribution
+{
+    + <<property>> Id: Guid
+    + <<property>> Path: string
+    + <<property>> WslVersion: int
+    + <<property>> Name: string
+    + <<property>> OsName: string
+    + <<property>> OsVersion: string
+    + <<property>> Users: IList<string>
+    + <<property>> Snapshots: ObservableCollection<Snapshot>
+    + <<property>> RunningProcesses: IList<Process>
+    + <<event>> PropertyChanged: PropertyChangedEventHandler?
+    # <<virtual>> OnPropertyChanged(propertyName: string?)
+}
+
+class Snapshot
+{
+    + <<property>> Id: Guid
+    + <<property>> Name: string
+    + <<property>> Description: string
+    + <<property>> CreationDate: string
+    + <<property>> Size: string
+    + <<property>> DistroSize: string
+    + <<property>> Path: string
+}
+
+class AuthToken
+{
+    + <<property>> Token: string
+    + <<property>> AccessToken: string
+    + <<property>> ExpiresIn: long
+    + <<property>> IssuedAt: DateTimeOffset
+}
+
+class ImageManifest
+{
+    + <<property>> SchemaVersion: int
+    + <<property>> MediaType: string
+    + <<property>> Config: Config
+    + <<property>> Layers: List<Config>
+}
+
+class Config
+{
+    + <<property>> MediaType: string
+    + <<property>> Size: int
+    + <<property>> Digest: string
+}
+
+
+'--------------Services--------------'
 
 interface IDistributionService 
 {
@@ -71,34 +187,82 @@ interface IDistributionService
 	+ GetAllDistributions() : IEnumerable<Distribution>
 	+ CreateDistribution(creationMode: string, distroName: string, resourceOrigin: string): Task<Distribution?>
 	+ RemoveDistribution(distribution: Distribution)
-	+ RenameDistribution(distribution: Distribution): bool
+	+ RenameDistribution(distribution: Distribution, newDistroName: string): Task<bool>
 	+ LaunchDistribution(distribution: Distribution)
 	+ StopDistribution(distribution: Distribution)
 	+ OpenDistributionFileSystem(distribution: Distribution)
+	+ OpenDistributionWithVsCode(distribution: Distribution)
+	+ OpenDistroWithWinTerm(distribution: Distribution)
 }
 
 class DistributionService 
 {
 	- WSL_UNC_PATH: string
-	- APP_FOLDER: string
 	- _distros: IList<Distribution>
 	- _wslApi: WslApi
-	- _factory: DistributionFactory?
+	- _distroInfosService: IDistributionInfosService
+	- _snapshotService: ISnapshotService
+	+ DistributionService(_snapshotService: ISnapshotService, _distroInfosService: IDistributionInfosService)
 	+ InitDistributionsList()
 	+ GetAllDistributions() : IEnumerable<Distribution>
-	- {static} CreateDistributionFolder(distroName: string) : Task<string>
 	+ CreateDistribution(creationMode: string, distroName: string, resourceOrigin: string): Task<Distribution?>
-	+ RemoveDistribution(distribution: Distribution): bool
-	+ RenameDistribution(distribution: Distribution, newDistroName: string)
+	+ RemoveDistribution(distribution: Distribution): Task
+	+ RemoveDistributionFolder(distribution: Distribution)
+	+ RenameDistribution(distribution: Distribution, newDistroName: string) Task<bool>
 	+ LaunchDistribution(distribution: Distribution)
+	- {static} CheckRunningDistribution(distribution: Distribution): Task<bool>
+	- {static} BackgroundLaunchDistribution(distribution: Distribution)
 	+ StopDistribution(distribution: Distribution)
+	- {static} TerminateDistribution(distroName: string): Task
 	+ OpenDistributionFileSystem(distribution: Distribution)
+	+ OpenDistributionWithVsCode(distribution: Distribution)
+	+ OpenDistroWithWinTerm(distribution: Distribution)
+}
+
+interface IDistributionInfosService 
+{
+	+ GetOsInfos(distro: Distribution, field: string): string
+	+ GetSize(distroPath: string): string
+	+ GetDistributionUsers(distribution: Distribution): List<string>
+}
+
+class DistributionInfosService 
+{
+    - WSL_UNC_PATH: string
+	+ GetOsInfos(distro: Distribution, field: string): string
+	- {static} GetOsInfosFromExt4(distroPath: string, osInfosFilePath: string, osInfosPattern: string): string
+	- {static} GetOsInfosFromFileSystem(distroName: string, osInfosPattern: string): string
+	+ GetSize(distroPath: string): string
+	+ GetDistributionUsers(distribution: Distribution): List<string>
+	- {static} GetUsersFromExt4(distroPath: string, userShellPattern: string): List<string>
+	- {static} GetUsersFromFileSystem(distroName: string, userShellPattern: string): List<string>
+}
+
+interface ISnapshotService
+{
+    + GetDistributionSnapshots(distroPath: string): ObservableCollection<Snapshot>
+    + CreateDistroSnapshot(distribution: Distribution, snapshotName: string, snapshotDescr: string): Task<bool>
+    + DeleteSnapshotFile(snapshot: Snapshot)
+    + DeleteSnapshotInfosRecord(snapshot: Snapshot)
+}
+
+class SnapshotService
+{
+    - _wslService: IWslService
+    + SnapshotService(wslService: IWslService)
+    + GetDistributionSnapshots(distroPath: string): ObservableCollection<Snapshot>
+    + CreateDistroSnapshot(distribution: Distribution, snapshotName: string, snapshotDescr: string): Task<bool>
+    - {static} CompressSnapshot(snapshotPath: string): Task<decimal>
+    - {static} SaveDistroSnapshotInfos(snapshot: Snapshot, snapshotFolder: string): Task
+    + DeleteSnapshotFile(snapshot: Snapshot)
+    + DeleteSnapshotInfosRecord(snapshot: Snapshot)
 }
 
 interface IWslService
 {
 	+ CheckWsl(): bool
 	+ CheckHypervisor(): bool
+	+ ExportDistribution(distroName: string, destPath: string): Task
 }
 
 class WslService
@@ -106,24 +270,7 @@ class WslService
 	- _wslApi: WslApi
 	+ CheckWsl(): bool
 	+ CheckHypervisor(): bool
-}
-
-abstract class DistributionFactory
-{
-    + {abstract} CreateDistribution(distroName: string, resourceOrigin: string, targetFolder: string): Task<Distribution?>
-    + {static} ImportDistribution(string distroName, string installDir, string tarLocation) : Task
-}
-
-class ArchiveDistributionFactory {
-  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
-}
-
-class DockerfileDistributionFactory {
-  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
-}
-
-class DockerHubDistributionFactory {
-  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+	+ ExportDistribution(distroName: string, destPath: string): Task
 }
 
 interface IInfoBarService 
@@ -137,72 +284,86 @@ interface IInfoBarService
 class InfoBarService 
 {
   + FindInfoBar(infoBarName: string): InfoBar
+  - {static} StopTimerInfoBar(sender: object, e: ElapsedEventArgs, inforBar: InfoBar)
   + OpenInfoBar(infoBar: InfoBar, time: double): void
   + OpenInfoBar(infoBar: InfoBar): void
   + CloseInfoBar(infoBar: InfoBar): void
 }
 
-interface IDialogBuilderService 
+abstract class DistributionFactory
 {
-  + SetTitle(title: object) : IDialogBuilderService
-  + SetContent(content: object) : IDialogBuilderService
-  + SetPrimaryButtonText(primaryButtonText: string) : IDialogBuilderService
-  + SetPrimaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetSecondaryButtonText(secondaryButtonText: string) : IDialogBuilderService
-  + SetSecondaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetCloseButtonText(closeButtonText: string) : IDialogBuilderService
-  + SetCloseButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetDefaultButton(button: ContentDialogButton) : IDialogBuilderService
-  + SetXamlRoot(xamlRoot: XamlRoot) : IDialogBuilderService
-  + AddContent(element: FrameworkElement) : IDialogBuilderService
-  + Build() : ContentDialog
+    + {abstract} CreateDistribution(distroName: string, resourceOrigin: string, targetFolder: string): Task<Distribution?>
+    + {static} ImportDistribution(string distroName, string installDir, string tarLocation) : Task
+    + {static} RemoveDistributionArchive(tarLocation: string)
 }
 
-class DialogBuilderService 
-{
-  - _contentDialog : ContentDialog
-  - _stackPanel : StackPanel
-  + SetTitle(title: object) : IDialogBuilderService
-  + SetContent(content: object) : IDialogBuilderService
-  + SetPrimaryButtonText(primaryButtonText: string) : IDialogBuilderService
-  + SetPrimaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetSecondaryButtonText(secondaryButtonText: string) : IDialogBuilderService
-  + SetSecondaryButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetCloseButtonText(closeButtonText: string) : IDialogBuilderService
-  + SetCloseButtonClick(clickEventHandler: TypedEventHandler<ContentDialog, ContentDialogButtonClickEventArgs>) : IDialogBuilderService
-  + SetDefaultButton(button: ContentDialogButton) : IDialogBuilderService
-  + SetXamlRoot(xamlRoot: XamlRoot) : IDialogBuilderService
-  + Build() : ContentDialog
+class ArchiveDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
 }
+
+class DockerfileDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+}
+
+class DockerHubDistributionFactory {
+  + CreateDistribution(string distroName, string resourceOrigin, string targetFolder) : Task<Distribution?>
+}
+'--------------View Models--------------'
 
 class DistrosListDetailsVM 
 {
   - _distributionService : IDistributionService
-  - _dialogBuilderService : IDialogBuilderService
-  - _isDistroCreationProcessing: bool
+  - _snapshotService : ISnapshotService
+  - _infoBarService : IInfoBarService
   
-  + <<property>> RemoveDistroCommand : RelayCommand<Distribution>
+  + <<property>> RemoveDistroCommand : AsyncRelayCommand<Distribution>
   + <<property>> RenameDistroCommand : AsyncRelayCommand<Distribution>
   + <<property>> LaunchDistroCommand : RelayCommand<Distribution>
   + <<property>> StopDistroCommand : RelayCommand<Distribution>
-  + <<property>> OpenDistroFileSystemCommand : RelayCommand<Distribution>
+  + <<property>> OpenDistroWithFileExplorerCommand : RelayCommand<Distribution>
+  + <<property>> OpenDistroWithVsCodeCommand : RelayCommand<Distribution>
+  + <<property>> OpenDistroWithWinTermCommand : RelayCommand<Distribution>
+  + <<property>> CreateDistroCommand : AsyncRelayCommand
+  + <<property>> CreateSnapshotCommand : AsyncRelayCommand<Distribution>
+  + <<property>> DisplaySnapshotsListCommand : AsyncRelayCommand<Distribution>
   + <<property>> Distros : ObservableCollection<Distribution>
   
-  + DistrosListDetailsVM(distributionService: IDistributionService, infoBarService: IInfoBarService)
+  
+  + DistrosListDetailsVM(distributionService: IDistributionService, snapshotService: ISnapshotService, infoBarService: IInfoBarService)
   - PopulateDistributionsCollection()
   - RemoveDistributionDialog(distribution: Distribution): Task
-  - RemoveDistributionViewModel(distribution: Distribution?)
-  - ValidateDistributionName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - RemoveDistributionViewModel(distribution: Distribution)
   - RenameDistributionDialog(distribution: Distribution) : Task
-  - RenameDistributionViewModel(distribution: Distribution, newDistroName: string)
+  - ValidateRenameDistribution(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - ValidateDistributionName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - RenameDistributionViewModel(distribution: Distribution, newDistroName: string): Task
   - LaunchDistributionViewModel(distribution: Distribution)
   - StopDistributionViewModel(distribution: Distribution)
-  - OpenDistributionFileSystemViewModel(distribution: Distribution)
-  - ValidateCreationMode(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
-  - GetDistributionCreationInfos(dialog: ContentDialog): Tuple<string, string, string>
+  - OpenDistributionWithFileExplorerViewModel(distribution: Distribution)
+  - OpenDistributionWithVsCodeViewModel(distribution: Distribution)
+  - OpenDistroWithWinTermViewModel(distribution: Distribution)
+  - {static} GetDistroCreationFormInfos(dialog: ContentDialog): Tuple<string, string, string>
   - CreateDistributionDialog(): Task
+  - ValidateCreateDistribution(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - {static} ValidateCreationMode(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
   - CreateDistributionViewModel(creationMode: string, distroName: string, resourceOrigin: string): Task
+  - DisplaySnapshotsList(distribution: Distribution): Task
+  - CreateSnapshotDialog(distribution: Distribution): Task
+  - {static} ValidateSnapshotName(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+  - CreateSnapshotViewModel(distribution: Distribution, snapshotName: string, snapshotDescr: string): Task
 }
+
+class DisplaySnapshotsVM
+{
+    - _snapshotService: ISnapshotService
+    - _distrosViewModel: DistrosListDetailsVM
+    + <<property>> DeleteSnapshotCommand : RelayCommand<Snapshot>
+    + DisplaySnapshotsVM(snapshotService: ISnapshotService)
+    + DeleteSnapshotViewModel(snapshot: Snapshot)
+    + CreateDistroFromSnapshot(sender: ContentDialog, args: ContentDialogButtonClickEventArgs)
+}
+
+'--------------Views--------------'
 
 class DistrosListDetailsView
 {
@@ -210,6 +371,16 @@ class DistrosListDetailsView
     + <<property>> ViewModel: DistrosListDetailsVM
     + DistrosListDetailsView()
     - FindDistroStopButton(parent: DependencyObject, findDistroName: string)
+}
+
+class DisplaySnapshotsView
+{
+    + <<property>> ViewModel: DisplaySnapshotsVM
+    + DisplaySnapshotsView()
+    - OpenSnapshotsFolder(sender: object, args: RoutedEventArgs)
+    - OpenDeleteSnapshotDialog(sender: object, args: RoutedEventArgs)
+    - DeleteSnapshot(snapshot: Snapshot)
+    - OpenCreateDistroDialog(sender: object, args: RoutedEventArgs)
 }
 
 class CreateDistroDialogView
@@ -221,21 +392,25 @@ class CreateDistroDialogView
 
 class App
 {
+    - {static} IsDistributionProcessing: bool
+    - {static} ROAMING_PATH: string
+    - APP_FOLDER_NAME: string
+    - TMP_FOLDER_NAME: string
+    - LOG_FOLDER_NAME: string
+    + <<property>> appDirPath: string?
+    + <<property>> tmpDirPath: string?
+    + <<property>> logDirPath: string?
     + <<property>> Host: IHost
     + {static} <<property>> MainWindow: WindowEx
     + App()
     + {static} GetService<T>(): T
+    - {static} CreateAppFolders()
     + {static} NoWslDialog(): Task
     + {static} ShowNoWslDialog()
-    + {static} VirtualizationDisabled(): Task
+    + {static} VirtualizationDisabledDialog(): Task
     + {static} ShowVirtualizationDisabledDialog
     - App_UnhandledException(sender: object, e: UnhandledExceptionEventArgs)
     # OnLaunched(args: LaunchActivatedEventArgs)
-}
-
-class MainWindow
-{
-    + MainWindow()
 }
 
 @enduml

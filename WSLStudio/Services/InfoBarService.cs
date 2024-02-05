@@ -28,7 +28,7 @@ public class InfoBarService : IInfoBarService
     }
 
     // Send a message to the view to close the InfoBar
-    private void StopTimerInfoBar(object sender, ElapsedEventArgs e, InfoBar infoBar)
+    private static void StopTimerInfoBar(object sender, ElapsedEventArgs e, InfoBar infoBar)
     {
         var timer = sender as Timer;
         WeakReferenceMessenger.Default.Send(new CloseInfoBarMessage(infoBar));

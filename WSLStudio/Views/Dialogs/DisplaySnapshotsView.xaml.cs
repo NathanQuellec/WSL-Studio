@@ -27,7 +27,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         this.ViewModel = App.GetService<DisplaySnapshotsVM>();
     }
 
-    private void  OpenSnapshotsFolder(object sender, RoutedEventArgs args)
+    private void OpenSnapshotsFolder(object sender, RoutedEventArgs args)
     {
         var distribution = this.DataContext as Distribution;
         var snapshotsFolderPath = Path.Combine(distribution!.Path, "snapshots");

@@ -13,13 +13,12 @@ namespace WSLStudio.Services;
 public class DistributionInfosService : IDistributionInfosService
 {
     private const string WSL_UNC_PATH = @"\\wsl$";
-    private readonly object _lock = new object();
 
     /*  To get distributions infos, we try at first to read the image "ext4.vhdx" and open the file /etc/os-release.
         If we cannot read ext4.dhdx, that means the distribution is runningand we can get os-release file from the 
         file system located at \\wsl$\distroname\...
     */
-    public string GetOsInfos(Distribution distro, string field)
+    public string GetOsInfos(Distribution distribution, string field)
     {
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
         var osInfosFile = Path.Combine("etc", "os-release");
@@ -28,14 +27,14 @@ public class DistributionInfosService : IDistributionInfosService
 
         try
         {
-            osInfos = GetOsInfosFromExt4(distro.Path, osInfosFile, osInfosPattern);
+            osInfos = GetOsInfosFromExt4(distribution.Path, osInfosFile, osInfosPattern);
         }
         catch (FileNotFoundException ex)
         {
             // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
 
             Console.WriteLine("Didn't find /etc/os-release, retry with fallback file : " + ex.Message);
-            osInfos = GetOsInfosFromExt4(distro.Path, osInfosFileFallBack, osInfosPattern);
+            osInfos = GetOsInfosFromExt4(distribution.Path, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
         {
@@ -44,7 +43,7 @@ public class DistributionInfosService : IDistributionInfosService
              */
 
             Console.WriteLine("Another process is already reading ext4.vhdx : " + ex.Message);
-            osInfos = GetOsInfosFromFileSystem(distro.Name, osInfosPattern);
+            osInfos = GetOsInfosFromFileSystem(distribution.Name, osInfosPattern);
         }
         catch (Exception ex)
         {
@@ -55,7 +54,7 @@ public class DistributionInfosService : IDistributionInfosService
         return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
     }
 
-    private string GetOsInfosFromExt4(string distroPath, string osInfosFilePath, string osInfosPattern)
+    private static string GetOsInfosFromExt4(string distroPath, string osInfosFilePath, string osInfosPattern)
     {
         var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
 
@@ -154,7 +153,7 @@ public class DistributionInfosService : IDistributionInfosService
         return usersList;
     }
 
-    private List<string> GetUsersFromExt4(string distroPath, string userShellPattern)
+    private static List<string> GetUsersFromExt4(string distroPath, string userShellPattern)
     {
         var passwdFilePath = Path.Combine("etc", "passwd");
         var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
@@ -184,10 +183,9 @@ public class DistributionInfosService : IDistributionInfosService
         }
     }
 
-    private List<string> GetUsersFromFileSystem(string distroName, string userShellPattern)
+    private static List<string> GetUsersFromFileSystem(string distroName, string userShellPattern)
     {
         var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
-        var usersList = new List<string>();
 
         try
         {

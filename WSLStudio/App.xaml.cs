@@ -45,6 +45,8 @@ public partial class App : Application
         get;
     }
 
+    public static WindowEx MainWindow { get; } = new MainWindow();
+
     public static T GetService<T>()
         where T : class
     {
@@ -55,8 +57,6 @@ public partial class App : Application
 
         return service;
     }
-
-    public static WindowEx MainWindow { get; } = new MainWindow();
 
     private static void CreateAppFolders()
     {
@@ -105,7 +105,7 @@ public partial class App : Application
         }
     }
 
-    public static async Task VirtualizationDisabled()
+    public static async Task VirtualizationDisabledDialog()
     {
         try
         {
@@ -132,7 +132,7 @@ public partial class App : Application
     {
         if (MainWindow.Content is FrameworkElement fe)
         {
-            fe.Loaded += (ss, se) => VirtualizationDisabled();
+            fe.Loaded += (ss, se) => VirtualizationDisabledDialog();
         }
     }
 

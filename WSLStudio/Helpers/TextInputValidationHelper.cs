@@ -8,16 +8,16 @@ namespace WSLStudio.Helpers;
 
 public class TextInputValidationHelper
 {
-    private readonly string _textInputl;
+    private readonly string _textInput;
 
     public TextInputValidationHelper(string textInput)
     {
-        _textInputl = textInput;
+        _textInput = textInput;
     }
 
     public TextInputValidationHelper NotNullOrWhiteSpace()
     {
-        if (string.IsNullOrWhiteSpace(_textInputl))
+        if (string.IsNullOrWhiteSpace(_textInput))
         {
             throw new ArgumentException($"cannot be empty.");
         }
@@ -27,7 +27,7 @@ public class TextInputValidationHelper
 
     public TextInputValidationHelper IncludeWhiteSpaceChar()
     {
-        if (_textInputl.Any(char.IsWhiteSpace))
+        if (_textInput.Any(char.IsWhiteSpace))
         {
             throw new ArgumentException($"cannot include white spaces.");
         }
@@ -37,7 +37,7 @@ public class TextInputValidationHelper
     // only min length -> max length is set with the xaml property of textbox
     public TextInputValidationHelper MinimumLength(int minLength)
     {
-        if (_textInputl.Length < minLength)
+        if (_textInput.Length < minLength)
         {
             throw new ArgumentException($"must be at least {minLength} characters long.");
         }
@@ -46,7 +46,7 @@ public class TextInputValidationHelper
 
     public TextInputValidationHelper InvalidCharacters(Regex regex, string regexDescr)
     {
-        if (!regex.IsMatch(_textInputl))
+        if (!regex.IsMatch(_textInput))
         {
             throw new ArgumentException($"cannot include {regexDescr}.");
         }
@@ -55,7 +55,7 @@ public class TextInputValidationHelper
 
     public TextInputValidationHelper DataAlreadyExist(List<string> collection)
     {
-        if (collection.Contains(_textInputl, StringComparer.OrdinalIgnoreCase))
+        if (collection.Contains(_textInput, StringComparer.OrdinalIgnoreCase))
         {
             throw new ArgumentException($"already exists.");
         }
