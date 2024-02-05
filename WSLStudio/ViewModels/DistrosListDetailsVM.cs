@@ -267,7 +267,7 @@ public class DistrosListDetailsVM : ObservableObject
     // return a tuple composed of the distro name, the resource origin (file/folder path or docker hub link)
     // and the creation mode chose by the user
     // TODO : Refactor
-    private Tuple<string, string, string> GetCreateDistroFormInfos(ContentDialog dialog)
+    private static Tuple<string, string, string> GetDistroCreationFormInfos(ContentDialog dialog)
     {
         var distroNameInput = dialog.FindChild("DistroNameInput") as TextBox;
         var distroName = distroNameInput!.Text;
@@ -318,7 +318,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         if (buttonClicked == ContentDialogResult.Primary)
         {
-            var (distroName, creationMode, resourceOrigin) = GetCreateDistroFormInfos(createDistroDialog);
+            var (distroName, creationMode, resourceOrigin) = GetDistroCreationFormInfos(createDistroDialog);
 
             await CreateDistributionViewModel(distroName, creationMode, resourceOrigin);
         }

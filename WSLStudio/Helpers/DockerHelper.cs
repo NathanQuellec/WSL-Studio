@@ -75,7 +75,6 @@ public class DockerHelper
         return tarball;
     }
 
-
     public async Task BuildDockerImage(string workingDirectory, string imageName)
     {
         try
@@ -223,10 +222,10 @@ public class DockerHelper
         }
     }
 
-    public static async Task<AuthToken?> GetAuthToken(string image)
+    public static async Task<AuthToken?> GetAuthToken(string imageName)
     {
         var uriString =
-            $@"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{image}:pull";
+            $@"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{imageName}:pull";
 
         var uri = new Uri(uriString);
         using var httpClient = new HttpClient();
@@ -247,9 +246,9 @@ public class DockerHelper
         
     }
 
-    public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string image, string tag)
+    public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
     {
-        var uriString = $@"{DOCKER_REGISTRY}/{image}/manifests/{tag}";
+        var uriString = $@"{DOCKER_REGISTRY}/{imageName}/manifests/{imageTag}";
         var uri = new Uri(uriString);
         using var httpClient = new HttpClient();
 
@@ -271,7 +270,7 @@ public class DockerHelper
         }
     }
 
-    public static async Task<List<string>?> GetLayers(AuthToken authToken, ImageManifest imageManifest, string image)
+    public static async Task<List<string>?> GetLayers(AuthToken authToken, ImageManifest imageManifest, string imageName)
     {
         try
         {
@@ -287,7 +286,7 @@ public class DockerHelper
                 var destPath = Path.Combine(App.tmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
-                var uriString = $@"{DOCKER_REGISTRY}/{image}/blobs/{layer.Digest}";
+                var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";
 
                 var uri = new Uri(uriString);
                 using var httpResponse = await httpClient.GetAsync(uri);

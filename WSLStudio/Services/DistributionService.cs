@@ -169,7 +169,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    public void RemoveDistributionFolder(Distribution distribution)
+    private static void RemoveDistributionFolder(Distribution distribution)
     {
         var distroPath = Directory.GetParent(distribution.Path).FullName;
 
