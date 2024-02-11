@@ -10,6 +10,7 @@ using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
@@ -128,7 +129,7 @@ public class DistrosListDetailsVM : ObservableObject
 
     private async Task RenameDistributionDialog(Distribution distribution)
     {
-        Console.WriteLine($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
+        Log.Information($"[INFO] Command called : Opening ContentDialog to rename {distribution.Name} ...");
 
         try
         {
@@ -149,9 +150,8 @@ public class DistrosListDetailsVM : ObservableObject
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error(ex.Message);
         }
-
     }
 
     private void ValidateRenameDistribution(ContentDialog sender, ContentDialogButtonClickEventArgs args)

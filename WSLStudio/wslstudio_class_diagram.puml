@@ -49,9 +49,10 @@ WslService --> ProcessBuilderHelper
 Distribution o-- Snapshot
 ImageManifest o-- Config
 
-DistrosListDetailsVM ..> TextInputValidationHelper
+
 DistrosListDetailsVM ..> IInfoBarService
 DistrosListDetailsVM ..> IDistributionService
+DistrosListDetailsVM --> TextInputValidationHelper
 DistrosListDetailsVM --> Distribution
 DistrosListDetailsVM --> App
 DistrosListDetailsVM --> CreateDistroDialogView
@@ -397,14 +398,14 @@ class App
     - APP_FOLDER_NAME: string
     - TMP_FOLDER_NAME: string
     - LOG_FOLDER_NAME: string
-    + <<property>> appDirPath: string?
-    + <<property>> tmpDirPath: string?
-    + <<property>> logDirPath: string?
+    + <<property>> AppDirPath: string?
+    + <<property>> TmpDirPath: string?
+    + <<property>> LogDirPath: string?
     + <<property>> Host: IHost
     + {static} <<property>> MainWindow: WindowEx
     + App()
     + {static} GetService<T>(): T
-    - {static} CreateAppFolders()
+    - {static} CreateProjectFolders()
     + {static} NoWslDialog(): Task
     + {static} ShowNoWslDialog()
     + {static} VirtualizationDisabledDialog(): Task

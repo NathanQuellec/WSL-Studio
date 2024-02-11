@@ -108,7 +108,7 @@ public class DistributionService : IDistributionService
         try
         {
             //var distroFolder = CreateDistributionFolder(distroName);
-            var distroFolder = FilesHelper.CreateDirectory(App.appDirPath, distroName);
+            var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {

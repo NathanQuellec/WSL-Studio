@@ -283,7 +283,7 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(App.tmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.TmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
                 var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";
