@@ -30,6 +30,7 @@ public class WslService : IWslService
             .SetCreateNoWindow(true)
             .Build();
         processBuilder.Start();
+
         var output = processBuilder.StandardOutput.ReadToEnd();
         var virtualizationEnabled = bool.Parse(output);
         
@@ -46,6 +47,7 @@ public class WslService : IWslService
             .SetCreateNoWindow(true)
             .Build();
         processBuilder.Start();
+
         await processBuilder.WaitForExitAsync();
     }
 }

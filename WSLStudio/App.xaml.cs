@@ -61,11 +61,12 @@ public partial class App : Application
 
     private static void CreateProjectFolders()
     {
+        Log.Information("Creating project folders ...");
         AppDirPath = FilesHelper.CreateDirectory(ROAMING_PATH, APP_FOLDER_NAME);
 
         if (AppDirPath == null)
         {
-            Console.WriteLine("[ERROR] Cannot create app folder");
+            Log.Error("Cannot create project folders");
             MainWindow.Close();
         }
         else
@@ -93,7 +94,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open NoWSL dialog - Caused by exception : {ex}");
             MainWindow.Close();
         }
     }
@@ -124,7 +125,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open VirtualizationDisabled dialog - Caused by exception : {ex}");
             MainWindow.Close();
         }
     }
@@ -152,7 +153,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open ShowSnapshotProcessing dialog - Caused by exception : {ex}");
         }
     }
 
@@ -195,10 +196,10 @@ public partial class App : Application
         UnhandledException += App_UnhandledException;
     }
 
-    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs ex)
     {
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
-        Console.WriteLine("App_UnhandledException caught : " + e.Message);
+        Log.Debug($"App_UnhandledException caught : {ex}");
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
@@ -226,7 +227,7 @@ public partial class App : Application
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File(Path.Combine(LogDirPath, "log.txt"))
+            .WriteTo.File(Path.Combine(LogDirPath, "log.txt")) // add current date or rolling
             .CreateLogger();
         Log.Information("Test log");
     }

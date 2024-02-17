@@ -6,6 +6,7 @@ using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
+using Serilog;
 
 namespace WSLStudio.Services.Factories;
 
@@ -13,6 +14,8 @@ public class DockerfileDistributionFactory : DistributionFactory
 {
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
+        Log.Information("Creating distribution from Dockerfile ...");
+
         var containerName = $"wsl-studio-{distroName.ToLower()}";
         var imageName = containerName;
         var distroTarFile = $"{distroName}.tar.gz";
@@ -33,7 +36,7 @@ public class DockerfileDistributionFactory : DistributionFactory
             await docker.RemoveDockerContainer(container!.ID);
             await docker.RemoveDockerImage(imageName);
 
-            Console.WriteLine("[INFO] Distribution creation from Dockerfile succeed.");
+            Log.Information("Distribution creation from Dockerfile succeed.");
 
             return new Distribution()
             {
@@ -43,12 +46,12 @@ public class DockerfileDistributionFactory : DistributionFactory
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to create distribution from Dockerfile - Caused by exception : {ex}");
             throw;
         }
     }

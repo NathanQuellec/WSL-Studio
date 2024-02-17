@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ICSharpCode.SharpZipLib.GZip;
+using Serilog;
 
 namespace WSLStudio.Helpers;
 
@@ -14,6 +15,8 @@ public static class ArchiveHelper
     // the new archive is just the result of all archives data with only one EOF marker.
     public static async Task MergeArchive(List<string> tarPathList, string destPath)
     {
+        Log.Information($"Merging archive files ...");
+
         try
         {
             using var mergedArchive = File.Open(destPath, FileMode.Append);
@@ -29,12 +32,13 @@ public static class ArchiveHelper
         }
         catch(Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to merged archive files - Caused by exception : {ex}");
         }
     }
        
     public static async Task<string?> DecompressArchive(string path)
     {
+        Log.Information($"Decompressing archive file ...");
         try
         {
             await using var tarGzFile = File.OpenRead(path);
@@ -52,7 +56,7 @@ public static class ArchiveHelper
         }
         catch(Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to decompress archive file - Caused by exception : {ex}");
             return null;
         }
     }

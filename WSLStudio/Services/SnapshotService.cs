@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using ICSharpCode.SharpZipLib.GZip;
 using System.Text;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
 using WSLStudio.Helpers;
@@ -20,6 +21,8 @@ public class SnapshotService : ISnapshotService
 
     public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
     {
+        Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
+
         var snapshotsList = new ObservableCollection<Snapshot>();
         var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
 
@@ -45,13 +48,14 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to populate list of snapshots from snapshot records file - Caused by exception {ex}");
             return new ObservableCollection<Snapshot>();
         }
     }
 
     public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
+        Log.Information($"Creating snapshot {snapshotName} from distribution {distribution.Name} ...");
 
         var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
         var snapshotFolder = FilesHelper.CreateDirectory(distribution.Path, "snapshots");
@@ -82,14 +86,14 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
-
+            Log.Error($"Failed to create snapshot {snapshotName} from distribution {distribution.Name} - Caused by exception {ex}");
             return false;
         }
     }
 
     private static async Task<decimal> CompressSnapshot(string snapshotPath)
     {
+        Log.Information($"Compressing snapshot from .tar to .tar.gz in location {snapshotPath}");
         try
         {
             var compressedFilePath = snapshotPath + ".gz";
@@ -106,13 +110,14 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Snapshot compression failed : " + ex.Message);
+            Log.Error($"Failed to compress snapshot in {snapshotPath} - Caused by exception : {ex}");
             throw;
         }
     }
 
     private static async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
     {
+        Log.Information($"Saving snapshot {snapshot.Name} information in {snapshotFolder} folder");
         try
         {
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
@@ -133,12 +138,13 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to save snapshot information - Caused by exception : {ex}");
         }
     }
 
     public void DeleteSnapshotFile(Snapshot snapshot)
     {
+        Log.Information("Deleting snapshot file ...");
         if (File.Exists(snapshot.Path))
         {
             File.Delete(snapshot.Path);
@@ -147,6 +153,7 @@ public class SnapshotService : ISnapshotService
 
     public async void DeleteSnapshotInfosRecord(Snapshot snapshot)
     {
+        Log.Information($"Delete snapshot {snapshot.Name} information records");
         try
         {
             var snapshotsFolder = Directory.GetParent(snapshot.Path)?.FullName;
@@ -161,7 +168,7 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to delete snapshot information records - Caused by exception : {ex}");
         }
     }
 }

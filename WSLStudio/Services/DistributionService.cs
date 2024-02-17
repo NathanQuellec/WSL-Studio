@@ -21,6 +21,7 @@ using DiscUtils.Ext;
 using DiscUtils.Streams;
 using DiscUtils.Vhdx;
 using System.IO;
+using Serilog;
 
 
 namespace WSLStudio.Services;
@@ -47,6 +48,7 @@ public class DistributionService : IDistributionService
     // TODO : Refactor InitDistributionsList
     public void InitDistributionsList()
     {
+        Log.Information("Fetching distributions list from windows registry ...");
         try
         {     
 
@@ -93,7 +95,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to fetch distributions list from windows registry - Caused by exception : {ex}");
         }
     }
 
@@ -145,7 +147,6 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
             RemoveDistributionFolder(new Distribution(){Name = distroName});
             throw;
         }
@@ -165,7 +166,7 @@ public class DistributionService : IDistributionService
         {
             _distros.Remove(distribution);
             RemoveDistributionFolder(distribution);
-            Console.WriteLine($"[INFO] Distribution {distribution?.Name} deleted");
+            Log.Information($"DistributionService successfully deleted {distribution?.Name}");
         }
     }
 
@@ -187,7 +188,7 @@ public class DistributionService : IDistributionService
      */
     public async Task<bool> RenameDistribution(Distribution distribution, string newDistroName)
     {
-        Console.WriteLine($"[INFO] Editing Registry for {distribution.Name} with key : {distribution.Id}");
+        Log.Information($"Editing registry for {distribution.Name} with key : {distribution.Id}");
         var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
 
         try
@@ -217,7 +218,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to edit registry");
             return false;
         }
     }
@@ -257,18 +258,19 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+            Log.Information($"New distribution process is running wiht ID : {process.Id} and NAME : {process.ProcessName} started");
             distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Log.Error($"Failed to start process for launching distribution {distribution.Name} - Caused by exception : {ex}");
         }
 
     }
 
     private static async Task<bool> CheckRunningDistribution(Distribution distribution)
     {
+        Log.Information($"Check running distribution for {distribution.Name}");
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
@@ -288,7 +290,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Log.Error($"Failed to start process to check running distribution - Caused by exception : {ex}");
             return false;
         }
     }
@@ -299,6 +301,8 @@ public class DistributionService : IDistributionService
     **/
     private static void BackgroundLaunchDistribution(Distribution distribution)
     {
+        Log.Information($"Launching distribution {distribution.Name} in background ...");
+
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
@@ -311,7 +315,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Log.Error($"Failed to start process for launching distribution in the background - Caused by exception : {ex}");
         }
     }
 
@@ -319,8 +323,7 @@ public class DistributionService : IDistributionService
     {
         if (distribution.RunningProcesses.Count == 0)
         {
-            Console.WriteLine($"[ERROR] Try to execute StopDistribution method but " +
-                            $"they are no processes running for {distribution!.Name}");
+            Log.Warning($"Trying to stop {distribution.Name} but they aren't processes running for it");
         }
         else
         {
@@ -332,8 +335,7 @@ public class DistributionService : IDistributionService
 
                 if (process.HasExited)
                 {
-                    Console.WriteLine($"[INFO] Process ID : {process.Id} and " +
-                                      $"NAME : {process.ProcessName} is closed");
+                    Log.Information($"Process ID : {process.Id} and NAME : {process.ProcessName} is closed");
                 }
                 else
                 {
@@ -346,6 +348,8 @@ public class DistributionService : IDistributionService
 
     private static async Task TerminateDistribution(string distroName)
     {
+        Log.Information($"Terminating distribution {distroName} ...");
+
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
@@ -359,7 +363,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to start process to terminate distribution - Caused by exception {ex}");
         }
     }
 
@@ -382,7 +386,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to start process for opening distribution file system");
         }
         
     }
@@ -406,12 +410,12 @@ public class DistributionService : IDistributionService
                 .SetCreateNoWindow(true)
                 .Build();
             process.Start();
-            Console.WriteLine($"[INFO] Process ID : {process.Id} and NAME : {process.ProcessName} started");
+            Log.Information($"Process ID : {process.Id} and NAME : {process.ProcessName} started");
            // distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ERROR] Process start failed for distro {distribution.Name}, reason : {ex}");
+            Log.Error($"Failed to start process for opening distro with WinTerm - Caused by {ex}");
         }
     }
 }

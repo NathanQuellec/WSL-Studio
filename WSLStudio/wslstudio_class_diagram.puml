@@ -231,7 +231,7 @@ class DistributionInfosService
 {
     - WSL_UNC_PATH: string
 	+ GetOsInfos(distro: Distribution, field: string): string
-	- {static} GetOsInfosFromExt4(distroPath: string, osInfosFilePath: string, osInfosPattern: string): string
+	- {static} GetOsInfosFromVhdx(distroPath: string, osInfosFilePath: string, osInfosPattern: string): string
 	- {static} GetOsInfosFromFileSystem(distroName: string, osInfosPattern: string): string
 	+ GetSize(distroPath: string): string
 	+ GetDistributionUsers(distribution: Distribution): List<string>

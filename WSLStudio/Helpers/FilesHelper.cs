@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 using SharpCompress;
 
 namespace WSLStudio.Helpers;
@@ -10,6 +11,7 @@ public static class FilesHelper
 {
     public static string? CreateDirectory(string parentDirPath, string dirName)
     {
+        Log.Information("Creating new directory ...");
         try
         {
             var newDirPath = Path.Combine(parentDirPath, dirName);
@@ -24,7 +26,7 @@ public static class FilesHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to create new directory - Caused by exception {ex}");
             return null;
         }
     }
