@@ -1,4 +1,5 @@
-﻿using WSLStudio.Helpers;
+﻿using Serilog;
+using WSLStudio.Helpers;
 using WSLStudio.Models;
 
 namespace WSLStudio.Contracts.Services.Factories;
@@ -9,6 +10,7 @@ public abstract class DistributionFactory
 
     public static async Task ImportDistribution(string distroName, string installDir, string tarLocation)
     {
+        Log.Information("Importing distribution ...");
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
@@ -24,8 +26,8 @@ public abstract class DistributionFactory
         }
         catch (Exception ex)
         {
-            Console.WriteLine("[ERROR] Failed to import distribution, reason: " + ex.Message);
-        }
+            Log.Error($"Failed to import distribution - Caused by exception {ex}");
+        } 
     }
 
     public static void RemoveDistributionArchive(string tarLocation)
@@ -33,7 +35,7 @@ public abstract class DistributionFactory
         if (File.Exists(tarLocation))
         {
             File.Delete(tarLocation);
-            Console.WriteLine("Temporary archive has been successfully deleted");
+            Log.Information("Temporary archive has been successfully deleted");
         }
     }
 }

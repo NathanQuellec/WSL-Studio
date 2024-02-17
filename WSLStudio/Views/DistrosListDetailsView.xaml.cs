@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI.Controls;
+using Serilog;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
@@ -35,6 +36,7 @@ public sealed partial class DistrosListDetailsView : Page
 
         WeakReferenceMessenger.Default.Register<ShowDistroStopButtonMessage>(this, (recipient, message) =>
         {
+            Log.Information("[PUB/SUB] Message received to show distribution 'stop' button");
             var distro = message.Distribution;
             FindDistroStopButton(this, distro.Name);
             if (_distroStopButton != null)
@@ -45,6 +47,7 @@ public sealed partial class DistrosListDetailsView : Page
 
         WeakReferenceMessenger.Default.Register<HideDistroStopButtonMessage>(this, (recipient, message) =>
         {
+            Log.Information("[PUB/SUB] Message received to hide distribution 'stop' button");
             var distro = message.Distribution;
             FindDistroStopButton(this, distro.Name);
             if (_distroStopButton != null)
@@ -56,6 +59,7 @@ public sealed partial class DistrosListDetailsView : Page
         //Close InfoBar after timer set in DistroListDetailsViewModel.cs
         WeakReferenceMessenger.Default.Register<CloseInfoBarMessage>(this, (recipient, message) =>
         {
+            Log.Information("[PUB/SUB] Message received to close infobar");
             var infoBar = message.InfoBar;
             DispatcherQueue.TryEnqueue(() => infoBar.IsOpen = false);
         });

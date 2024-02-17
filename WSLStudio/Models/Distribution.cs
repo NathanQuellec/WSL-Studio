@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace WSLStudio.Models;
 
@@ -39,7 +40,7 @@ public class Distribution : INotifyPropertyChanged
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        Debug.WriteLine($"[INFO] PropertyChanged Event Raised for property \"{propertyName}\"");
+        Log.Debug($"PropertyChanged Event Raised for property \"{propertyName}\"");
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Docker.DotNet;
 using Docker.DotNet.Models;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
@@ -11,6 +12,8 @@ public class DockerHubDistributionFactory : DistributionFactory
 {
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
+        Log.Information("Creating distribution from DockerHub ...");
+
         var imageName = resourceOrigin;
         var imageTag = "latest"; // default tag
 
@@ -47,14 +50,14 @@ public class DockerHubDistributionFactory : DistributionFactory
                 tarPathList.Add(tarFilePath);
             }
 
-            var newArchPath = Path.Combine(App.tmpDirPath,"distro.tar");
+            var newArchPath = Path.Combine(App.TmpDirPath,"distro.tar");
            // File.Delete(newArchPath); // TODO REMOVE
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
             await ImportDistribution(distroName, installDir, newArchPath);
-            FilesHelper.RemoveDirContent(App.tmpDirPath);
+            FilesHelper.RemoveDirContent(App.TmpDirPath);
 
-            Console.WriteLine("[INFO] Distribution creation from Docker Hub succeed.");
+            Log.Information("Distribution creation from DockerHub succeed.");
 
             return new Distribution()
             {
@@ -63,14 +66,14 @@ public class DockerHubDistributionFactory : DistributionFactory
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine(ex.ToString());
-            FilesHelper.RemoveDirContent(App.tmpDirPath);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
+            FilesHelper.RemoveDirContent(App.TmpDirPath);
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
-            FilesHelper.RemoveDirContent(App.tmpDirPath);
+            Log.Error($"Failed to create distribution from DockerHub - Caused by exception : {ex}");
+            FilesHelper.RemoveDirContent(App.TmpDirPath);
             throw;
         }
     }

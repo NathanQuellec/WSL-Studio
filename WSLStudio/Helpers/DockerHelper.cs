@@ -9,6 +9,7 @@ using ICSharpCode.SharpZipLib.Tar;
 using WSLStudio.Models.Docker;
 using System;
 using System.Reflection.Emit;
+using Serilog;
 using TarArchive = SharpCompress.Archives.Tar.TarArchive;
 using TarArchiveEntry = SharpCompress.Archives.Tar.TarArchiveEntry;
 
@@ -77,6 +78,7 @@ public class DockerHelper
 
     public async Task BuildDockerImage(string workingDirectory, string imageName)
     {
+        Log.Information("Building Docker image ...");
         try
         {
 
@@ -94,19 +96,20 @@ public class DockerHelper
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine("[ERROR] Failed to build image, reason: " + ex.Message);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
             throw;
         }
 
         catch (Exception ex)
         {
-            Console.WriteLine("[ERROR] Failed to build image, reason: " + ex.Message);
+            Log.Error($"Failed to build Docker image - Caused by exception : {ex}");
             throw;
         }
     }
 
     public async Task PullImageFromDockerHub(string imageName, string imageTag)
     {
+        Log.Information("Pulling Docker image from DockerHub ...");
         try
         {
 
@@ -122,19 +125,20 @@ public class DockerHelper
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine("[ERROR] Failed to pull image, reason: " + ex.Message);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
             throw;
         }
 
         catch (Exception ex)
         {
-            Console.WriteLine("[ERROR] Failed to pull image, reason: " + ex.Message);
+            Log.Error($"Failed to pull Docker image - Caused by exception : {ex}");
             throw;
         }
     }
 
     public async Task<CreateContainerResponse?> CreateDockerContainer(string imageName, string containerName)
     {
+        Log.Information("Creating Docker container ...");
         try
         {
 
@@ -148,20 +152,21 @@ public class DockerHelper
         catch (DockerApiException ex)
         {
             await RemoveDockerImage(imageName);
-            Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
             throw;
         }
 
         catch (Exception ex)
         {
             await RemoveDockerImage(imageName);
-            Console.WriteLine("[ERROR] Failed to create container, reason: " + ex.Message);
+            Log.Error($"Failed to create Docker container - Caused by exception : {ex}");
             throw;
         }
     }
 
     public async Task ExportDockerContainer(string containerName, string targetPath)
     {
+        Log.Information("Exporting Docker container ...");
         try
         {
 
@@ -173,12 +178,12 @@ public class DockerHelper
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("[ERROR] Failed to export container, reason: " + ex.Message);
+            Log.Error($"Failed to export Docker container - Caused by exception : {ex}");
             throw;
         }
 
@@ -186,6 +191,7 @@ public class DockerHelper
 
     public async Task RemoveDockerImage(string imageName)
     {
+        Log.Information("Deleting Docker image ...");
         try
         {
             await _dockerClient.Images.DeleteImageAsync(imageName, new ImageDeleteParameters()
@@ -195,16 +201,18 @@ public class DockerHelper
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine(ex);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error($"Failed to delete Docker image - Caused by exception : {ex}");
         }
     }
 
     public async Task RemoveDockerContainer(string containerId)
     {
+        Log.Information("Deleting Docker container ...");
+
         try
         {
             await _dockerClient.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters()
@@ -214,16 +222,18 @@ public class DockerHelper
         }
         catch (DockerApiException ex)
         {
-            Console.WriteLine(ex);
+            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error($"Failed to delete Docker container - Caused by exception : {ex}");
         }
     }
 
     public static async Task<AuthToken?> GetAuthToken(string imageName)
     {
+        Log.Information("Fetching Docker image authtoken ...");
+
         var uriString =
             $@"https://auth.docker.io/token?service=registry.docker.io&scope=repository:{imageName}:pull";
 
@@ -240,7 +250,7 @@ public class DockerHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to download image auth token : " + ex);
+            Log.Error($"Failed to fetch Docker image authtoken - Caused by exception : {ex}");
             return null;
         }
         
@@ -248,6 +258,8 @@ public class DockerHelper
 
     public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
     {
+        Log.Information("Fetching Docker image manifest ...");
+
         var uriString = $@"{DOCKER_REGISTRY}/{imageName}/manifests/{imageTag}";
         var uri = new Uri(uriString);
         using var httpClient = new HttpClient();
@@ -265,13 +277,15 @@ public class DockerHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to download image manifest : " + ex);
+            Log.Error($"Failed to fetch Docker image manifest - Caused by exception : {ex}");
             return null;
         }
     }
 
     public static async Task<List<string>?> GetLayers(AuthToken authToken, ImageManifest imageManifest, string imageName)
     {
+        Log.Information("Fetching Docker image layers ...");
+
         try
         {
             var layers = imageManifest.Layers;
@@ -283,7 +297,7 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(App.tmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.TmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
                 var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";
@@ -302,7 +316,7 @@ public class DockerHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Failed to download image layers : " + ex);
+            Log.Error($"Failed to fetch Docker image layers - Caused by exception : {ex}");
             return null;
         }
     }

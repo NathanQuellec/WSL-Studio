@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.UI.Xaml;
 
@@ -17,6 +16,8 @@ using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Views.Dialogs;
 using CommunityToolkit.WinUI.UI.Controls;
+using Serilog;
+using Serilog.Events;
 
 namespace WSLStudio;
 
@@ -36,9 +37,9 @@ public partial class App : Application
     private const string TMP_FOLDER_NAME = ".tmp";
     private const string LOG_FOLDER_NAME = ".log";
 
-    public static string? appDirPath { get; set; }
-    public static string? tmpDirPath { get; set; }
-    public static string? logDirPath { get; set; }
+    public static string? AppDirPath { get; set; }
+    public static string? TmpDirPath { get; set; }
+    public static string? LogDirPath { get; set; }
 
     public IHost Host
     {
@@ -58,19 +59,20 @@ public partial class App : Application
         return service;
     }
 
-    private static void CreateAppFolders()
+    private static void CreateProjectFolders()
     {
-        appDirPath = FilesHelper.CreateDirectory(ROAMING_PATH, APP_FOLDER_NAME);
+        Log.Information("Creating project folders ...");
+        AppDirPath = FilesHelper.CreateDirectory(ROAMING_PATH, APP_FOLDER_NAME);
 
-        if (appDirPath == null)
+        if (AppDirPath == null)
         {
-            Console.WriteLine("[ERROR] Cannot create app folder");
+            Log.Error("Cannot create project folders");
             MainWindow.Close();
         }
         else
         {
-            tmpDirPath = FilesHelper.CreateDirectory(appDirPath, TMP_FOLDER_NAME);
-            logDirPath = FilesHelper.CreateDirectory(appDirPath, LOG_FOLDER_NAME);
+            TmpDirPath = FilesHelper.CreateDirectory(AppDirPath, TMP_FOLDER_NAME);
+            LogDirPath = FilesHelper.CreateDirectory(AppDirPath, LOG_FOLDER_NAME);
         }
     }
 
@@ -92,7 +94,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open NoWSL dialog - Caused by exception : {ex}");
             MainWindow.Close();
         }
     }
@@ -123,7 +125,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open VirtualizationDisabled dialog - Caused by exception : {ex}");
             MainWindow.Close();
         }
     }
@@ -151,7 +153,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open ShowSnapshotProcessing dialog - Caused by exception : {ex}");
         }
     }
 
@@ -178,7 +180,6 @@ public partial class App : Application
             services.AddSingleton<ISnapshotService, SnapshotService>();
             services.AddSingleton<IWslService, WslService>();
 
-
             // Core Services
             services.AddSingleton<IFileService, FileService>();
 
@@ -190,14 +191,15 @@ public partial class App : Application
 
             // Configuration
         }).
+        UseSerilog().
         Build();
         UnhandledException += App_UnhandledException;
     }
 
-    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
+    private void App_UnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs ex)
     {
         // https://docs.microsoft.com/windows/windows-app-sdk/api/winrt/microsoft.ui.xaml.application.unhandledexception.
-        Console.WriteLine("App_UnhandledException caught : " + e.Message);
+        Log.Debug($"App_UnhandledException caught : {ex}");
     }
 
     protected async override void OnLaunched(LaunchActivatedEventArgs args)
@@ -218,6 +220,15 @@ public partial class App : Application
             ShowVirtualizationDisabledDialog();
         }
 
-        CreateAppFolders();
+        CreateProjectFolders();
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File(Path.Combine(LogDirPath, "log.txt")) // add current date or rolling
+            .CreateLogger();
+        Log.Information("Test log");
     }
 }

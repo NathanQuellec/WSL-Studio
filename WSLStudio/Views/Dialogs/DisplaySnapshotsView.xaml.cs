@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI;
+using Serilog;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using Path = System.IO.Path;
@@ -29,6 +30,8 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
     private void OpenSnapshotsFolder(object sender, RoutedEventArgs args)
     {
+        Log.Information("Opening snapshots folder ...");
+
         var distribution = this.DataContext as Distribution;
         var snapshotsFolderPath = Path.Combine(distribution!.Path, "snapshots");
 
@@ -41,12 +44,14 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to open snapshots folder - Caused by exception {ex}");
         }
     }
 
     private async void OpenDeleteSnapshotDialog(object sender, RoutedEventArgs args)
     {
+        Log.Information("Opening delete snapshot dialog");
+
         this.Hide();
         var snapshot = (sender as Button)?.DataContext as Snapshot;
 
@@ -83,12 +88,13 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to open snapshot deletion dialog of {snapshot.Name} - Caused by exception {ex}");
         }
     }
 
     private void DeleteSnapshot(Snapshot snapshot)
     {
+        Log.Information($"Deleting snapshot {snapshot.Name}");
         var distro = this.DataContext as Distribution;
 
         try
@@ -100,13 +106,15 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to delete snapshot {snapshot.Name} - Caused by exception {ex}");
         }
     }
 
     private async void OpenCreateDistroDialog(object sender, RoutedEventArgs args)
     {
         this.Hide();
+
+        Log.Information("Opening dialog for distribution creation from snapshot");
 
         if (App.IsDistributionProcessing)
         {
@@ -142,7 +150,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"[View exception] Failed to open distribution creation dialog - Caused by exception : {ex}");
         }
     }
 }

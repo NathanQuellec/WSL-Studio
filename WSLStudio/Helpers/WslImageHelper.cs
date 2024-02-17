@@ -2,6 +2,7 @@
 using DiscUtils.Streams;
 using System.Text.RegularExpressions;
 using System.Text;
+using Serilog;
 
 namespace WSLStudio.Helpers;
 
@@ -23,6 +24,7 @@ public class WslImageHelper
      */
     public string ReadFile(string fileToExtract) 
     {
+        Log.Information("Reading distribution image file for extraction");
         try
         {
             // open vhdx and get bytes stream 
@@ -56,17 +58,17 @@ public class WslImageHelper
         }
         catch (FileNotFoundException ex)
         {
-            Console.WriteLine("File not found : " + ex.Message);
+            Log.Error($"Cannot find file to extract - Caused by exception {ex}");
             throw;
         }
         catch (IOException ex)
         {
-            Console.WriteLine("Cannot read distribution image file : " + ex.Message);
+            Log.Error($"Cannot read distribution image file - Caused by exception {ex}");
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            Log.Error($"Cannot extract image file - Caused by exception {ex}");
             throw;
         }
     }

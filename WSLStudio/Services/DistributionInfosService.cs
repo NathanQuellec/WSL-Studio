@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
@@ -20,6 +21,8 @@ public class DistributionInfosService : IDistributionInfosService
     */
     public string GetOsInfos(Distribution distribution, string field)
     {
+        Log.Information($"Fetching OS information of distribution {distribution.Name} ...");
+
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
         var osInfosFile = Path.Combine("etc", "os-release");
         var osInfosFileFallBack = Path.Combine("usr", "lib", "os-release");
@@ -27,14 +30,14 @@ public class DistributionInfosService : IDistributionInfosService
 
         try
         {
-            osInfos = GetOsInfosFromExt4(distribution.Path, osInfosFile, osInfosPattern);
+            osInfos = GetOsInfosFromVhdx(distribution.Path, osInfosFile, osInfosPattern);
         }
         catch (FileNotFoundException ex)
         {
             // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
 
-            Console.WriteLine("Didn't find /etc/os-release, retry with fallback file : " + ex.Message);
-            osInfos = GetOsInfosFromExt4(distribution.Path, osInfosFileFallBack, osInfosPattern);
+            Log.Error($"Didn't find /etc/os-release, retry with fallback file - Caused by exception : {ex}");
+            osInfos = GetOsInfosFromVhdx(distribution.Path, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
         {
@@ -42,20 +45,22 @@ public class DistributionInfosService : IDistributionInfosService
                 and we can get os-release file from the file system located at \\wsl$\distroname\...
              */
 
-            Console.WriteLine("Another process is already reading ext4.vhdx : " + ex.Message);
+            Log.Error($"Another process is already reading ext4.vhdx - Caused by exception : {ex}");
             osInfos = GetOsInfosFromFileSystem(distribution.Name, osInfosPattern);
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed fetch OS information - Caused by exception {ex}");
             osInfos = "Unknown";
         }
 
         return string.IsNullOrEmpty(osInfos) ? "Unknown" : osInfos;
     }
 
-    private static string GetOsInfosFromExt4(string distroPath, string osInfosFilePath, string osInfosPattern)
+    private static string GetOsInfosFromVhdx(string distroPath, string osInfosFilePath, string osInfosPattern)
     {
+        Log.Information($"Fetching OS information from WSL vhdx image ...");
+
         var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
 
         try
@@ -70,23 +75,25 @@ public class DistributionInfosService : IDistributionInfosService
         }
         catch (FileNotFoundException ex)
         {
-            Console.WriteLine("Didn't find /usr/lib/os-release : " + ex.Message);
+            Log.Error($"Didn't find /usr/lib/os-release - Caused by exception : {ex}");
             throw;
         }
         catch (IOException ex)
         {
-            Console.WriteLine("Another process is already reading ext4.vhdx : " + ex.Message);
+            Log.Error($"Another process is already reading ext4.vhdx - Caused by exception : {ex}");
             throw;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed fetch OS information from WSL vhdx image - Caused by exception {ex}");
             throw;
         }
     }
 
     private static string GetOsInfosFromFileSystem(string distroName, string osInfosPattern)
     {
+        Log.Information($"Fetching OS information from os-release file of {distroName} FS ...");
+
         var osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "os-release");
 
         try
@@ -95,7 +102,7 @@ public class DistributionInfosService : IDistributionInfosService
             if (osInfosFile.Attributes.HasFlag(FileAttributes.ReparsePoint))
             {
                 // we cannot read a symlink, so we use the fallback os-release file located at /usr/lib/os-release
-                Console.WriteLine("/etc/os-release is a symbolic link to /usr/lib/os-release");
+                Log.Warning("/etc/os-release is a symbolic link to /usr/lib/os-release");
                 osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
             }
 
@@ -107,13 +114,15 @@ public class DistributionInfosService : IDistributionInfosService
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Cannot get os infos from os-release file : " + ex.Message);
+            Log.Error($"Failed to fetch os infos from os-release file - Caused by exception : {ex} ");
             return "Unknown";
         }
     }
 
     public string GetSize(string distroPath)
     {
+        Log.Information("Getting distribution size from wsl vhdx image ...");
+
         try
         {
             var diskLocation = Path.Combine(distroPath, "ext4.vhdx");
@@ -124,13 +133,15 @@ public class DistributionInfosService : IDistributionInfosService
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Log.Error($"Failed to get distribution size from wsl vhdx image - Caused by exception : {ex} ");
             return "0";
         }
     }
 
     public List<string> GetDistributionUsers(Distribution distribution)
     {
+        Log.Information("Getting distribution's users list ...");
+
         const string userShellPattern = @"/bin/(.*?)sh$";
         var usersList = new List<string>();
 
@@ -139,14 +150,14 @@ public class DistributionInfosService : IDistributionInfosService
             usersList = GetUsersFromExt4(distribution.Path, userShellPattern);
 
         }
-        catch (IOException e)
+        catch (IOException ex)
         {
-            Console.WriteLine("Cannot get users from ext4.vhdx image file : " + e.Message);
+            Log.Error($"Failed to get distro users from ext4.vhdx image file - Caused by exception : {ex}");
             usersList = GetUsersFromFileSystem(distribution.Name, userShellPattern);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("Cannot get list of users : " + e.Message);
+            Log.Error($"Failed to get distro users from file system - Caused by exception : {ex}");
             usersList.Add("Unknown");
         }
 
@@ -155,6 +166,8 @@ public class DistributionInfosService : IDistributionInfosService
 
     private static List<string> GetUsersFromExt4(string distroPath, string userShellPattern)
     {
+        Log.Information("Getting distribution's users list from wsl vhdx image ...");
+
         var passwdFilePath = Path.Combine("etc", "passwd");
         var wslImagePath = Path.Combine(distroPath, "ext4.vhdx");
 
@@ -171,20 +184,22 @@ public class DistributionInfosService : IDistributionInfosService
 
             return users;
         }
-        catch (IOException e)
+        catch (IOException ex)
         {
-            Console.WriteLine("Cannot read ext4.vhdx image file : " + e.Message);
+            Log.Error($"Cannot read ext4.vhdx image file - Caused by exception : {ex}");
             throw;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
+            Log.Error($"Cannot get list of users from /etc/passwd file - Caused by exception : {ex}");
             return new List<string>() { "Unknown" };
         }
     }
 
     private static List<string> GetUsersFromFileSystem(string distroName, string userShellPattern)
     {
+        Log.Information("Getting distribution's users list from distro FS ...");
+
         var passwdFilePath = Path.Combine(WSL_UNC_PATH, distroName, "etc", "passwd");
 
         try
@@ -198,9 +213,9 @@ public class DistributionInfosService : IDistributionInfosService
 
             return users;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("Cannot get list of users from /etc/passwd file : " + e.Message);
+            Log.Error($"Cannot get list of users from /etc/passwd file : {ex}");
             return new List<string>() { "Unknown" };
         }
     }

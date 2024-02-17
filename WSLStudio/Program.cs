@@ -1,5 +1,6 @@
 ﻿using Microsoft.UI.Dispatching;
 using Microsoft.Windows.AppLifecycle;
+using Serilog;
 
 namespace WSLStudio;
 
@@ -24,6 +25,7 @@ public class Program
                 new App();
             });
         }
+        await Log.CloseAndFlushAsync();
         return 0;
     }
 

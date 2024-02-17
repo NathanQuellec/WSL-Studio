@@ -1,4 +1,5 @@
 ﻿using Docker.DotNet;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
@@ -10,13 +11,14 @@ public class ArchiveDistributionFactory : DistributionFactory
 {
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
+        Log.Information("Creating distribution from archive file ...");
         var installDir = Path.Combine(targetFolder, "installDir");
 
         try
         {
            await ImportDistribution(distroName, installDir, resourceOrigin);
 
-           Console.WriteLine("[INFO] Distribution creation from Archive file succeed.");
+           Log.Information("Distribution creation from archive file succeed.");
 
             return new Distribution()
             {
@@ -25,7 +27,7 @@ public class ArchiveDistributionFactory : DistributionFactory
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.ToString());
+            Log.Error($"Failed to create distribution from archive file - Caused by exception : {ex}");
             throw;
         }
     }
