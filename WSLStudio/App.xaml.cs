@@ -138,7 +138,7 @@ public partial class App : Application
         }
     }
 
-    public static async void ShowSnapshotProcessingDialog()
+    public static async void ShowIsProcessingDialog()
     {
         try
         {
@@ -146,7 +146,7 @@ public partial class App : Application
             {
                 Title = "WSL Studio is currently creating a distribution",
                 CloseButtonText = "Close",
-                XamlRoot = App.MainWindow.Content.XamlRoot,
+                XamlRoot = MainWindow.Content.XamlRoot,
             };
 
             await dialog.ShowAsync();

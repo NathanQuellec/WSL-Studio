@@ -334,7 +334,7 @@ public class DistrosListDetailsVM : ObservableObject
 
             if (App.IsDistributionProcessing)
             {
-                App.ShowSnapshotProcessingDialog();
+                App.ShowIsProcessingDialog();
                 return;
             }
 

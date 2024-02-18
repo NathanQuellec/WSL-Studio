@@ -31,6 +31,22 @@ public static class FilesHelper
         }
     }
 
+    public static void RemoveDirectory(string dirPath)
+    {
+        try
+        {
+            Directory.Delete(dirPath);
+        }
+        catch (DirectoryNotFoundException ex)
+        {
+            Log.Error($"Cannot failed directory to remove at {dirPath}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to remove {dirPath} - Caused by exception {ex}");
+        }
+    }
+
     public static void RemoveDirContent(string dirPath)
     {
         var dirInfo = new DirectoryInfo(dirPath);

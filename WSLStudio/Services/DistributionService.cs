@@ -107,10 +107,10 @@ public class DistributionService : IDistributionService
 
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
+        var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
+
         try
         {
-            //var distroFolder = CreateDistributionFolder(distroName);
-            var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {
@@ -147,7 +147,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            RemoveDistributionFolder(new Distribution(){Name = distroName});
+            FilesHelper.RemoveDirectory(distroFolder);
             throw;
         }
     }

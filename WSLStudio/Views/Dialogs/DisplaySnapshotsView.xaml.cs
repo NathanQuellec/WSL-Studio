@@ -57,7 +57,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         if (App.IsDistributionProcessing)
         {
-            App.ShowSnapshotProcessingDialog();
+            App.ShowIsProcessingDialog();
             return;
         }
 
@@ -118,7 +118,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         if (App.IsDistributionProcessing)
         {
-            App.ShowSnapshotProcessingDialog();
+            App.ShowIsProcessingDialog();
             return;
         }
 
