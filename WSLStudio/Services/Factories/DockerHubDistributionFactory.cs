@@ -16,9 +16,7 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         var imageName = resourceOrigin;
         var imageTag = "latest"; // default tag
-
         var distroTarFile = $"{distroName}.tar.gz";
-
         var installDir = Path.Combine(targetFolder, "installDir");
 
 
@@ -32,15 +30,14 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         try
         {
-            /*await docker.PullImageFromDockerHub(imageName, imageTag);
-            var container = await docker.CreateDockerContainer(imageName, containerName);
-            await docker.ExportDockerContainer(containerName, tarLocation);
-            await ImportDistribution(distroName, installDir, tarLocation);
-            RemoveDistributionArchive(tarLocation);
-            await docker.RemoveDockerContainer(container!.ID);
-            await docker.RemoveDockerImage(imageName);*/
             var imageToken = await DockerHelper.GetAuthToken(imageName);
             var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
+
+            if (imageManifest.Layers == null)
+            {
+                throw new Exception("Didnt't find layers for this image on DockerHub");
+            }
+
             var imageLayers = await DockerHelper.GetLayers(imageToken, imageManifest, imageName);
 
             var tarPathList = new List<string>();
@@ -51,10 +48,9 @@ public class DockerHubDistributionFactory : DistributionFactory
             }
 
             var newArchPath = Path.Combine(App.TmpDirPath,"distro.tar");
-           // File.Delete(newArchPath); // TODO REMOVE
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
-            await ImportDistribution(distroName, installDir, newArchPath);
+            await WslHelper.ImportDistribution(distroName, installDir, newArchPath);
             FilesHelper.RemoveDirContent(App.TmpDirPath);
 
             Log.Information("Distribution creation from DockerHub succeed.");

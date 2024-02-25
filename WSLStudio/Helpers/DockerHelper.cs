@@ -317,7 +317,7 @@ public class DockerHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to fetch Docker image layers - Caused by exception : {ex}");
-            return null;
+            throw;
         }
     }
 

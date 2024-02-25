@@ -107,10 +107,10 @@ public class DistributionService : IDistributionService
 
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
+        var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
+
         try
         {
-            //var distroFolder = CreateDistributionFolder(distroName);
-            var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
 
             if (!Directory.Exists(distroFolder))
             {
@@ -147,7 +147,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            RemoveDistributionFolder(new Distribution(){Name = distroName});
+            FilesHelper.RemoveDirectory(distroFolder);
             throw;
         }
     }
@@ -268,33 +268,6 @@ public class DistributionService : IDistributionService
 
     }
 
-    private static async Task<bool> CheckRunningDistribution(Distribution distribution)
-    {
-        Log.Information($"Check running distribution for {distribution.Name}");
-        try
-        {
-            var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments("/c wsl --list --running --quiet")
-                .SetRedirectStandardOutput(true)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
-
-            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
-            await process.WaitForExitAsync();
-            var sanitizedOutput = output.Replace("\0", "").Replace("\r", "");  // remove special character
-            var runningDistros = sanitizedOutput.Split("\n");
-
-            return runningDistros.Contains(distribution.Name);
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to start process to check running distribution - Caused by exception : {ex}");
-            return false;
-        }
-    }
-
     /** Workaround to solve file system access error (Issue : https://github.com/microsoft/wsl/issues/5307)
         Because a distribution need to be running to use its file system, 
         we quickly start and stop the corresponding distribution to avoid an error  
@@ -372,7 +345,7 @@ public class DistributionService : IDistributionService
         var distroFileSystem = Path.Combine(WSL_UNC_PATH, $"{distribution.Name}");
         try
         {
-            var distroIsRunning = await CheckRunningDistribution(distribution);
+            var distroIsRunning = await WslHelper.CheckRunningDistribution(distribution.Name);
 
             if (!distroIsRunning)
             {
@@ -386,7 +359,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for opening distribution file system");
+            Log.Error($"Failed to start process for opening distribution file system - Caused by exception : {ex}");
         }
         
     }
@@ -415,7 +388,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            Log.Error($"Failed to start process for opening distro with WinTerm - Caused by {ex}");
+            Log.Error($"Failed to start process for opening distro with WinTerm - Caused by exception : {ex}");
         }
     }
 }

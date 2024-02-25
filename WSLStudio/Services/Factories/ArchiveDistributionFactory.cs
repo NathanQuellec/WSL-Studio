@@ -16,7 +16,7 @@ public class ArchiveDistributionFactory : DistributionFactory
 
         try
         {
-           await ImportDistribution(distroName, installDir, resourceOrigin);
+           await WslHelper.ImportDistribution(distroName, installDir, resourceOrigin);
 
            Log.Information("Distribution creation from archive file succeed.");
 

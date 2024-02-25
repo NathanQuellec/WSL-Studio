@@ -138,7 +138,7 @@ public partial class App : Application
         }
     }
 
-    public static async void ShowSnapshotProcessingDialog()
+    public static async void ShowIsProcessingDialog()
     {
         try
         {
@@ -146,7 +146,7 @@ public partial class App : Application
             {
                 Title = "WSL Studio is currently creating a distribution",
                 CloseButtonText = "Close",
-                XamlRoot = App.MainWindow.Content.XamlRoot,
+                XamlRoot = MainWindow.Content.XamlRoot,
             };
 
             await dialog.ShowAsync();
@@ -178,7 +178,6 @@ public partial class App : Application
             services.AddSingleton<IDistributionService, DistributionService>();
             services.AddSingleton<IDistributionInfosService, DistributionInfosService>();
             services.AddSingleton<ISnapshotService, SnapshotService>();
-            services.AddSingleton<IWslService, WslService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();
@@ -207,14 +206,12 @@ public partial class App : Application
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
 
-        var wslService = App.GetService<IWslService>();
-
-        if (!wslService.CheckWsl())
+        if (!WslHelper.CheckWsl())
         {
             ShowNoWslDialog();
         }
 
-        var virtualizationEnabled = wslService.CheckHypervisor();
+        var virtualizationEnabled = WslHelper.CheckHypervisor();
         if (!virtualizationEnabled)
         {
             ShowVirtualizationDisabledDialog();
