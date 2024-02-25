@@ -28,6 +28,11 @@ public class DockerfileDistributionFactory : DistributionFactory
         try
         {
 
+            if (!Directory.Exists(resourceOrigin))
+            {
+                throw new DirectoryNotFoundException();
+            }
+
             await docker.BuildDockerImage(resourceOrigin, imageName);
             var container = await docker.CreateDockerContainer(imageName, containerName);
             await docker.ExportDockerContainer(containerName, tarLocation);
