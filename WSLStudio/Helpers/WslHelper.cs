@@ -78,7 +78,7 @@ public static class WslHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to import distribution - Caused by exception {ex}");
-            throw ex;
+            throw;
         }
     }
 
