@@ -30,13 +30,6 @@ public class DockerHubDistributionFactory : DistributionFactory
 
         try
         {
-            /*await docker.PullImageFromDockerHub(imageName, imageTag);
-            var container = await docker.CreateDockerContainer(imageName, containerName);
-            await docker.ExportDockerContainer(containerName, tarLocation);
-            await ImportDistribution(distroName, installDir, tarLocation);
-            RemoveDistributionArchive(tarLocation);
-            await docker.RemoveDockerContainer(container!.ID);
-            await docker.RemoveDockerImage(imageName);*/
             var imageToken = await DockerHelper.GetAuthToken(imageName);
             var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
 

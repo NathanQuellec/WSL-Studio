@@ -3,6 +3,7 @@ using Community.Wsl.Sdk;
 using Microsoft.Win32;
 using Serilog;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Exceptions;
 using WSLStudio.Models;
 
 namespace WSLStudio.Helpers;
@@ -66,10 +67,18 @@ public static class WslHelper
 
             process.Start();
             await process.WaitForExitAsync();
+
+            var isDistroImported = await CheckExistingDistribution(distroName);
+
+            if (!isDistroImported)
+            {
+                throw new ImportDistributionException("Failed to import distribution");
+            }
         }
         catch (Exception ex)
         {
             Log.Error($"Failed to import distribution - Caused by exception {ex}");
+            throw ex;
         }
     }
 
@@ -96,6 +105,33 @@ public static class WslHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to start process to check running distribution - Caused by exception : {ex}");
+            return false;
+        }
+    }
+
+    public static async Task<bool> CheckExistingDistribution(string distroName)
+    {
+        Log.Information($"Check existing distribution for {distroName}");
+        try
+        {
+            var process = new ProcessBuilderHelper("cmd.exe")
+                .SetArguments("/c wsl --list --quiet")
+                .SetRedirectStandardOutput(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+
+            var output = process.StandardOutput.ReadToEndAsync().GetAwaiter().GetResult();
+            await process.WaitForExitAsync();
+            var sanitizedOutput = output.Replace("\0", "").Replace("\r", "");  // remove special character
+            var existingDistros = sanitizedOutput.Split("\n");
+
+            return existingDistros.Contains(distroName);
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to start process to check existing distribution - Caused by exception : {ex}");
             return false;
         }
     }
