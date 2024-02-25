@@ -57,7 +57,7 @@ public class DockerHubDistributionFactory : DistributionFactory
             var newArchPath = Path.Combine(App.TmpDirPath,"distro.tar");
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
-            await ImportDistribution(distroName, installDir, newArchPath);
+            await WslHelper.ImportDistribution(distroName, installDir, newArchPath);
             FilesHelper.RemoveDirContent(App.TmpDirPath);
 
             Log.Information("Distribution creation from DockerHub succeed.");

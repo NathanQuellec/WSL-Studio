@@ -12,12 +12,6 @@ namespace WSLStudio.Services;
 
 public class SnapshotService : ISnapshotService
 {
-    private readonly IWslService _wslService;
-
-    public SnapshotService(IWslService wslService)
-    {
-        _wslService = wslService;
-    }
 
     public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
     {
@@ -65,7 +59,7 @@ public class SnapshotService : ISnapshotService
         try
         {
             var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
-            await this._wslService.ExportDistribution(distribution.Name, snapshotPath);
+            await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
             decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
             var snapshot = new Snapshot()
