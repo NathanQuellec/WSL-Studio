@@ -13,7 +13,8 @@
     xmlns:test="System.Windows.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    
+    xmlns:userControls="using:WSLStudio.Views.UserControls"
+
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
@@ -343,7 +344,7 @@
             </controls:ListDetailsView.ListCommandBar>
         </controls:ListDetailsView>
 
-        <local:WslProcessInfoBar Grid.Row="1"/>
+        <userControls:WslProcessInfoBar x:Name="WslProcessInfoBar" Grid.Row="1"/>
 
     </Grid>
 </Page>

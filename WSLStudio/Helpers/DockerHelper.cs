@@ -94,16 +94,10 @@ public class DockerHelper
 
             await _dockerClient.Images.BuildImageFromDockerfileAsync(imageBuildParameters, tarball, null, null, progress);
         }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
-            throw;
-        }
-
         catch (Exception ex)
         {
-            Log.Error($"Failed to build Docker image - Caused by exception : {ex}");
-            throw;
+            Log.Error($"Docker image build failed - Caused by exception : {ex}");
+            throw new Exception("Failed to build Docker image, please check that Docker Desktop is running on your host");
         }
     }
 
@@ -123,16 +117,10 @@ public class DockerHelper
 
             await _dockerClient.Images.CreateImageAsync(imageCreateParameters, null, progress);
         }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
-            throw;
-        }
-
         catch (Exception ex)
         {
             Log.Error($"Failed to pull Docker image - Caused by exception : {ex}");
-            throw;
+            throw new Exception("Failed to pull Docker image");
         }
     }
 
@@ -149,18 +137,11 @@ public class DockerHelper
             });
 
         }
-        catch (DockerApiException ex)
-        {
-            await RemoveDockerImage(imageName);
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
-            throw;
-        }
-
         catch (Exception ex)
         {
             await RemoveDockerImage(imageName);
             Log.Error($"Failed to create Docker container - Caused by exception : {ex}");
-            throw;
+            throw new Exception("Failed to create Docker container from this image");
         }
     }
 
@@ -176,15 +157,10 @@ public class DockerHelper
             await exportStream.CopyToAsync(fileStream);
 
         }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
-            throw;
-        }
         catch (Exception ex)
         {
             Log.Error($"Failed to export Docker container - Caused by exception : {ex}");
-            throw;
+            throw new Exception("Failed to export Docker Container for distribution creation");
         }
 
     }
@@ -198,10 +174,6 @@ public class DockerHelper
             {
                 Force = true,
             });
-        }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
         }
         catch (Exception ex)
         {
@@ -219,10 +191,6 @@ public class DockerHelper
             {
                 Force = true,
             });
-        }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
         }
         catch (Exception ex)
         {
@@ -251,7 +219,7 @@ public class DockerHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to fetch Docker image authtoken - Caused by exception : {ex}");
-            return null;
+            throw new Exception("Failed to fetch image authentication token");
         }
         
     }
@@ -278,7 +246,7 @@ public class DockerHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to fetch Docker image manifest - Caused by exception : {ex}");
-            return null;
+            throw new Exception("Failed to fetch image manifest");
         }
     }
 
@@ -317,7 +285,7 @@ public class DockerHelper
         catch (Exception ex)
         {
             Log.Error($"Failed to fetch Docker image layers - Caused by exception : {ex}");
-            throw;
+            throw new Exception("Failed to fetch image layers");
         }
     }
 

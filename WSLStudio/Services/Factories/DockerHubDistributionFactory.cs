@@ -35,7 +35,7 @@ public class DockerHubDistributionFactory : DistributionFactory
 
             if (imageManifest.Layers == null)
             {
-                throw new Exception("Didnt't find layers for this image on DockerHub");
+                throw new Exception("Unable to find this image on DockerHub");
             }
 
             var imageLayers = await DockerHelper.GetLayers(imageToken, imageManifest, imageName);
@@ -59,12 +59,6 @@ public class DockerHubDistributionFactory : DistributionFactory
             {
                 Name = distroName,
             };
-        }
-        catch (DockerApiException ex)
-        {
-            Log.Error($"Failed to connect to Docker API - Caused by exception : {ex}");
-            FilesHelper.RemoveDirContent(App.TmpDirPath);
-            throw;
         }
         catch (Exception ex)
         {

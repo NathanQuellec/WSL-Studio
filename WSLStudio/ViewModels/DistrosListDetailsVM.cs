@@ -226,6 +226,7 @@ public class DistrosListDetailsVM : ObservableObject
             {
                 Distros.ElementAt(index).Name = newDistroName;
             }
+
         }
         catch (Exception ex)
         {
@@ -417,7 +418,7 @@ public class DistrosListDetailsVM : ObservableObject
 
             _infoBarService.CloseInfoBar(createDistroInfoProgress);
             var createDistroInfoError = _infoBarService.FindInfoBar("CreateDistroInfoError");
-            _infoBarService.OpenInfoBar(createDistroInfoError, 5000);
+            _infoBarService.OpenInfoBar(createDistroInfoError, ex.Message, 5000);
             App.IsDistributionProcessing = false;
         }
     }

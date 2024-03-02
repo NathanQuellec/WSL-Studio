@@ -5,6 +5,7 @@ using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Messages;
+using WSLStudio.Views.UserControls;
 using Timer = System.Timers.Timer;
 
 namespace WSLStudio.Services;
@@ -35,6 +36,11 @@ public class InfoBarService : IInfoBarService
         timer?.Stop();
     }
 
+    public void OpenInfoBar(InfoBar infoBar)
+    {
+        infoBar.IsOpen = true;
+    }
+
     public void OpenInfoBar(InfoBar infoBar, double time)
     {
         var timer = new Timer(time);
@@ -43,9 +49,13 @@ public class InfoBarService : IInfoBarService
         timer.Start();
     }
 
-    public void OpenInfoBar(InfoBar infoBar)
+    public void OpenInfoBar(InfoBar infoBar, string message, double time)
     {
+        var timer = new Timer(time);
+        timer.Elapsed += (sender, e) => StopTimerInfoBar(sender, e, infoBar);
+        infoBar.Message = message;
         infoBar.IsOpen = true;
+        timer.Start();
     }
 
     public void CloseInfoBar(InfoBar infoBar)
