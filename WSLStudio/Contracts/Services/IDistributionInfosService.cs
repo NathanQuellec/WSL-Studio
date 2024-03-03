@@ -4,7 +4,7 @@ namespace WSLStudio.Contracts.Services;
 
 public interface IDistributionInfosService
 {
-    string GetOsInfos(Distribution distribution, string field);
+    string GetOsInfos(string distroName, string distroPath, string field);
     string GetSize(string distroPath);
-    List<string> GetDistributionUsers(Distribution distribution);
+    List<string> GetDistributionUsers(string distroName, string distroPath);
 }

@@ -55,10 +55,9 @@ public class DockerHubDistributionFactory : DistributionFactory
 
             Log.Information("Distribution creation from DockerHub succeed.");
 
-            return new Distribution()
-            {
-                Name = distroName,
-            };
+            return new DistributionBuilder()
+               .WithName(distroName)
+               .Build();
         }
         catch (Exception ex)
         {

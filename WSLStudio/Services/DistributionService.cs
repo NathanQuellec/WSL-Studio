@@ -1,26 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WSLStudio.Models;
+﻿using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
-using System.Diagnostics;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Text.RegularExpressions;
-using ABI.Windows.UI.Text;
 using Community.Wsl.Sdk;
 using WSLStudio.Helpers;
 using Microsoft.Win32;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Services.Factories;
-using DiscUtils;
-using DiscUtils.Dmg;
-using DiscUtils.Ext;
-using DiscUtils.Streams;
-using DiscUtils.Vhdx;
-using System.IO;
 using Serilog;
 
 
@@ -73,19 +57,17 @@ public class DistributionService : IDistributionService
                     var distroPath = (string)distroSubkeys.GetValue("BasePath");
                     var wslVersion = (int)distroSubkeys.GetValue("Version");
 
-                    var distro = new Distribution()
-                    {
-                        Id = Guid.Parse(subKey),
-                        Name = distroName,
-                        Path = distroPath,
-                        WslVersion = wslVersion,
-                    };
-
-                    distro.OsName = _distroInfosService.GetOsInfos(distro, "NAME");
-                    distro.OsVersion = _distroInfosService.GetOsInfos(distro, "VERSION");
-                    distro.Size = _distroInfosService.GetSize(distroPath);
-                    distro.Users = _distroInfosService.GetDistributionUsers(distro);
-                    distro.Snapshots = _snapshotService.GetDistributionSnapshots(distroPath);
+                    var distro = new DistributionBuilder()
+                        .WithId(Guid.Parse(subKey))
+                        .WithName(distroName)
+                        .WithPath(distroPath)
+                        .WithWslVersion(wslVersion)
+                        .WithOsName(_distroInfosService.GetOsInfos(distroName, distroPath, "NAME"))
+                        .WithOsVersion(_distroInfosService.GetOsInfos(distroName, distroPath, "VERSION"))
+                        .WithSize(_distroInfosService.GetSize(distroPath))
+                        .WithUsers(_distroInfosService.GetDistributionUsers(distroName, distroPath))
+                        .WithSnapshots(_snapshotService.GetDistributionSnapshots(distroPath))
+                        .Build();
 
                     this._distros.Add(distro);
                 }
@@ -105,6 +87,8 @@ public class DistributionService : IDistributionService
         return _distros;
     }
 
+
+    // TODO : Refactor
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
         var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
@@ -127,19 +111,20 @@ public class DistributionService : IDistributionService
 
             var newDistro = await factory.CreateDistribution(distroName, resourceOrigin, distroFolder);
 
+            // fetch distro infos created by WSL
             var distro = _wslApi
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
-            await TerminateDistribution(newDistro.Name); // to read ext4 file
+            await TerminateDistribution(distroName); // to read ext4 file
 
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
-            newDistro.OsName = _distroInfosService.GetOsInfos(newDistro, "NAME");
-            newDistro.OsVersion = _distroInfosService.GetOsInfos(newDistro, "VERSION");
+            newDistro.OsName = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path, "NAME");
+            newDistro.OsVersion = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path,"VERSION");
             newDistro.Size = _distroInfosService.GetSize(newDistro.Path);
-            newDistro.Users = _distroInfosService.GetDistributionUsers(newDistro);
+            newDistro.Users = _distroInfosService.GetDistributionUsers(newDistro.Name, newDistro.Path);
 
             this._distros.Add(newDistro);
 

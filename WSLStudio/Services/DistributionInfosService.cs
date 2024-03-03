@@ -19,9 +19,9 @@ public class DistributionInfosService : IDistributionInfosService
         If we cannot read ext4.dhdx, that means the distribution is runningand we can get os-release file from the 
         file system located at \\wsl$\distroname\...
     */
-    public string GetOsInfos(Distribution distribution, string field)
+    public string GetOsInfos(string distroName, string distroPath, string field)
     {
-        Log.Information($"Fetching OS information of distribution {distribution.Name} ...");
+        Log.Information($"Fetching OS information of distribution {distroName} ...");
 
         var osInfosPattern = $@"(\b{field}="")(.*?)""";
         var osInfosFile = Path.Combine("etc", "os-release");
@@ -30,14 +30,14 @@ public class DistributionInfosService : IDistributionInfosService
 
         try
         {
-            osInfos = GetOsInfosFromVhdx(distribution.Path, osInfosFile, osInfosPattern);
+            osInfos = GetOsInfosFromVhdx(distroPath, osInfosFile, osInfosPattern);
         }
         catch (FileNotFoundException ex)
         {
             // fallback following os-release specs : https://www.freedesktop.org/software/systemd/man/os-release.html
 
             Log.Error($"Didn't find /etc/os-release, retry with fallback file - Caused by exception : {ex}");
-            osInfos = GetOsInfosFromVhdx(distribution.Path, osInfosFileFallBack, osInfosPattern);
+            osInfos = GetOsInfosFromVhdx(distroPath, osInfosFileFallBack, osInfosPattern);
         }
         catch (IOException ex)
         {
@@ -46,7 +46,7 @@ public class DistributionInfosService : IDistributionInfosService
              */
 
             Log.Error($"Another process is already reading ext4.vhdx - Caused by exception : {ex}");
-            osInfos = GetOsInfosFromFileSystem(distribution.Name, osInfosPattern);
+            osInfos = GetOsInfosFromFileSystem(distroName, osInfosPattern);
         }
         catch (Exception ex)
         {
@@ -138,7 +138,7 @@ public class DistributionInfosService : IDistributionInfosService
         }
     }
 
-    public List<string> GetDistributionUsers(Distribution distribution)
+    public List<string> GetDistributionUsers(string distroName, string distroPath)
     {
         Log.Information("Getting distribution's users list ...");
 
@@ -147,13 +147,13 @@ public class DistributionInfosService : IDistributionInfosService
 
         try
         {
-            usersList = GetUsersFromExt4(distribution.Path, userShellPattern);
+            usersList = GetUsersFromExt4(distroPath, userShellPattern);
 
         }
         catch (IOException ex)
         {
             Log.Error($"Failed to get distro users from ext4.vhdx image file - Caused by exception : {ex}");
-            usersList = GetUsersFromFileSystem(distribution.Name, userShellPattern);
+            usersList = GetUsersFromFileSystem(distroName, userShellPattern);
         }
         catch (Exception ex)
         {

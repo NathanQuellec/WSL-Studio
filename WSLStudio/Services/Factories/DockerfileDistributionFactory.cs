@@ -43,11 +43,9 @@ public class DockerfileDistributionFactory : DistributionFactory
 
             Log.Information("Distribution creation from Dockerfile succeed.");
 
-            return new Distribution()
-            {
-                Name = distroName,
-                
-            };
+            return new DistributionBuilder()
+                .WithName(distroName)
+                .Build();
         }
         catch (DockerApiException ex)
         {
