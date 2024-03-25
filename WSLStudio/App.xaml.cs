@@ -224,8 +224,9 @@ public partial class App : Application
             .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File(Path.Combine(LogDirPath, "log.txt")) // add current date or rolling
+            .WriteTo.File(Path.Combine(LogDirPath, "log.txt"), 
+                            rollingInterval: RollingInterval.Day,
+                            rollOnFileSizeLimit: true)
             .CreateLogger();
-        Log.Information("Test log");
     }
 }
