@@ -20,6 +20,7 @@
     <AppxBundle>Auto</AppxBundle>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppxPackageDir>C:\Users\nathan\source\repos\NathanQuellec\WSLStudio\WSLStudio\bin\x64\Release\net6.0-windows10.0.19041.0\AppPackages</AppxPackageDir>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Views\ContentDialog\**" />
