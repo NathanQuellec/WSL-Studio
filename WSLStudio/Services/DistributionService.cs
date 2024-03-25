@@ -1,6 +1,7 @@
 ﻿using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using Community.Wsl.Sdk;
+using Microsoft.VisualBasic;
 using WSLStudio.Helpers;
 using Microsoft.Win32;
 using WSLStudio.Contracts.Services.Factories;
@@ -140,7 +141,7 @@ public class DistributionService : IDistributionService
     public async Task RemoveDistribution(Distribution distribution)
     {
         var process = new ProcessBuilderHelper("cmd.exe")
-            .SetArguments($"/c wsl --unregister {distribution?.Name}")
+            .SetArguments($"/c wsl --unregister {distribution.Name}")
             .SetCreateNoWindow(true)
             .Build();
         process.Start();
@@ -151,7 +152,7 @@ public class DistributionService : IDistributionService
         {
             _distros.Remove(distribution);
             RemoveDistributionFolder(distribution);
-            Log.Information($"DistributionService successfully deleted {distribution?.Name}");
+            Log.Information($"DistributionService successfully deleted {distribution.Name}");
         }
     }
 
@@ -167,10 +168,12 @@ public class DistributionService : IDistributionService
 
     
     /**
+     * TODO REFACTOR
      * Rename distro name in the Windows Registry.
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
+
     public async Task<bool> RenameDistribution(Distribution distribution, string newDistroName)
     {
         Log.Information($"Editing registry for {distribution.Name} with key : {distribution.Id}");
@@ -190,11 +193,20 @@ public class DistributionService : IDistributionService
                 var distroRegPath = Path.Combine(lxssRegPath, subKey);
                 var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
 
-                distroSubkeys.SetValue("DistributionName", newDistroName);
-                distroSubkeys.Close();
+                var oldDistroName = distribution.Name;
+                await TerminateDistribution(newDistroName); // solve error when opening file system just after renaming distro
+                var isFolderRenamed = RenameDistributionFolder(oldDistroName, newDistroName);
 
-                distribution.Name = newDistroName;
-                await TerminateDistribution(distribution.Name); // solve open file system error just after renaming distro
+                if (isFolderRenamed)
+                {
+                    var newDistroPath = distribution.Path.Replace(oldDistroName, newDistroName);
+                    distroSubkeys.SetValue("DistributionName", newDistroName);
+                    distroSubkeys.SetValue("BasePath", newDistroPath);
+                    distribution.Name = newDistroName;
+                    distribution.Path = newDistroPath;
+                }
+
+                distroSubkeys.Close();
                 return true;
             }
 
@@ -208,29 +220,31 @@ public class DistributionService : IDistributionService
         }
     }
 
-    /*private async void RenameDistributionFolder(Distribution distribution, string newDistroName)
+    private static bool RenameDistributionFolder(string oldDistroName, string newDistroName)
     {
-        var distroPath = Path.Combine(Roaming, APP_FOLDER, distribution.Name);
-        var newDistroPath = Path.Combine(Roaming, APP_FOLDER, newDistroName);
+        var oldDistroPath = Path.Combine(App.AppDirPath, oldDistroName);
+        var newDistroPath = Path.Combine(App.AppDirPath, newDistroName);
 
         try
         {
-            if (Directory.Exists(distroPath))
+            if (!Directory.Exists(oldDistroPath))
             {
-                await TerminateDistribution(newDistroName);
-                Directory.Move(distroPath, newDistroPath);
-                Console.WriteLine("Directory renamed successfully.");
+                Log.Information("Source directory does not exist.");
+                throw new DirectoryNotFoundException();
             }
-            else
-            {
-                Console.WriteLine("Source directory does not exist.");
-            }
+            //await TerminateDistribution(newDistroName);
+            File.Copy(oldDistroPath, newDistroPath);
+            Directory.Move(oldDistroPath, newDistroPath);
+            Log.Information("Directory renamed successfully.");
+
+            return true;
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            Console.WriteLine("Error renaming directory: " + e.Message);
+            Log.Error("Error renaming directory: " + ex.Message);
+            return false;
         }
-    }*/
+    }
     
     public void LaunchDistribution(Distribution distribution)
     {

@@ -57,13 +57,14 @@
                         <StackPanel.Resources>
                             <MenuFlyout x:Key="DistroMenuFlyout">
 
-                                <MenuFlyoutItem Text="Rename"
+                                <!--<MenuFlyoutItem Text="Rename"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.RenameDistroCommand}"
                                                 CommandParameter="{x:Bind}">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8AC;"/>
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
+                                -->
 
                                 <MenuFlyoutItem Text="Open with File Explorer"
                                                 Command="{Binding ElementName=Page, Path=ViewModel.OpenDistroWithFileExplorerCommand}"
