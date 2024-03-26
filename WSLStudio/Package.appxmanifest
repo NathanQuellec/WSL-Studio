@@ -8,9 +8,8 @@
   xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
   xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
   xmlns:desktop6="http://schemas.microsoft.com/appx/manifest/desktop/windows10/6"
-  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
-  IgnorableNamespaces="uap rescap genTemplate desktop6 virtualization mp">
+  IgnorableNamespaces="uap rescap genTemplate desktop6 mp">
 
   <Identity
     Name="14543NathanQuellec.WSLStudio"
@@ -21,27 +20,6 @@
     <DisplayName>WSL Studio</DisplayName>
     <PublisherDisplayName>Nathan Quellec</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-
-	  <desktop6:RegistryWriteVirtualization>disabled</desktop6:RegistryWriteVirtualization>
-
-	  <desktop6:FileSystemWriteVirtualization>disabled</desktop6:FileSystemWriteVirtualization>
-
-	  <!-- On Windows 10, version 21H1 and later OS versions, you can declare specific file system and/or registry locations that you want to be unvirtualized. 
-    If these are recognized on the current device, then they take precedence over the old declarations. On older devices,
-    the new declarations are ignored and the old ones are honored. -->
-
-	  <virtualization:RegistryWriteVirtualization>
-		  <virtualization:ExcludedKeys>
-			  <virtualization:ExcludedKey>HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Lxss</virtualization:ExcludedKey>
-		  </virtualization:ExcludedKeys>
-	  </virtualization:RegistryWriteVirtualization>
-
-	  <virtualization:FileSystemWriteVirtualization>
-		  <virtualization:ExcludedDirectories>
-			  <virtualization:ExcludedDirectory>$(KnownFolder:LocalAppData)\Fabrikam\Widgets</virtualization:ExcludedDirectory>
-			  <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\WslStudio</virtualization:ExcludedDirectory>
-		  </virtualization:ExcludedDirectories>
-	  </virtualization:FileSystemWriteVirtualization>
   </Properties>
 
   <Dependencies>
@@ -84,7 +62,7 @@
 
   <Capabilities>
     <!-- Include the required restricted capability. -->
-    <rescap:Capability Name="unvirtualizedResources"/>
+    <rescap:Capability Name="runFullTrust"/>
   </Capabilities>
 
   <genTemplate:Metadata>
