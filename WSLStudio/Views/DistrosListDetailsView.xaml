@@ -330,11 +330,12 @@
                                 <TextBlock x:Name="SnapshotsTotalSizeValue"
                                            RelativePanel.RightOf="SnapshotsTotalSize"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="{x:Bind functions:BindingFormatHandler.Concatenate(Snapshots[0].Size, ' GB')}"
+                                           Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(SnapshotsTotalSize, ' GB')}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
                             </RelativePanel>
+
 
                         </Grid>
                     </ScrollViewer>

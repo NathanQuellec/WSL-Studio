@@ -74,6 +74,8 @@ public class SnapshotService : ISnapshotService
             };
 
             distribution.Snapshots.Insert(0, snapshot);
+            distribution.SnapshotsTotalSize = (decimal.Parse(distribution.SnapshotsTotalSize) + sizeOfSnap)
+                .ToString(CultureInfo.InvariantCulture);
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
 
             return true;
