@@ -1,4 +1,5 @@
-﻿using WSLStudio.Models;
+﻿using System.Globalization;
+using WSLStudio.Models;
 using WSLStudio.Contracts.Services;
 using Community.Wsl.Sdk;
 using Microsoft.VisualBasic;
@@ -69,6 +70,8 @@ public class DistributionService : IDistributionService
                         .WithUsers(_distroInfosService.GetDistributionUsers(distroName, distroPath))
                         .WithSnapshots(_snapshotService.GetDistributionSnapshots(distroPath))
                         .Build();
+
+                    distro.SnapshotsTotalSize = distro.Snapshots.Sum(snapshot => decimal.Parse(snapshot.Size, CultureInfo.InvariantCulture)).ToString();
 
                     this._distros.Add(distro);
                 }

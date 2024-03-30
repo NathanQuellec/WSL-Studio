@@ -47,7 +47,7 @@
             <controls:Case Value="Dockerfile">
                 <Grid x:Name="DockerfileInputContainer"
                       Height="96">
-                    <TextBox Header="Dockerfile folder path :"
+                    <TextBox Header="Dockerfile root folder path :"
                              x:Name="DockerfileInput"
                              Height="64"
                              Margin="0 12 0 16"/>

@@ -9,14 +9,23 @@ namespace WSLStudio.Models;
 public class Distribution : INotifyPropertyChanged
 {
     public Guid Id { get; set; }
+
     public string Path { get; set; }
+
     public int WslVersion { get; set; }
+
     public string OsName { get; set; }
+
     public string OsVersion { get; set; }
+
     public string Size { get; set; }
 
     public IList<string> Users { get; set; } = new List<string>();
+
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
+
+    public string SnapshotsTotalSize { get; set; } = "0.0";
+
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;
