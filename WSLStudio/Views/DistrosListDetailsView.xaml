@@ -168,6 +168,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                                 
                                 <!--<StackPanel Orientation="Horizontal"
@@ -315,6 +316,24 @@
                                     <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
                                 </Button>
+                            </RelativePanel>
+
+                            <RelativePanel Grid.Column="0"
+                                           Grid.Row="7"
+                                           Margin="40 16">
+                                <TextBlock x:Name="SnapshotsTotalSize" 
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Text="Snapshots Total Size : "
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Margin="0 12 0 0 "/>
+                                <TextBlock x:Name="SnapshotsTotalSizeValue"
+                                           RelativePanel.RightOf="SnapshotsTotalSize"
+                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Text="{x:Bind functions:BindingFormatHandler.Concatenate(Snapshots[0].Size, ' GB')}"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Margin="12 12 0 0 "/>
                             </RelativePanel>
 
                         </Grid>
