@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--DEPRECATED-->
 <ContentDialog
     x:Class="WSLStudio.Views.Dialogs.RenameDistributionView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
