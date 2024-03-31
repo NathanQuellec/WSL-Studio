@@ -28,13 +28,13 @@ public class SnapshotService : ISnapshotService
                 var snapshotsInfos = snapshotsInfosLines[i].Split(';');
                 snapshotsList.Insert(0, new Snapshot()
                 {
-                    Id = Guid.Parse(snapshotsInfos[0]),
-                    Name = snapshotsInfos[1],
-                    Description = snapshotsInfos[2],
-                    CreationDate = snapshotsInfos[3],
-                    Size = snapshotsInfos[4],
-                    DistroSize = snapshotsInfos[5],
-                    Path = snapshotsInfos[6],
+                    CreationDate = snapshotsInfos[0],
+                    Description = snapshotsInfos[1],
+                    DistroSize = snapshotsInfos[2],
+                    Id = Guid.Parse(snapshotsInfos[3]),
+                    Name = snapshotsInfos[4],
+                    Path = snapshotsInfos[5],
+                    Size = snapshotsInfos[6],
                 });
             }
 
@@ -74,7 +74,7 @@ public class SnapshotService : ISnapshotService
             };
 
             distribution.Snapshots.Insert(0, snapshot);
-            distribution.SnapshotsTotalSize = (decimal.Parse(distribution.SnapshotsTotalSize) + sizeOfSnap)
+            distribution.SnapshotsTotalSize = (decimal.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture) + sizeOfSnap)
                 .ToString(CultureInfo.InvariantCulture);
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
 
@@ -119,8 +119,10 @@ public class SnapshotService : ISnapshotService
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
             var snapshotInfosHeader = new StringBuilder();
             var snapshotInfos = new StringBuilder();
-            var properties = snapshot.GetType().GetProperties();
+            // snapshot record's attributes are saved by 
+            var properties = snapshot.GetType().GetProperties().OrderBy(property => property.Name);
 
+            // construct file header if not exist
             if (!File.Exists(snapshotInfosFile))
             {
                 snapshotInfosHeader.Append(string.Join(';', properties.Select(prop => prop.Name)));
@@ -128,7 +130,8 @@ public class SnapshotService : ISnapshotService
                 await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfosHeader.ToString());
             }
 
-            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot))));
+            // add snapshots data to file
+            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot).ToString())));
             snapshotInfos.Append('\n');
             await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
         }
