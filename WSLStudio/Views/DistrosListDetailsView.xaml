@@ -350,7 +350,7 @@
                                 <TextBlock x:Name="SnapshotsCountValue"
                                            RelativePanel.RightOf="SnapshotsCount"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Count"
+                                           Text="{x:Bind Snapshots.Count}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
@@ -366,7 +366,7 @@
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
                                 <TextBlock x:Name="SnapshotLastDateValue"
-                                           RelativePanel.RightOf="SnapshotsCount"
+                                           RelativePanel.RightOf="SnapshotLastDate"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Date"
                                            FontSize="18"
