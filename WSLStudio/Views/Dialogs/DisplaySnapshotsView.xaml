@@ -16,6 +16,7 @@
 
         <!--ContentDialog style inheritance; Issue : https://github.com/microsoft/microsoft-ui-xaml/issues/6154-->
         <Style TargetType="local:DisplaySnapshotsView" BasedOn="{StaticResource DefaultContentDialogStyle}"/>
+
         <!-- Overriding DefaultContentDialogStyle style -->
         <x:Double x:Key="ContentDialogMaxWidth">1200</x:Double>
 
