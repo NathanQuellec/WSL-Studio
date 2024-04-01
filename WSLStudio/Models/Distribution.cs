@@ -24,8 +24,6 @@ public class Distribution : INotifyPropertyChanged
 
     public ObservableCollection<Snapshot> Snapshots { get; set; } = new();
 
-    public string SnapshotsTotalSize { get; set; } = "0.0";
-
     public IList<Process> RunningProcesses { get; set; } = new List<Process>();
 
     private string _name;
@@ -35,6 +33,17 @@ public class Distribution : INotifyPropertyChanged
         set
         {
             _name = value;
+            OnPropertyChanged();
+        }
+    }
+
+    private string _snapshotsTotalSize = "0.0";
+    public string SnapshotsTotalSize
+    {
+        get => _snapshotsTotalSize;
+        set
+        {
+            _snapshotsTotalSize = value;
             OnPropertyChanged();
         }
     }
