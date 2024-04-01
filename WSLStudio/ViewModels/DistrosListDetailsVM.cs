@@ -1,13 +1,10 @@
 ﻿using System.Collections.ObjectModel;
-using System.Net.Mime;
 using System.Text.RegularExpressions;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI;
-using Microsoft.UI.Dispatching;
-using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
@@ -15,7 +12,6 @@ using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
-using WSLStudio.Views;
 using WSLStudio.Views.Dialogs;
 
 namespace WSLStudio.ViewModels;
@@ -29,25 +25,55 @@ public class DistrosListDetailsVM : ObservableObject
 
     #region RelayCommand
 
-    public AsyncRelayCommand<Distribution> RemoveDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RemoveDistroCommand
+    {
+        get; set;
+    }
 
-    public AsyncRelayCommand<Distribution> RenameDistroCommand { get; set; }
+    public AsyncRelayCommand<Distribution> RenameDistroCommand
+    {
+        get; set;
+    }
 
-    public RelayCommand<Distribution> LaunchDistroCommand { get; set; }
+    public RelayCommand<Distribution> LaunchDistroCommand
+    {
+        get; set;
+    }
 
-    public RelayCommand<Distribution> StopDistroCommand { get; set; }
+    public RelayCommand<Distribution> StopDistroCommand
+    {
+        get; set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithFileExplorerCommand
+    {
+        get; set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithVsCodeCommand
+    {
+        get; set;
+    }
 
-    public RelayCommand<Distribution> OpenDistroWithWinTermCommand { get; set; }
+    public RelayCommand<Distribution> OpenDistroWithWinTermCommand
+    {
+        get; set;
+    }
 
-    public AsyncRelayCommand CreateDistroCommand { get; set; }
+    public AsyncRelayCommand CreateDistroCommand
+    {
+        get; set;
+    }
 
-    public AsyncRelayCommand<Distribution> CreateSnapshotCommand { get; set; }
+    public AsyncRelayCommand<Distribution> CreateSnapshotCommand
+    {
+        get; set;
+    }
 
-    public AsyncRelayCommand<Distribution> DisplaySnapshotsListCommand { get; set; }
+    public AsyncRelayCommand<Distribution> DisplaySnapshotsListCommand
+    {
+        get; set;
+    }
 
     #endregion
 
@@ -317,7 +343,7 @@ public class DistrosListDetailsVM : ObservableObject
             Log.Error($"Failed to fetch distribution creation form's information - Caused by exception : {ex}");
             return null;
         }
-        
+
     }
 
     private async Task CreateDistributionDialog()
@@ -390,7 +416,7 @@ public class DistrosListDetailsVM : ObservableObject
         {
             Log.Error($"Failed to validate distribution creation mode - Caused by exception : {ex}");
         }
-        
+
     }
 
     internal async Task CreateDistributionViewModel(string distroName, string creationMode, string resourceOrigin)
@@ -411,7 +437,7 @@ public class DistrosListDetailsVM : ObservableObject
             App.IsDistributionProcessing = false;
 
         }
-      
+
         catch (Exception ex)
         {
             Log.Error($"Failed to create new distribution {distroName} - Caused by exception : {ex} ");

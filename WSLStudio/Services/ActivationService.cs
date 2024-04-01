@@ -3,8 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 
 using WSLStudio.Activation;
 using WSLStudio.Contracts.Services;
-using WSLStudio.Helpers;
-using WSLStudio.Views;
 
 namespace WSLStudio.Services;
 

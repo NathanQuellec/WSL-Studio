@@ -1,6 +1,4 @@
-﻿using WSLStudio.Models;
-
-namespace WSLStudio.Contracts.Services;
+﻿namespace WSLStudio.Contracts.Services;
 
 public interface IDistributionInfosService
 {

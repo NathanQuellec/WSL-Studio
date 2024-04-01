@@ -1,22 +1,10 @@
-﻿using System.IO.Compression;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
-using WSLStudio.Models.Docker;
-using System;
-using System.Reflection.Emit;
 using Serilog;
-using TarArchive = SharpCompress.Archives.Tar.TarArchive;
-using TarArchiveEntry = SharpCompress.Archives.Tar.TarArchiveEntry;
-
-using SharpCompress.Archives;
-using SharpCompress.Common;
-using SharpCompress.Common.Tar;
-using SharpCompress.Common.Rar;
+using WSLStudio.Models.Docker;
 
 namespace WSLStudio.Helpers;
 
@@ -27,7 +15,7 @@ public class DockerHelper
 
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
     private const string DOCKER_REGISTRY = "https://registry.hub.docker.com/v2";
-   // private static readonly string DockerAuthToken = "auth.docker.io";
+    // private static readonly string DockerAuthToken = "auth.docker.io";
 
     public DockerHelper()
     {
@@ -221,7 +209,7 @@ public class DockerHelper
             Log.Error($"Failed to fetch Docker image authtoken - Caused by exception : {ex}");
             throw new Exception("Failed to fetch image authentication token");
         }
-        
+
     }
 
     public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
@@ -265,7 +253,7 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(App.TmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.TmpDirPath, $"{layer.Digest.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
                 var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";

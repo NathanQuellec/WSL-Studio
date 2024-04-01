@@ -1,10 +1,6 @@
-﻿using System.Diagnostics;
-using Community.Wsl.Sdk;
-using Microsoft.Win32;
+﻿using Community.Wsl.Sdk;
 using Serilog;
-using WSLStudio.Contracts.Services;
 using WSLStudio.Exceptions;
-using WSLStudio.Models;
 
 namespace WSLStudio.Helpers;
 

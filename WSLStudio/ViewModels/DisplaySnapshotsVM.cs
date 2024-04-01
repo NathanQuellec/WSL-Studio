@@ -1,14 +1,9 @@
-﻿using System.Text.RegularExpressions;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI;
-using Microsoft.UI;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using WSLStudio.Contracts.Services;
-using WSLStudio.Helpers;
 using WSLStudio.Models;
-using WSLStudio.Services.Factories;
 
 namespace WSLStudio.ViewModels;
 
@@ -18,7 +13,10 @@ public class DisplaySnapshotsVM : ObservableObject
 
     private readonly DistrosListDetailsVM _distrosViewModel;
 
-    public RelayCommand<Snapshot> DeleteSnapshotCommand { get; set; }
+    public RelayCommand<Snapshot> DeleteSnapshotCommand
+    {
+        get; set;
+    }
 
     public DisplaySnapshotsVM(ISnapshotService snapshotService)
     {

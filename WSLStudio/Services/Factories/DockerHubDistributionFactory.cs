@@ -1,7 +1,4 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
-using Serilog;
-using WSLStudio.Contracts.Services;
+﻿using Serilog;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
@@ -47,7 +44,7 @@ public class DockerHubDistributionFactory : DistributionFactory
                 tarPathList.Add(tarFilePath);
             }
 
-            var newArchPath = Path.Combine(App.TmpDirPath,"distro.tar");
+            var newArchPath = Path.Combine(App.TmpDirPath, "distro.tar");
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
             await WslHelper.ImportDistribution(distroName, installDir, newArchPath);
