@@ -173,7 +173,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Exceptions\" />
     <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
     <Folder Include="Views\UserControls\" />

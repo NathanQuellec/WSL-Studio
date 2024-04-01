@@ -14,6 +14,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:userControls="using:WSLStudio.Views.UserControls"
+    xmlns:system="using:System"
 
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -332,7 +333,7 @@
                                 <TextBlock x:Name="SnapshotsTotalSizeValue"
                                            RelativePanel.RightOf="SnapshotsTotalSize"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(SnapshotsTotalSize, ' GB')}"
+                                           Text="{x:Bind Path=system:String.Format('{0} GB', SnapshotsTotalSize)}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>

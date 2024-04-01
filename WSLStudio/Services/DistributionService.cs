@@ -71,7 +71,9 @@ public class DistributionService : IDistributionService
                         .WithSnapshots(_snapshotService.GetDistributionSnapshots(distroPath))
                         .Build();
 
-                    distro.SnapshotsTotalSize = distro.Snapshots.Sum(snapshot => decimal.Parse(snapshot.Size, CultureInfo.InvariantCulture)).ToString();
+                    distro.SnapshotsTotalSize = distro.Snapshots
+                        .Sum(snapshot => decimal.Parse(snapshot.Size, CultureInfo.InvariantCulture))
+                        .ToString(CultureInfo.InvariantCulture);
 
                     this._distros.Add(distro);
                 }

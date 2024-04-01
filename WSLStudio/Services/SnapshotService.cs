@@ -7,6 +7,7 @@ using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
 using WSLStudio.Helpers;
+using WSLStudio.Exceptions;
 
 namespace WSLStudio.Services;
 
@@ -53,12 +54,11 @@ public class SnapshotService : ISnapshotService
 
         var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
         var snapshotFolder = FilesHelper.CreateDirectory(distribution.Path, "snapshots");
-
         var snapshotId = Guid.NewGuid();
+        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
 
         try
         {
-            var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
             await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
             decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
@@ -74,15 +74,23 @@ public class SnapshotService : ISnapshotService
             };
 
             distribution.Snapshots.Insert(0, snapshot);
-            distribution.SnapshotsTotalSize = (decimal.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture) + sizeOfSnap)
+            var currentTotalSnapSize = decimal.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture);
+            distribution.SnapshotsTotalSize = (currentTotalSnapSize + sizeOfSnap)
                 .ToString(CultureInfo.InvariantCulture);
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
 
             return true;
         }
+        catch (FileCompressionException ex)
+        {
+            Log.Error($"Failed to compress snapshot {snapshotName} from distribution {distribution.Name} - Caused by exception {ex}");
+            File.Delete(snapshotPath);
+            return false;
+        }
         catch (Exception ex)
         {
             Log.Error($"Failed to create snapshot {snapshotName} from distribution {distribution.Name} - Caused by exception {ex}");
+            File.Delete(snapshotPath);
             return false;
         }
     }
@@ -107,7 +115,7 @@ public class SnapshotService : ISnapshotService
         catch (Exception ex)
         {
             Log.Error($"Failed to compress snapshot in {snapshotPath} - Caused by exception : {ex}");
-            throw;
+            throw new FileCompressionException();
         }
     }
 
