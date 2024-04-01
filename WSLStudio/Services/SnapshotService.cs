@@ -145,6 +145,7 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
+            File.Delete(snapshot.Path);
             Log.Error($"Failed to save snapshot information - Caused by exception : {ex}");
         }
     }

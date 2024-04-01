@@ -111,6 +111,7 @@
                            Grid.Row="1"
                            MinColumnWidth="140"
                            MaxColumnWidth="500"
+                           RowHeight="60"
                            ItemsSource="{Binding Snapshots}"
                            AutoGenerateColumns="False"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"

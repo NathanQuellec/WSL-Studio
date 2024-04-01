@@ -8,7 +8,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:CommunityToolkit.WinUI.UI.Controls"
     xmlns:local="using:WSLStudio.Views"
-    xmlns:functions="using:WSLStudio.Views.Functions"
+    xmlns:converters="using:WSLStudio.Views.Converters"
     xmlns:model="using:WSLStudio.Models"
     xmlns:test="System.Windows.Data"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -24,6 +24,11 @@
             <RowDefinition Height="32"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+
+        <Grid.Resources>
+            <!--Converters-->
+            <converters:BindingFormatHandler x:Key="ConcatString"/>
+        </Grid.Resources>
 
         <StackPanel x:Name="AppTitleBar"
                     Orientation="Horizontal"
@@ -131,7 +136,7 @@
                             <Button x:Name="StopButton"
                                     RelativePanel.RightOf="LaunchButton"
                                     Style="{StaticResource MinimalistButtonStyle}"
-                                    Tag="{x:Bind Path=functions:BindingFormatHandler.Concatenate('Stop','_', Name), Mode=OneWay}"
+                                    Tag="{x:Bind Path=system:String.Format('Stop_{0}', Name), Mode=OneWay}"
                                     Visibility="Collapsed"
                                     Margin="0 14 0 0 "
                                     Command="{Binding ElementName=Page, Path=ViewModel.StopDistroCommand}"
@@ -251,7 +256,7 @@
                                            FontWeight="SemiBold"/>
                                 <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="DistroSize"
-                                           Text="{x:Bind Path=functions:BindingFormatHandler.Concatenate(Size, ' GB')}"
+                                           Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
                                            FontSize="18"
                                            Margin="12 0 0 0 "/>
                             </RelativePanel>
@@ -333,7 +338,7 @@
                                 <TextBlock x:Name="SnapshotsTotalSizeValue"
                                            RelativePanel.RightOf="SnapshotsTotalSize"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="{x:Bind Path=system:String.Format('{0} GB', SnapshotsTotalSize)}"
+                                           Text="{x:Bind system:String.Format('{0} GB', SnapshotsTotalSize), Mode=OneWay}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
@@ -351,7 +356,7 @@
                                 <TextBlock x:Name="SnapshotsCountValue"
                                            RelativePanel.RightOf="SnapshotsCount"
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="{Binding Snapshots.Count}"
+                                           Text="{x:Bind Snapshots.Count, Mode=OneWay}"
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
