@@ -2,5 +2,5 @@
 
 public interface IImageManifest
 {
-    public List<string> getLayers();
+    public List<string> GetLayers();
 }

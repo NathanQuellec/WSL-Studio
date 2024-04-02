@@ -8,22 +8,22 @@ namespace WSLStudio.Services.Factories;
 
 public class DockerHubDistributionFactory : DistributionFactory
 {
+
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
         Log.Information("Creating distribution from DockerHub ...");
 
         var imageName = resourceOrigin;
         var imageTag = "latest"; // default tag
-        var distroTarFile = $"{distroName}.tar.gz";
         var installDir = Path.Combine(targetFolder, "installDir");
 
-
-        // check if user specify a tag in the image name input
-
+        // check if we used any docker official images and add library prefix 
         if (!resourceOrigin.Contains('/'))
         {
             imageName = string.Concat("library/", imageName);
         }
+
+        // check if user specify a tag in the image name input
         if (resourceOrigin.Contains(':'))
         {
             var imageElements = resourceOrigin.Split(':');
@@ -36,7 +36,7 @@ public class DockerHubDistributionFactory : DistributionFactory
             var imageToken = await DockerHelper.GetAuthToken(imageName);
             var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
 
-            if (imageManifest.getLayers() == null)
+            if (imageManifest?.GetLayers() == null)
             {
                 throw new Exception("Unable to find this image on DockerHub");
             }

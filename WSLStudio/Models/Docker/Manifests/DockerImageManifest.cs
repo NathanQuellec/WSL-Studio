@@ -16,7 +16,7 @@ public class DockerImageManifest : IImageManifest
     [JsonProperty("layers")]
     public List<Config> Layers { get; set; }
 
-    public List<string> getLayers()
+    public List<string> GetLayers()
     {
         return Layers.Select(layer => layer.Digest).ToList();
     }

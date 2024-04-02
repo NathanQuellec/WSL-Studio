@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
+using Newtonsoft.Json;
 using Serilog;
 using WSLStudio.Models.Docker;
 using WSLStudio.Models.Docker.Manifests;
@@ -222,10 +223,17 @@ public class DockerHelper
         var uri = new Uri(manifestUri);
         using var httpClient = new HttpClient();
 
+        // docker manifest spec
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.container.image.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.image.rootfs.diff.tar.gzip"));
+
+        // oci manifest spec
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.index.v1+json"));
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.manifest.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.config.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.layer.v1.tar+gzip"));
 
         try
         {
@@ -235,17 +243,19 @@ public class DockerHelper
             IImageManifest? imageManifest;
             switch (content.Headers.ContentType?.ToString())
             {
+                // in case of fat manifest
                 case "application/vnd.oci.image.index.v1+json":
                 {
-                    var fatManifest = content.ReadFromJsonAsync<FatManifest>().Result;
-                    var selectedManifestUri = manifestRootUri + $"/{fatManifest?.getAmd64ManifestDigest()}";
+                    var fatManifest = content.ReadFromJsonAsync<ImageFatManifest>().Result;
+                    var selectedManifestUri = manifestRootUri + $"/{fatManifest?.GetManifestByArchitecture("amd64")}";
                     var newUri = new Uri(selectedManifestUri);
                     using var newHttpResponse = await httpClient.GetAsync(newUri);
                     using var newContent = newHttpResponse.Content;
                     imageManifest = newContent.ReadFromJsonAsync<DockerImageManifest>().Result;
                     break;
                 }
-                case "application/vnd.docker.distribution.manifest.v2+json":
+                case "application/vnd.docker.distribution.manifest.v2+json" or
+                     "application/vnd.oci.image.manifest.v1+json" :
                     imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
                     break;
                 default:
@@ -270,7 +280,7 @@ public class DockerHelper
 
         try
         {
-            var layers = imageManifest.getLayers();
+            var layers = imageManifest.GetLayers();
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
             httpClient.Timeout = TimeSpan.FromSeconds(300);
