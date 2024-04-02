@@ -546,7 +546,7 @@ public class DistrosListDetailsVM : ObservableObject
             var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
             _infoBarService.OpenInfoBar(createSnapshotInfoProgress);
             var isSnapshotCreated =
-                await _snapshotService.CreateDistroSnapshot(distribution, snapshotName, snapshotDescr);
+                await _snapshotService.CreateSnapshot(distribution, snapshotName, snapshotDescr);
 
             if (isSnapshotCreated)
             {

@@ -47,7 +47,7 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    public async Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    public async Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
     {
         Log.Information($"Creating snapshot {snapshotName} from distribution {distribution.Name} ...");
 
@@ -83,12 +83,14 @@ public class SnapshotService : ISnapshotService
         catch (FileCompressionException ex)
         {
             Log.Error($"Failed to compress snapshot {snapshotName} from distribution {distribution.Name} - Caused by exception {ex}");
+            Log.Information("Deleting snapshot file ...");
             File.Delete(snapshotPath);
             return false;
         }
         catch (Exception ex)
         {
             Log.Error($"Failed to create snapshot {snapshotName} from distribution {distribution.Name} - Caused by exception {ex}");
+            Log.Information("Deleting snapshot file ...");
             File.Delete(snapshotPath);
             return false;
         }
@@ -144,16 +146,8 @@ public class SnapshotService : ISnapshotService
         }
         catch (Exception ex)
         {
-            File.Delete(snapshot.Path);
             Log.Error($"Failed to save snapshot information - Caused by exception : {ex}");
-        }
-    }
-
-    public void DeleteSnapshotFile(Snapshot snapshot)
-    {
-        Log.Information("Deleting snapshot file ...");
-        if (File.Exists(snapshot.Path))
-        {
+            Log.Information("Deleting snapshot file ...");
             File.Delete(snapshot.Path);
         }
     }

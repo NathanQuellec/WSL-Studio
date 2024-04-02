@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
+using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Models;
 
@@ -28,8 +29,11 @@ public class DisplaySnapshotsVM : ObservableObject
 
     public void DeleteSnapshotViewModel(Snapshot snapshot)
     {
-        _snapshotService.DeleteSnapshotFile(snapshot);
+        Log.Information("Deleting snapshot record");
         _snapshotService.DeleteSnapshotInfosRecord(snapshot);
+
+        Log.Information("Deleting snapshot file");
+        File.Delete(snapshot.Path);
     }
 
     public async void CreateDistroFromSnapshot(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -40,8 +44,10 @@ public class DisplaySnapshotsVM : ObservableObject
 
             var distroNameInput = (sender.Content as StackPanel)?.FindChild("DistroNameInput") as TextBox;
             var snapshot = sender.DataContext as Snapshot;
+
             _distrosViewModel.ValidateDistributionName(sender, args);
             await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, "Archive", snapshot!.Path);
+
             App.IsDistributionProcessing = false;
         }
         catch (Exception ex)
