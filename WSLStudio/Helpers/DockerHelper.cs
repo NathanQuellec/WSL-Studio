@@ -215,13 +215,9 @@ public class DockerHelper
 
     }
 
-    public static async Task<IImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
+    private static HttpClient BuildDockerHttpClient(AuthToken authToken)
     {
-        Log.Information("Fetching Docker image manifest ...");
-
-        var manifestRootUri = $@"{DOCKER_REGISTRY}/{imageName}/manifests";
-        var manifestUri = new Uri(manifestRootUri + $"/{imageTag}");
-        using var httpClient = new HttpClient();
+        var httpClient = new HttpClient();
 
         // docker manifest spec
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
@@ -234,6 +230,17 @@ public class DockerHelper
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.manifest.v1+json"));
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.config.v1+json"));
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.layer.v1.tar+gzip"));
+
+        return httpClient;
+    }
+
+    public static async Task<IImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
+    {
+        Log.Information("Fetching Docker image manifest ...");
+
+        var manifestRootUri = $@"{DOCKER_REGISTRY}/{imageName}/manifests";
+        var manifestUri = new Uri(manifestRootUri + $"/{imageTag}");
+        using var httpClient = BuildDockerHttpClient(authToken);
 
         try
         {
