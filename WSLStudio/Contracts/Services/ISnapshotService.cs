@@ -6,7 +6,6 @@ namespace WSLStudio.Contracts.Services;
 public interface ISnapshotService
 {
     ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath);
-    Task<bool> CreateDistroSnapshot(Distribution distribution, string snapshotName, string snapshotDescr);
-    void DeleteSnapshotFile(Snapshot snapshot);
+    Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr);
     void DeleteSnapshotInfosRecord(Snapshot snapshot);
 }
