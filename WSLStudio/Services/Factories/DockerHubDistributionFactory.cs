@@ -2,6 +2,7 @@
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
+using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Services.Factories;
 
@@ -30,7 +31,7 @@ public class DockerHubDistributionFactory : DistributionFactory
             var imageToken = await DockerHelper.GetAuthToken(imageName);
             var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
 
-            if (imageManifest.Layers == null)
+            if (imageManifest.getLayers() == null)
             {
                 throw new Exception("Unable to find this image on DockerHub");
             }

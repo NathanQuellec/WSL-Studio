@@ -5,6 +5,7 @@ using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
 using Serilog;
 using WSLStudio.Models.Docker;
+using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Helpers;
 
@@ -212,22 +213,47 @@ public class DockerHelper
 
     }
 
-    public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
+    public static async Task<IImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
     {
         Log.Information("Fetching Docker image manifest ...");
 
-        var uriString = $@"{DOCKER_REGISTRY}/{imageName}/manifests/{imageTag}";
-        var uri = new Uri(uriString);
+        var manifestRootUri = $@"{DOCKER_REGISTRY}/{imageName}/manifests";
+        var manifestUri = manifestRootUri + $"/{imageTag}";
+        var uri = new Uri(manifestUri);
         using var httpClient = new HttpClient();
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.index.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.manifest.v1+json"));
 
         try
         {
             using var httpResponse = await httpClient.GetAsync(uri);
             using var content = httpResponse.Content;
-            var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
+
+            IImageManifest? imageManifest;
+            switch (content.Headers.ContentType?.ToString())
+            {
+                case "application/vnd.oci.image.index.v1+json":
+                {
+                    var fatManifest = content.ReadFromJsonAsync<FatManifest>().Result;
+                    var selectedManifestUri = manifestRootUri + $"/{fatManifest?.getAmd64ManifestDigest()}";
+                    var newUri = new Uri(selectedManifestUri);
+                    using var newHttpResponse = await httpClient.GetAsync(newUri);
+                    using var newContent = newHttpResponse.Content;
+                    imageManifest = newContent.ReadFromJsonAsync<DockerImageManifest>().Result;
+                    break;
+                }
+                case "application/vnd.docker.distribution.manifest.v2+json":
+                    imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
+                    break;
+                default:
+                    imageManifest = null;
+                    break;
+
+            }
+            //var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
 
             return imageManifest;
         }
@@ -238,13 +264,13 @@ public class DockerHelper
         }
     }
 
-    public static async Task<List<string>?> GetLayers(AuthToken authToken, ImageManifest imageManifest, string imageName)
+    public static async Task<List<string>?> GetLayers(AuthToken authToken, IImageManifest imageManifest, string imageName)
     {
         Log.Information("Fetching Docker image layers ...");
 
         try
         {
-            var layers = imageManifest.Layers;
+            var layers = imageManifest.getLayers();
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
             httpClient.Timeout = TimeSpan.FromSeconds(300);
@@ -253,10 +279,10 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(App.TmpDirPath, $"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.TmpDirPath, $"{layer.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
-                var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";
+                var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer}";
 
                 var uri = new Uri(uriString);
                 using var httpResponse = await httpClient.GetAsync(uri);
