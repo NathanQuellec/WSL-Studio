@@ -220,8 +220,7 @@ public class DockerHelper
         Log.Information("Fetching Docker image manifest ...");
 
         var manifestRootUri = $@"{DOCKER_REGISTRY}/{imageName}/manifests";
-        var manifestUri = manifestRootUri + $"/{imageTag}";
-        var uri = new Uri(manifestUri);
+        var manifestUri = new Uri(manifestRootUri + $"/{imageTag}");
         using var httpClient = new HttpClient();
 
         // docker manifest spec
@@ -238,22 +237,23 @@ public class DockerHelper
 
         try
         {
-            using var httpResponse = await httpClient.GetAsync(uri);
-            using var content = httpResponse.Content;
+            using var manifestResponse = await httpClient.GetAsync(manifestUri);
+            using var content = manifestResponse.Content;
 
             IImageManifest? imageManifest;
             switch (content.Headers.ContentType?.ToString())
             {
-                // in case of fat manifest
+                // if manifest is a fat manifest (a list of others manifest)
                 case "application/vnd.oci.image.index.v1+json":
                 {
                     Log.Information("Fetching fat manifest");
                     var fatManifest = content.ReadFromJsonAsync<ImageFatManifest>().Result;
-                    var selectedManifestUri = manifestRootUri + $"/{fatManifest?.GetManifestByArchitecture("amd64")}";
-                    var newUri = new Uri(selectedManifestUri);
+                    var selectedManifest = manifestRootUri + $"/{fatManifest?.GetManifestByArchitecture("amd64")}";
+                    var selectedManifestUri = new Uri(selectedManifest);
+
                     Log.Information("Fetching manifest with amd64 architecture");
-                    using var newHttpResponse = await httpClient.GetAsync(newUri);
-                    using var newContent = newHttpResponse.Content;
+                    using var selectedManifestResponse = await httpClient.GetAsync(selectedManifestUri);
+                    using var newContent = selectedManifestResponse.Content;
                     imageManifest = newContent.ReadFromJsonAsync<DockerImageManifest>().Result;
                     break;
                 }
