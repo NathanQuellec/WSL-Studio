@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using WSLStudio.Contracts.Services;
 
 namespace WSLStudio.Helpers;
 

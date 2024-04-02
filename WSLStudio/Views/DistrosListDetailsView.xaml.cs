@@ -2,15 +2,13 @@
 // Licensed under the MIT License.
 
 
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using CommunityToolkit.Mvvm.Messaging;
-using CommunityToolkit.WinUI.UI.Controls;
 using Serilog;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
-using WSLStudio.Models;
 using WSLStudio.ViewModels;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -24,7 +22,10 @@ public sealed partial class DistrosListDetailsView : Page
 {
     private Button _distroStopButton = new();
 
-    public DistrosListDetailsVM ViewModel { get; }
+    public DistrosListDetailsVM ViewModel
+    {
+        get;
+    }
 
     public DistrosListDetailsView()
     {

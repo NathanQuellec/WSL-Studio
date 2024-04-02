@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.WinUI.UI;
 using Serilog;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
-using Path = System.IO.Path;
 using WSLStudio.ViewModels;
+using Path = System.IO.Path;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -20,7 +14,10 @@ namespace WSLStudio.Views.Dialogs;
 public sealed partial class DisplaySnapshotsView : ContentDialog
 {
 
-    public DisplaySnapshotsVM ViewModel { get; set; }
+    public DisplaySnapshotsVM ViewModel
+    {
+        get; set;
+    }
 
     public DisplaySnapshotsView()
     {
@@ -70,7 +67,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
             CloseButtonText = "Cancel",
             DefaultButton = ContentDialogButton.Primary,
         };
-        
+
         deleteSnapshotDialog.PrimaryButtonCommand = ViewModel.DeleteSnapshotCommand;
         deleteSnapshotDialog.PrimaryButtonCommandParameter = deleteSnapshotDialog.DataContext;
 

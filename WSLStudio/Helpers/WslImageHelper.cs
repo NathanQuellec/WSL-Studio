@@ -1,7 +1,6 @@
-﻿using DiscUtils.Ext;
+﻿using System.Text;
+using DiscUtils.Ext;
 using DiscUtils.Streams;
-using System.Text.RegularExpressions;
-using System.Text;
 using Serilog;
 
 namespace WSLStudio.Helpers;
@@ -22,7 +21,7 @@ public class WslImageHelper
      *  Read a specific file from a wsl image (ext4.vhdx) and return the results in ASCII
      * </summary>
      */
-    public string ReadFile(string fileToExtract) 
+    public string ReadFile(string fileToExtract)
     {
         Log.Information("Reading distribution image file for extraction");
         try

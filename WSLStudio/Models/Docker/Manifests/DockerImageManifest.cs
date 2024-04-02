@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace WSLStudio.Models.Docker;
+namespace WSLStudio.Models.Docker.Manifests;
 
-public class ImageManifest
+public class DockerImageManifest : IImageManifest
 {
     [JsonProperty("schemaVersion")]
     public int SchemaVersion { get; set; }
@@ -15,6 +15,11 @@ public class ImageManifest
 
     [JsonProperty("layers")]
     public List<Config> Layers { get; set; }
+
+    public List<string> GetLayers()
+    {
+        return Layers.Select(layer => layer.Digest).ToList();
+    }
 }
 
 public class Config

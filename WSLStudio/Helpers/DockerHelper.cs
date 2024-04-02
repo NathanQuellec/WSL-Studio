@@ -1,22 +1,13 @@
-﻿using System.IO.Compression;
-using System.Net;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
-using WSLStudio.Models.Docker;
-using System;
-using System.Reflection.Emit;
+using Newtonsoft.Json;
 using Serilog;
-using TarArchive = SharpCompress.Archives.Tar.TarArchive;
-using TarArchiveEntry = SharpCompress.Archives.Tar.TarArchiveEntry;
-
-using SharpCompress.Archives;
-using SharpCompress.Common;
-using SharpCompress.Common.Tar;
-using SharpCompress.Common.Rar;
+using Serilog.Core;
+using WSLStudio.Models.Docker;
+using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Helpers;
 
@@ -27,7 +18,7 @@ public class DockerHelper
 
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
     private const string DOCKER_REGISTRY = "https://registry.hub.docker.com/v2";
-   // private static readonly string DockerAuthToken = "auth.docker.io";
+    // private static readonly string DockerAuthToken = "auth.docker.io";
 
     public DockerHelper()
     {
@@ -221,25 +212,69 @@ public class DockerHelper
             Log.Error($"Failed to fetch Docker image authtoken - Caused by exception : {ex}");
             throw new Exception("Failed to fetch image authentication token");
         }
-        
+
     }
 
-    public static async Task<ImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
+    private static HttpClient BuildDockerHttpClient(AuthToken authToken)
+    {
+        var httpClient = new HttpClient();
+
+        // docker manifest spec
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.container.image.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.image.rootfs.diff.tar.gzip"));
+
+        // oci manifest spec
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.index.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.manifest.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.config.v1+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.oci.image.layer.v1.tar+gzip"));
+
+        return httpClient;
+    }
+
+    public static async Task<IImageManifest?> GetImageManifest(AuthToken authToken, string imageName, string imageTag)
     {
         Log.Information("Fetching Docker image manifest ...");
 
-        var uriString = $@"{DOCKER_REGISTRY}/{imageName}/manifests/{imageTag}";
-        var uri = new Uri(uriString);
-        using var httpClient = new HttpClient();
-
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
-        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+        var manifestRootUri = $@"{DOCKER_REGISTRY}/{imageName}/manifests";
+        var manifestUri = new Uri(manifestRootUri + $"/{imageTag}");
+        using var httpClient = BuildDockerHttpClient(authToken);
 
         try
         {
-            using var httpResponse = await httpClient.GetAsync(uri);
-            using var content = httpResponse.Content;
-            var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
+            using var manifestResponse = await httpClient.GetAsync(manifestUri);
+            using var content = manifestResponse.Content;
+
+            IImageManifest? imageManifest;
+            switch (content.Headers.ContentType?.ToString())
+            {
+                // if manifest is a fat manifest (a list of others manifest)
+                case "application/vnd.oci.image.index.v1+json":
+                {
+                    Log.Information("Fetching fat manifest");
+                    var fatManifest = content.ReadFromJsonAsync<ImageFatManifest>().Result;
+                    var selectedManifest = manifestRootUri + $"/{fatManifest?.GetManifestByArchitecture("amd64")}";
+                    var selectedManifestUri = new Uri(selectedManifest);
+
+                    Log.Information("Fetching manifest with amd64 architecture");
+                    using var selectedManifestResponse = await httpClient.GetAsync(selectedManifestUri);
+                    using var newContent = selectedManifestResponse.Content;
+                    imageManifest = newContent.ReadFromJsonAsync<DockerImageManifest>().Result;
+                    break;
+                }
+                case "application/vnd.docker.distribution.manifest.v2+json" or
+                     "application/vnd.oci.image.manifest.v1+json":
+                {
+                    Log.Information("Fetching standard manifest");
+                    imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
+                    break;
+                }
+                default:
+                    imageManifest = null;
+                    break;
+            }
 
             return imageManifest;
         }
@@ -250,13 +285,13 @@ public class DockerHelper
         }
     }
 
-    public static async Task<List<string>?> GetLayers(AuthToken authToken, ImageManifest imageManifest, string imageName)
+    public static async Task<List<string>?> GetLayers(AuthToken authToken, IImageManifest imageManifest, string imageName)
     {
         Log.Information("Fetching Docker image layers ...");
 
         try
         {
-            var layers = imageManifest.Layers;
+            var layers = imageManifest.GetLayers();
             using var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
             httpClient.Timeout = TimeSpan.FromSeconds(300);
@@ -265,10 +300,10 @@ public class DockerHelper
 
             foreach (var layer in layers)
             {
-                var destPath = Path.Combine(App.TmpDirPath,$"{layer.Digest.Split(':')[1]}.tar.gz");
+                var destPath = Path.Combine(App.TmpDirPath, $"{layer.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
-                var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer.Digest}";
+                var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer}";
 
                 var uri = new Uri(uriString);
                 using var httpResponse = await httpClient.GetAsync(uri);

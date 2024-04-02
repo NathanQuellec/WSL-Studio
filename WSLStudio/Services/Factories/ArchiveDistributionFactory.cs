@@ -1,6 +1,4 @@
-﻿using Docker.DotNet;
-using Serilog;
-using WSLStudio.Contracts.Services;
+﻿using Serilog;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;

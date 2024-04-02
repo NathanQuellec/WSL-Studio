@@ -1,11 +1,9 @@
-﻿using System.Threading;
-using System.Timers;
+﻿using System.Timers;
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Messages;
-using WSLStudio.Views.UserControls;
 using Timer = System.Timers.Timer;
 
 namespace WSLStudio.Services;

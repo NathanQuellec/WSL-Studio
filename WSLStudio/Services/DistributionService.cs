@@ -1,13 +1,12 @@
 ﻿using System.Globalization;
-using WSLStudio.Models;
-using WSLStudio.Contracts.Services;
 using Community.Wsl.Sdk;
-using Microsoft.VisualBasic;
-using WSLStudio.Helpers;
 using Microsoft.Win32;
-using WSLStudio.Contracts.Services.Factories;
-using WSLStudio.Services.Factories;
 using Serilog;
+using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.Factories;
+using WSLStudio.Helpers;
+using WSLStudio.Models;
+using WSLStudio.Services.Factories;
 
 
 namespace WSLStudio.Services;
@@ -20,7 +19,7 @@ public class DistributionService : IDistributionService
     private readonly WslApi _wslApi;
 
     private readonly IDistributionInfosService _distroInfosService;
-    private readonly  ISnapshotService _snapshotService;
+    private readonly ISnapshotService _snapshotService;
 
     public DistributionService(ISnapshotService snapshotService, IDistributionInfosService distroInfosService)
     {
@@ -36,7 +35,7 @@ public class DistributionService : IDistributionService
     {
         Log.Information("Fetching distributions list from windows registry ...");
         try
-        {     
+        {
 
             var lxssRegPath = Path.Combine("SOFTWARE", "Microsoft", "Windows", "CurrentVersion", "Lxss");
             var lxssSubKeys = Registry.CurrentUser.OpenSubKey(lxssRegPath);
@@ -128,7 +127,7 @@ public class DistributionService : IDistributionService
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
             newDistro.OsName = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path, "NAME");
-            newDistro.OsVersion = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path,"VERSION");
+            newDistro.OsVersion = _distroInfosService.GetOsInfos(newDistro.Name, newDistro.Path, "VERSION");
             newDistro.Size = _distroInfosService.GetSize(newDistro.Path);
             newDistro.Users = _distroInfosService.GetDistributionUsers(newDistro.Name, newDistro.Path);
 
@@ -171,7 +170,7 @@ public class DistributionService : IDistributionService
         }
     }
 
-    
+
     /**
      * TODO REFACTOR
      * Rename distro name in the Windows Registry.
@@ -250,7 +249,7 @@ public class DistributionService : IDistributionService
             return false;
         }
     }
-    
+
     public void LaunchDistribution(Distribution distribution)
     {
         try
@@ -365,7 +364,7 @@ public class DistributionService : IDistributionService
         {
             Log.Error($"Failed to start process for opening distribution file system - Caused by exception : {ex}");
         }
-        
+
     }
 
     public void OpenDistributionWithVsCode(Distribution distribution)
@@ -388,7 +387,7 @@ public class DistributionService : IDistributionService
                 .Build();
             process.Start();
             Log.Information($"Process ID : {process.Id} and NAME : {process.ProcessName} started");
-           // distribution?.RunningProcesses.Add(process);
+            // distribution?.RunningProcesses.Add(process);
         }
         catch (Exception ex)
         {

@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Helpers;
-using WSLStudio.Models;
 
 namespace WSLStudio.Services;
 
@@ -106,7 +105,7 @@ public class DistributionInfosService : IDistributionInfosService
                 osInfosFilePath = Path.Combine(WSL_UNC_PATH, distroName, "usr", "lib", "os-release");
             }
 
-           // using var streamReader = new StreamReader(osInfosFilePath);
+            // using var streamReader = new StreamReader(osInfosFilePath);
             var content = File.ReadAllText(osInfosFilePath);
             var osInfos = Regex.Match(content, osInfosPattern).Groups[2].Value;
 

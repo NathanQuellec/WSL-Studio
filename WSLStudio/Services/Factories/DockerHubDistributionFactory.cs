@@ -1,24 +1,27 @@
-﻿using Docker.DotNet;
-using Docker.DotNet.Models;
-using Serilog;
-using WSLStudio.Contracts.Services;
+﻿using Serilog;
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
+using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Services.Factories;
 
 public class DockerHubDistributionFactory : DistributionFactory
 {
+
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
         Log.Information("Creating distribution from DockerHub ...");
 
         var imageName = resourceOrigin;
         var imageTag = "latest"; // default tag
-        var distroTarFile = $"{distroName}.tar.gz";
         var installDir = Path.Combine(targetFolder, "installDir");
 
+        // check if we used any docker official images and add library prefix 
+        if (!resourceOrigin.Contains('/'))
+        {
+            imageName = string.Concat("library/", imageName);
+        }
 
         // check if user specify a tag in the image name input
         if (resourceOrigin.Contains(':'))
@@ -33,7 +36,7 @@ public class DockerHubDistributionFactory : DistributionFactory
             var imageToken = await DockerHelper.GetAuthToken(imageName);
             var imageManifest = await DockerHelper.GetImageManifest(imageToken, imageName, imageTag);
 
-            if (imageManifest.Layers == null)
+            if (imageManifest?.GetLayers() == null)
             {
                 throw new Exception("Unable to find this image on DockerHub");
             }
@@ -47,7 +50,7 @@ public class DockerHubDistributionFactory : DistributionFactory
                 tarPathList.Add(tarFilePath);
             }
 
-            var newArchPath = Path.Combine(App.TmpDirPath,"distro.tar");
+            var newArchPath = Path.Combine(App.TmpDirPath, "distro.tar");
             await ArchiveHelper.MergeArchive(tarPathList, newArchPath);
 
             await WslHelper.ImportDistribution(distroName, installDir, newArchPath);

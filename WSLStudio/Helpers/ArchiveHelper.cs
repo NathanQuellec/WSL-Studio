@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ICSharpCode.SharpZipLib.GZip;
+﻿using System.IO.Compression;
 using Serilog;
 
 namespace WSLStudio.Helpers;
@@ -30,12 +24,12 @@ public static class ArchiveHelper
             using var lastTarFile = File.Open(tarPathList.Last(), FileMode.Open, FileAccess.ReadWrite);
             await lastTarFile.CopyToAsync(mergedArchive);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Log.Error($"Failed to merged archive files - Caused by exception : {ex}");
         }
     }
-       
+
     public static async Task<string?> DecompressArchive(string path)
     {
         Log.Information($"Decompressing archive file ...");
@@ -54,7 +48,7 @@ public static class ArchiveHelper
 
             return newTarFilePath;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Log.Error($"Failed to decompress archive file - Caused by exception : {ex}");
             return null;

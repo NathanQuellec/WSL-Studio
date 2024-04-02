@@ -1,8 +1,4 @@
-﻿
-using System.Collections;
-using System.Text.RegularExpressions;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Controls.Primitives;
+﻿using System.Text.RegularExpressions;
 
 namespace WSLStudio.Helpers;
 
