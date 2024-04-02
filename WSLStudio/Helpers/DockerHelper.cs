@@ -5,6 +5,7 @@ using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Serilog;
+using Serilog.Core;
 using WSLStudio.Models.Docker;
 using WSLStudio.Models.Docker.Manifests;
 
@@ -246,24 +247,27 @@ public class DockerHelper
                 // in case of fat manifest
                 case "application/vnd.oci.image.index.v1+json":
                 {
+                    Log.Information("Fetching fat manifest");
                     var fatManifest = content.ReadFromJsonAsync<ImageFatManifest>().Result;
                     var selectedManifestUri = manifestRootUri + $"/{fatManifest?.GetManifestByArchitecture("amd64")}";
                     var newUri = new Uri(selectedManifestUri);
+                    Log.Information("Fetching manifest with amd64 architecture");
                     using var newHttpResponse = await httpClient.GetAsync(newUri);
                     using var newContent = newHttpResponse.Content;
                     imageManifest = newContent.ReadFromJsonAsync<DockerImageManifest>().Result;
                     break;
                 }
                 case "application/vnd.docker.distribution.manifest.v2+json" or
-                     "application/vnd.oci.image.manifest.v1+json" :
+                     "application/vnd.oci.image.manifest.v1+json":
+                {
+                    Log.Information("Fetching standard manifest");
                     imageManifest = content.ReadFromJsonAsync<DockerImageManifest>().Result;
                     break;
+                }
                 default:
                     imageManifest = null;
                     break;
-
             }
-            //var imageManifest = content.ReadFromJsonAsync<ImageManifest>().Result;
 
             return imageManifest;
         }
