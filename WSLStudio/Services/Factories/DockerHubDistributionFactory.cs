@@ -19,6 +19,11 @@ public class DockerHubDistributionFactory : DistributionFactory
 
 
         // check if user specify a tag in the image name input
+
+        if (!resourceOrigin.Contains('/'))
+        {
+            imageName = string.Concat("library/", imageName);
+        }
         if (resourceOrigin.Contains(':'))
         {
             var imageElements = resourceOrigin.Split(':');
