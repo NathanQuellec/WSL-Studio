@@ -1,6 +1,8 @@
 ﻿using Community.Wsl.Sdk;
+using CommunityToolkit.Mvvm.Messaging;
 using Serilog;
 using WSLStudio.Exceptions;
+using WSLStudio.Messages;
 
 namespace WSLStudio.Helpers;
 
@@ -52,6 +54,7 @@ public static class WslHelper
     {
         
         Log.Information("Importing distribution ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Importing your distribution ..."));
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")

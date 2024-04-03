@@ -425,6 +425,8 @@ public class DistrosListDetailsVM : ObservableObject
 
         App.IsDistributionProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
+        // setting initial progress bar message
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("WSL Studio creates your distribution ..."));
         _infoBarService.OpenInfoBar(createDistroInfoProgress);
 
         try
@@ -435,7 +437,6 @@ public class DistrosListDetailsVM : ObservableObject
             _infoBarService.OpenInfoBar(createDistroInfoSuccess, 2000);
             Distros.Add(newDistro);
             App.IsDistributionProcessing = false;
-
         }
 
         catch (Exception ex)

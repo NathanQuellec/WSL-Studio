@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using CommunityToolkit.Mvvm.Messaging;
 using Docker.DotNet;
@@ -72,6 +73,7 @@ public class DockerHelper
     public async Task BuildDockerImage(string workingDirectory, string imageName)
     {
         Log.Information("Building Docker image ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Building Docker image ..."));
         try
         {
 
@@ -94,6 +96,7 @@ public class DockerHelper
         }
     }
 
+    [Obsolete("WSL Studio is not using docker client to pull image from docker hub. Instead fetching layers through HTTP calls")]
     public async Task PullImageFromDockerHub(string imageName, string imageTag)
     {
         Log.Information("Pulling Docker image from DockerHub ...");
@@ -120,6 +123,7 @@ public class DockerHelper
     public async Task<CreateContainerResponse?> CreateDockerContainer(string imageName, string containerName)
     {
         Log.Information("Creating Docker container ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Creating Docker container ..."));
         try
         {
 
@@ -141,6 +145,7 @@ public class DockerHelper
     public async Task ExportDockerContainer(string containerName, string targetPath)
     {
         Log.Information("Exporting Docker container ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Exporting Docker container as .tar file ..."));
         try
         {
 
@@ -303,15 +308,16 @@ public class DockerHelper
             var index = 1;
             foreach (var layer in layers)
             {
-                Log.Information("Sending distribution creation progress status to the view");
-                WeakReferenceMessenger.Default.Send(new ProgressBarMessage($"Downloading layer {index}/{layers.Count}"));
+                Log.Information("[PUB/SUB] Sending distribution creation progress status to the view");
+                WeakReferenceMessenger.Default.Send(new ProgressBarMessage($"Downloading image layer {index}/{layers.Count} ..."));
                 index++;
+
                 var destPath = Path.Combine(App.TmpDirPath, $"{layer.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
                 var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer}";
-
                 var uri = new Uri(uriString);
+                var progress = new Progress<long>();
                 using var httpResponse = await httpClient.GetAsync(uri);
                 using var content = httpResponse.Content;
                 await using var layerStream = await content.ReadAsStreamAsync();

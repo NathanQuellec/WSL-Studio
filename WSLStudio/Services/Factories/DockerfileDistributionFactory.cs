@@ -16,7 +16,7 @@ public class DockerfileDistributionFactory : DistributionFactory
         var imageName = containerName;
         var distroTarFile = $"{distroName}.tar.gz";
 
-        var tarLocation = Path.Combine(targetFolder, distroTarFile);
+        var tarLocation = Path.Combine(App.TmpDirPath, distroTarFile);
         var installDir = Path.Combine(targetFolder, "installDir");
 
         var docker = new DockerHelper();
