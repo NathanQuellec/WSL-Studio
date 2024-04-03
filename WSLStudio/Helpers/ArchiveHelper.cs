@@ -1,5 +1,7 @@
 ﻿using System.IO.Compression;
+using CommunityToolkit.Mvvm.Messaging;
 using Serilog;
+using WSLStudio.Messages;
 
 namespace WSLStudio.Helpers;
 
@@ -10,6 +12,7 @@ public static class ArchiveHelper
     public static async Task MergeArchive(List<string> tarPathList, string destPath)
     {
         Log.Information($"Merging archive files ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Merging image layers ..."));
 
         try
         {

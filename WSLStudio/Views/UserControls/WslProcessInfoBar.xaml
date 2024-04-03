@@ -20,14 +20,14 @@
         <InfoBar x:Name="CreateDistroInfoProgress"
                  VerticalAlignment="Bottom"
                  Severity="Informational"
-                 Title="WSL Studio is currently creating your distribution"
+                 Title="WSL Studio creates your distribution ..."
                  IsOpen="False"
                  IsClosable="False"
                  Height="100"
                  Width="450">
             <InfoBar.Content>
                 <ProgressBar IsIndeterminate="True" 
-                     Margin="0,0,20,6" 
+                     Margin="0,0,16,6" 
                      MaxWidth="200"/>
             </InfoBar.Content>
         </InfoBar>
@@ -43,7 +43,7 @@
         <InfoBar x:Name="CreateDistroInfoSuccess"
                  VerticalAlignment="Bottom"
                  Severity="Success"
-                 Title="WSL Studio has successfully create your distribution"
+                 Title="WSL Studio has successfully created your distribution"
                  IsOpen="False"
                  Height="100"
                  Width="450"/>
@@ -51,7 +51,7 @@
         <InfoBar x:Name="CreateSnapshotInfoProgress"
                  VerticalAlignment="Bottom"
                  Severity="Informational"
-                 Title="WSL Studio is currently creating your snapshot"
+                 Title="WSL Studio creates your snapshot ..."
                  IsOpen="False"
                  IsClosable="False"
                  Height="100"
@@ -74,7 +74,7 @@
         <InfoBar x:Name="CreateSnapshotInfoSuccess"
                  VerticalAlignment="Bottom"
                  Severity="Success"
-                 Title="WSL Studio has successfully create your snapshot"
+                 Title="WSL Studio has successfully created your snapshot"
                  IsOpen="False"
                  Height="100"
                  Width="450"/>
