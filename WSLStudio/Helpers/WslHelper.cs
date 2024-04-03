@@ -50,11 +50,12 @@ public static class WslHelper
 
     public static async Task ImportDistribution(string distroName, string installDir, string tarLocation)
     {
+        
         Log.Information("Importing distribution ...");
         try
         {
             var process = new ProcessBuilderHelper("cmd.exe")
-                .SetArguments($"/c wsl --import {distroName} {installDir} {tarLocation}")
+                .SetArguments($"/c md {installDir} & wsl --import {distroName} {installDir} {tarLocation}")
                 .SetRedirectStandardOutput(true)
                 .SetRedirectStandardError(true)
                 .SetUseShellExecute(false)

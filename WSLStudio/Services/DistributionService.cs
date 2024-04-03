@@ -96,16 +96,10 @@ public class DistributionService : IDistributionService
     // TODO : Refactor
     public async Task<Distribution?> CreateDistribution(string distroName, string creationMode, string resourceOrigin)
     {
-        var distroFolder = FilesHelper.CreateDirectory(App.AppDirPath, distroName);
+        var distroFolder = Path.Combine(App.DistroDirPath, distroName);
 
         try
         {
-
-            if (!Directory.Exists(distroFolder))
-            {
-                throw new DirectoryNotFoundException();
-            }
-
             DistributionFactory factory = creationMode switch
             {
                 "Dockerfile" => new DockerfileDistributionFactory(),
@@ -122,7 +116,6 @@ public class DistributionService : IDistributionService
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
             await TerminateDistribution(distroName); // to read ext4 file
-
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
@@ -137,7 +130,7 @@ public class DistributionService : IDistributionService
         }
         catch (Exception ex)
         {
-            FilesHelper.RemoveDirectory(distroFolder);
+            Log.Error($"Error while creating wsl distribution - Caused by {ex}");
             throw;
         }
     }
