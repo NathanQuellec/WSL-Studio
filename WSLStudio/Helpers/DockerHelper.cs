@@ -1,11 +1,14 @@
 ﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using CommunityToolkit.Mvvm.Messaging;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Serilog;
 using Serilog.Core;
+using WSLStudio.Messages;
+using WSLStudio.Models;
 using WSLStudio.Models.Docker;
 using WSLStudio.Models.Docker.Manifests;
 
@@ -297,8 +300,12 @@ public class DockerHelper
 
             var layersPath = new List<string>();
 
+            var index = 1;
             foreach (var layer in layers)
             {
+                Log.Information("Sending distribution creation progress status to the view");
+                WeakReferenceMessenger.Default.Send(new ProgressBarMessage($"Downloading layer {index}/{layers.Count}"));
+                index++;
                 var destPath = Path.Combine(App.TmpDirPath, $"{layer.Split(':')[1]}.tar.gz");
                 layersPath.Add(destPath);
 
