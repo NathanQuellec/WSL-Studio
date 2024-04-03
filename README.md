@@ -1,4 +1,4 @@
-# WSLStudio
+# WSL Studio
 
 WSL Studio is an open-source project aimed at providing a user-friendly interface for managing Windows Subsystem for Linux (WSL) distributions. With WSL Studio, users can easily view information about existing WSL distributions, manage them, and create new ones from Docker images. This tool simplifies the management of WSL distributions, making it more accessible and intuitive for users.
 
