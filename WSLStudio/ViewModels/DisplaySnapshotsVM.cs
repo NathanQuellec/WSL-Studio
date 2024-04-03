@@ -14,10 +14,7 @@ public class DisplaySnapshotsVM : ObservableObject
 
     private readonly DistrosListDetailsVM _distrosViewModel;
 
-    public RelayCommand<Snapshot> DeleteSnapshotCommand
-    {
-        get; set;
-    }
+    public RelayCommand<Snapshot> DeleteSnapshotCommand { get; set; }
 
     public DisplaySnapshotsVM(ISnapshotService snapshotService)
     {
@@ -52,6 +49,7 @@ public class DisplaySnapshotsVM : ObservableObject
         }
         catch (Exception ex)
         {
+            Log.Error($"Failed to create distribution from snapshot - Caused by {ex}");
             App.IsDistributionProcessing = false;
             args.Cancel = true;
         }

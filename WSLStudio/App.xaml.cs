@@ -33,12 +33,13 @@ public partial class App : Application
     public static bool IsDistributionProcessing { get; set; } = false;
 
     private static readonly string ROAMING_PATH = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-    private static readonly Windows.Storage.StorageFolder localFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
+    private static readonly Windows.Storage.StorageFolder LocalFolder = Windows.Storage.ApplicationData.Current.LocalFolder;
 
     private const string APP_FOLDER_NAME = "WslStudio";
     private const string TMP_FOLDER_NAME = ".tmp";
     private const string LOG_FOLDER_NAME = ".log";
 
+    public static string? DistroDirPath { get; set; } = Path.Combine(ROAMING_PATH, APP_FOLDER_NAME);
     public static string? AppDirPath { get; set; }
     public static string? TmpDirPath { get; set; }
     public static string? LogDirPath { get; set; }
@@ -64,8 +65,7 @@ public partial class App : Application
     private static void CreateProjectFolders()
     {
         Log.Information("Creating project folders ...");
-        AppDirPath = FilesHelper.CreateDirectory(localFolder.Path, APP_FOLDER_NAME);
-
+        AppDirPath = FilesHelper.CreateDirectory(LocalFolder.Path, APP_FOLDER_NAME);
         if (AppDirPath == null)
         {
             Log.Error("Cannot create project folders");

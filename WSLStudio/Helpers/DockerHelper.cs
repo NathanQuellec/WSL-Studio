@@ -13,7 +13,6 @@ namespace WSLStudio.Helpers;
 
 public class DockerHelper
 {
-
     private readonly DockerClient _dockerClient;
 
     private const string DOCKER_NAMED_PIPE = "npipe://./pipe/docker_engine";
