@@ -128,7 +128,7 @@ public class SnapshotService : ISnapshotService
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
             var snapshotInfosHeader = new StringBuilder();
             var snapshotInfos = new StringBuilder();
-            // snapshot record's attributes are saved by 
+            // snapshot record's attributes are saved
             var properties = snapshot.GetType().GetProperties().OrderBy(property => property.Name);
 
             // construct file header if not exist

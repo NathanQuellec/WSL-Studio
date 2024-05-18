@@ -258,6 +258,8 @@ public class DistributionService : IDistributionService
             process.Start();
             Log.Information($"New distribution process is running wiht ID : {process.Id} and NAME : {process.ProcessName} started");
             distribution?.RunningProcesses.Add(process);
+            //var res = distribution.RunningProcesses[0].WorkingSet64;
+            
         }
         catch (Exception ex)
         {

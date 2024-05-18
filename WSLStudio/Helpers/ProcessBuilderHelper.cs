@@ -19,6 +19,12 @@ public class ProcessBuilderHelper
         return this;
     }
 
+    public ProcessBuilderHelper SetRedirectStandardInput(bool val)
+    {
+        this._process.StartInfo.RedirectStandardInput = val;
+        return this;
+    }
+
     public ProcessBuilderHelper SetRedirectStandardOutput(bool val)
     {
         this._process.StartInfo.RedirectStandardOutput = val;
