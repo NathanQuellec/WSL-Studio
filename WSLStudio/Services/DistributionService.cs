@@ -139,7 +139,7 @@ public class DistributionService : IDistributionService
 
     public async Task RemoveDistribution(Distribution distribution)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
+        var process = new ProcessBuilder("cmd.exe")
             .SetArguments($"/c wsl --unregister {distribution.Name}")
             .SetCreateNoWindow(true)
             .Build();
@@ -249,7 +249,7 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments($"/c wsl ~ -d {distribution?.Name}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(true)
@@ -276,7 +276,7 @@ public class DistributionService : IDistributionService
 
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments($"/c wsl -d {distribution?.Name}")
                 .SetCreateNoWindow(true)
                 .SetUseShellExecute(false)
@@ -323,7 +323,7 @@ public class DistributionService : IDistributionService
 
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments($"/c wsl --terminate {distroName}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(false)
@@ -350,7 +350,7 @@ public class DistributionService : IDistributionService
                 BackgroundLaunchDistribution(distribution);
             }
 
-            var processBuilder = new ProcessBuilderHelper("explorer.exe")
+            var processBuilder = new ProcessBuilder("explorer.exe")
                 .SetArguments(distroFileSystem)
                 .Build();
             processBuilder.Start();
@@ -364,7 +364,7 @@ public class DistributionService : IDistributionService
 
     public void OpenDistributionWithVsCode(Distribution distribution)
     {
-        var process = new ProcessBuilderHelper("cmd.exe")
+        var process = new ProcessBuilder("cmd.exe")
             .SetArguments($"/c wsl ~ -d {distribution.Name} code .")
             .Build();
         process.Start();
@@ -374,7 +374,7 @@ public class DistributionService : IDistributionService
     {
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments($"/c wt wsl ~ -d {distribution?.Name}")
                 .SetRedirectStandardOutput(false)
                 .SetUseShellExecute(false)

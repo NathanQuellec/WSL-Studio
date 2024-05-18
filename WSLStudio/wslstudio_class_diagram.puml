@@ -52,7 +52,7 @@ ImageManifest o-- Config
 
 DistrosListDetailsVM ..> IInfoBarService
 DistrosListDetailsVM ..> IDistributionService
-DistrosListDetailsVM --> TextInputValidationHelper
+DistrosListDetailsVM --> TextInputValidation
 DistrosListDetailsVM --> Distribution
 DistrosListDetailsVM --> App
 DistrosListDetailsVM --> CreateDistroDialogView
@@ -111,15 +111,15 @@ class DockerHelper {
   + {static} GetLayers(authToken: AuthToken, imageManifest: ImageManifest, imageName: string): Task<List<string>?>
 }
 
-class TextInputValidationHelper
+class TextInputValidation
 {
     - _textInput: string
-    + TextInputValidationHelper(textInput: string)
-    + NotNullOrWhiteSpace(): TextInputValidationHelper
-    + IncludeWhiteSpaceChar(): TextInputValidationHelper
-    + MinimumLength(): TextInputValidationHelper
-    + InvalidCharacters(): TextInputValidationHelper
-    + DataAlreadyExist(): TextInputValidationHelper
+    + TextInputValidation(textInput: string)
+    + NotNullOrWhiteSpace(): TextInputValidation
+    + IncludeWhiteSpaceChar(): TextInputValidation
+    + MinimumLength(): TextInputValidation
+    + InvalidCharacters(): TextInputValidation
+    + DataAlreadyExist(): TextInputValidation
 }
 
 class WslImageHelper {

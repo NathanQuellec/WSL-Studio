@@ -217,7 +217,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         try
         {
-            var textInputValidationHelper = new TextInputValidationHelper(distroNameInput.Text);
+            var textInputValidationHelper = new TextInputValidation(distroNameInput.Text);
             textInputValidationHelper
                 .NotNullOrWhiteSpace()
                 .IncludeWhiteSpaceChar()
@@ -520,7 +520,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         try
         {
-            var textInputValidationHelper = new TextInputValidationHelper(snapshotNameInput.Text);
+            var textInputValidationHelper = new TextInputValidation(snapshotNameInput.Text);
             textInputValidationHelper
                 .NotNullOrWhiteSpace()
                 .IncludeWhiteSpaceChar()

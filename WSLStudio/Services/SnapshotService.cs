@@ -1,17 +1,26 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Text;
+using Windows.Storage;
 using ICSharpCode.SharpZipLib.GZip;
 using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
+using WSLStudio.Services.Storage;
+using WSLStudio.Services.Storage.impl;
 
 namespace WSLStudio.Services;
 
 public class SnapshotService : ISnapshotService
 {
+    private IFileStorageService _fileStorageService;
+
+    public SnapshotService(IFileStorageService fileStorageService)
+    {
+        _fileStorageService = fileStorageService;
+    }
 
     public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
     {
@@ -129,7 +138,7 @@ public class SnapshotService : ISnapshotService
             var snapshotInfosHeader = new StringBuilder();
             var snapshotInfos = new StringBuilder();
             // snapshot record's attributes are saved by 
-            var properties = snapshot.GetType().GetProperties().OrderBy(property => property.Name);
+            var properties = snapshot.GetType().GetProperties();
 
             // construct file header if not exist
             if (!File.Exists(snapshotInfosFile))
@@ -162,9 +171,8 @@ public class SnapshotService : ISnapshotService
             if (snapshotsFolder != null)
             {
                 var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
-                var recordsToKeep = (await File.ReadAllLinesAsync(snapshotsInfosFile))
-                    .Where(line => line.Split(';')[0] != snapshot.Id.ToString());
-                await File.WriteAllLinesAsync(snapshotsInfosFile, recordsToKeep);
+                _fileStorageService = new FlatFileStorageService();
+                await _fileStorageService.Delete(snapshotsInfosFile, snapshot);
             }
         }
         catch (Exception ex)

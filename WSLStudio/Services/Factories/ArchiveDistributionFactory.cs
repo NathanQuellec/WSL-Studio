@@ -20,7 +20,6 @@ public class ArchiveDistributionFactory : DistributionFactory
                 throw new FileNotFoundException();
             }
 
-
             await WslHelper.ImportDistribution(distroName, installDir, resourceOrigin);
 
             Log.Information("Distribution creation from archive file succeed.");

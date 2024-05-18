@@ -2,16 +2,16 @@
 
 namespace WSLStudio.Helpers;
 
-public class TextInputValidationHelper
+public class TextInputValidation
 {
     private readonly string _textInput;
 
-    public TextInputValidationHelper(string textInput)
+    public TextInputValidation(string textInput)
     {
         _textInput = textInput;
     }
 
-    public TextInputValidationHelper NotNullOrWhiteSpace()
+    public TextInputValidation NotNullOrWhiteSpace()
     {
         if (string.IsNullOrWhiteSpace(_textInput))
         {
@@ -21,7 +21,7 @@ public class TextInputValidationHelper
         return this;
     }
 
-    public TextInputValidationHelper IncludeWhiteSpaceChar()
+    public TextInputValidation IncludeWhiteSpaceChar()
     {
         if (_textInput.Any(char.IsWhiteSpace))
         {
@@ -31,7 +31,7 @@ public class TextInputValidationHelper
     }
 
     // only min length -> max length is set with the xaml property of textbox
-    public TextInputValidationHelper MinimumLength(int minLength)
+    public TextInputValidation MinimumLength(int minLength)
     {
         if (_textInput.Length < minLength)
         {
@@ -40,7 +40,7 @@ public class TextInputValidationHelper
         return this;
     }
 
-    public TextInputValidationHelper InvalidCharacters(Regex regex, string regexDescr)
+    public TextInputValidation InvalidCharacters(Regex regex, string regexDescr)
     {
         if (!regex.IsMatch(_textInput))
         {
@@ -49,7 +49,7 @@ public class TextInputValidationHelper
         return this;
     }
 
-    public TextInputValidationHelper DataAlreadyExist(List<string> collection)
+    public TextInputValidation DataAlreadyExist(List<string> collection)
     {
         if (collection.Contains(_textInput, StringComparer.OrdinalIgnoreCase))
         {

@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
-namespace WSLStudio.Models.Docker.Manifests;
+namespace WSLStudio.Models.Docker.Manifests.impl;
 
 public class ImageFatManifest : IImageManifest
 {

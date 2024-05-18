@@ -18,6 +18,8 @@ using WSLStudio.Views.Dialogs;
 using CommunityToolkit.WinUI.UI.Controls;
 using Serilog;
 using Serilog.Events;
+using WSLStudio.Services.Storage;
+using WSLStudio.Services.Storage.impl;
 
 namespace WSLStudio;
 
@@ -180,6 +182,8 @@ public partial class App : Application
             services.AddSingleton<IDistributionService, DistributionService>();
             services.AddSingleton<IDistributionInfosService, DistributionInfosService>();
             services.AddSingleton<ISnapshotService, SnapshotService>();
+            services.AddSingleton<IFileStorageService, FlatFileStorageService>();
+            services.AddSingleton<IFileStorageService, JsonFileStorageService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

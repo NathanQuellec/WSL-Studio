@@ -34,7 +34,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         try
         {
-            var process = new ProcessBuilderHelper("explorer.exe")
+            var process = new ProcessBuilder("explorer.exe")
                 .SetArguments(snapshotsFolderPath)
                 .Build();
             process.Start();

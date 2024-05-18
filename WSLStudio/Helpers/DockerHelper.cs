@@ -12,6 +12,7 @@ using WSLStudio.Messages;
 using WSLStudio.Models;
 using WSLStudio.Models.Docker;
 using WSLStudio.Models.Docker.Manifests;
+using WSLStudio.Models.Docker.Manifests.impl;
 
 namespace WSLStudio.Helpers;
 

@@ -20,7 +20,7 @@ public static class WslHelper
 
     public static bool CheckHypervisor()
     {
-        var processBuilder = new ProcessBuilderHelper("powershell.exe")
+        var processBuilder = new ProcessBuilder("powershell.exe")
             .SetArguments(
                 "/c (Get-WmiObject -Class \"Win32_ComputerSystem\" -ComputerName \"localhost\").HypervisorPresent")
             .SetUseShellExecute(false)
@@ -38,7 +38,7 @@ public static class WslHelper
 
     public static async Task ExportDistribution(string distroName, string destPath)
     {
-        var processBuilder = new ProcessBuilderHelper("cmd.exe")
+        var processBuilder = new ProcessBuilder("cmd.exe")
             .SetArguments(
                 $"/c wsl --export {distroName} {destPath}")
             .SetRedirectStandardOutput(true)
@@ -57,7 +57,7 @@ public static class WslHelper
         WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Importing your distribution ..."));
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments($"/c md {installDir} & wsl --import {distroName} {installDir} {tarLocation}")
                 .SetRedirectStandardOutput(true)
                 .SetRedirectStandardError(true)
@@ -87,7 +87,7 @@ public static class WslHelper
         Log.Information($"Check running distribution for {distroName}");
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments("/c wsl --list --running --quiet")
                 .SetRedirectStandardOutput(true)
                 .SetUseShellExecute(false)
@@ -114,7 +114,7 @@ public static class WslHelper
         Log.Information($"Check existing distribution for {distroName}");
         try
         {
-            var process = new ProcessBuilderHelper("cmd.exe")
+            var process = new ProcessBuilder("cmd.exe")
                 .SetArguments("/c wsl --list --quiet")
                 .SetRedirectStandardOutput(true)
                 .SetUseShellExecute(false)

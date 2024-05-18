@@ -14,13 +14,13 @@ namespace WSLStudio.Tests.MSTest;
 [TestClass]
 public class ProcessBuilderHelperTest
 {
-    private ProcessBuilderHelper _processBuilder;
+    private ProcessBuilder _processBuilder;
 
     [TestInitialize]
     public void InitProcess()
     {
         string fileName = "cmd.exe";
-        _processBuilder = new ProcessBuilderHelper(fileName);
+        _processBuilder = new ProcessBuilder(fileName);
         Assert.AreEqual(fileName, _processBuilder.Build().StartInfo.FileName);   
     }
 

@@ -2,7 +2,6 @@
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
-using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Services.Factories;
 

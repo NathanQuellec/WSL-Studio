@@ -6,7 +6,7 @@ using Serilog;
 
 namespace WSLStudio.Models;
 
-public class Distribution : INotifyPropertyChanged
+public class Distribution : INotifyPropertyChanged, IBaseModel
 {
     public Guid Id { get; set; }
 
