@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <RootNamespace>WSLStudio.Core</RootNamespace>
-    <Platforms>x86;x64;arm64;AnyCPU</Platforms>
+    <Platforms>x64</Platforms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 

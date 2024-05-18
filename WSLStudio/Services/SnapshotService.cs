@@ -37,13 +37,13 @@ public class SnapshotService : ISnapshotService
                 var snapshotsInfos = snapshotsInfosLines[i].Split(';');
                 snapshotsList.Insert(0, new Snapshot()
                 {
-                    CreationDate = snapshotsInfos[0],
-                    Description = snapshotsInfos[1],
-                    DistroSize = snapshotsInfos[2],
-                    Id = Guid.Parse(snapshotsInfos[3]),
-                    Name = snapshotsInfos[4],
-                    Path = snapshotsInfos[5],
-                    Size = snapshotsInfos[6],
+                    Id = Guid.Parse(snapshotsInfos[0]),
+                    Name = snapshotsInfos[1],
+                    Description = snapshotsInfos[2],
+                    CreationDate = snapshotsInfos[3],
+                    Size = snapshotsInfos[4],
+                    DistroSize = snapshotsInfos[5],
+                    Path = snapshotsInfos[6],
                 });
             }
 
