@@ -1,4 +1,4 @@
-﻿namespace WSLStudio.Contracts.Services;
+﻿namespace WSLStudio.Contracts.Services.UserInterface;
 
 public interface IActivationService
 {

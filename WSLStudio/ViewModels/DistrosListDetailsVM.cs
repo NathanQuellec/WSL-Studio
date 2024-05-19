@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;

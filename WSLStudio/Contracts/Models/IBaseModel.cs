@@ -1,4 +1,4 @@
-﻿namespace WSLStudio.Models;
+﻿namespace WSLStudio.Contracts.Models;
 
 public interface IBaseModel
 {

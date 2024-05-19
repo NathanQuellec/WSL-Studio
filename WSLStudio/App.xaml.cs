@@ -11,15 +11,14 @@ using WSLStudio.Services;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
-using Community.Wsl.Sdk;
-using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Views.Dialogs;
-using CommunityToolkit.WinUI.UI.Controls;
 using Serilog;
 using Serilog.Events;
+using WSLStudio.Contracts.Services.Storage;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.Services.Storage;
-using WSLStudio.Services.Storage.impl;
+using WSLStudio.Services.UserInterface;
 
 namespace WSLStudio;
 

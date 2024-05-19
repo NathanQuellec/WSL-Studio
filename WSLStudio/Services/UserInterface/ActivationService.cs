@@ -2,9 +2,9 @@
 using Microsoft.UI.Xaml.Controls;
 
 using WSLStudio.Activation;
-using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 
-namespace WSLStudio.Services;
+namespace WSLStudio.Services.UserInterface;
 
 public class ActivationService : IActivationService
 {

@@ -1,15 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Text;
-using Windows.Storage;
 using ICSharpCode.SharpZipLib.GZip;
 using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
+using WSLStudio.Contracts.Services.Storage;
 using WSLStudio.Services.Storage;
-using WSLStudio.Services.Storage.impl;
 
 namespace WSLStudio.Services;
 
@@ -25,29 +23,13 @@ public class SnapshotService : ISnapshotService
     public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
     {
         Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
-
-        var snapshotsList = new ObservableCollection<Snapshot>();
         var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
 
         try
         {
-            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
-            for (var i = 1; i < snapshotsInfosLines.Length; i++)
-            {
-                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
-                snapshotsList.Insert(0, new Snapshot()
-                {
-                    Id = Guid.Parse(snapshotsInfos[0]),
-                    Name = snapshotsInfos[1],
-                    Description = snapshotsInfos[2],
-                    CreationDate = snapshotsInfos[3],
-                    Size = snapshotsInfos[4],
-                    DistroSize = snapshotsInfos[5],
-                    Path = snapshotsInfos[6],
-                });
-            }
-
-            return snapshotsList;
+            _fileStorageService = new FlatFileStorageService();
+            var snapshotList  = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
+            return snapshotList;
         }
         catch (Exception ex)
         {
@@ -129,29 +111,14 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private static async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
+    private async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
     {
         Log.Information($"Saving snapshot {snapshot.Name} information in {snapshotFolder} folder");
         try
         {
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
-            var snapshotInfosHeader = new StringBuilder();
-            var snapshotInfos = new StringBuilder();
-            // snapshot record's attributes are saved by 
-            var properties = snapshot.GetType().GetProperties();
-
-            // construct file header if not exist
-            if (!File.Exists(snapshotInfosFile))
-            {
-                snapshotInfosHeader.Append(string.Join(';', properties.Select(prop => prop.Name)));
-                snapshotInfosHeader.Append('\n');
-                await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfosHeader.ToString());
-            }
-
-            // add snapshots data to file
-            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot).ToString())));
-            snapshotInfos.Append('\n');
-            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
+            _fileStorageService = new FlatFileStorageService();
+            await _fileStorageService.Save(snapshotInfosFile, snapshot);
         }
         catch (Exception ex)
         {

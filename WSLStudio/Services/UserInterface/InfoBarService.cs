@@ -2,11 +2,11 @@
 using CommunityToolkit.Mvvm.Messaging;
 using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
-using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.Messages;
 using Timer = System.Timers.Timer;
 
-namespace WSLStudio.Services;
+namespace WSLStudio.Services.UserInterface;
 
 public class InfoBarService : IInfoBarService
 {

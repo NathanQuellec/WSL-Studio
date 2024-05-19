@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using WSLStudio.Contracts.Models.Docker.Manifests;
 
 namespace WSLStudio.Models.Docker.Manifests.impl;
 

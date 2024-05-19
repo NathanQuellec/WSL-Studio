@@ -1,7 +1,7 @@
 ﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-namespace WSLStudio.Contracts.Services;
+namespace WSLStudio.Contracts.Services.UserInterface;
 
 public interface INavigationService
 {

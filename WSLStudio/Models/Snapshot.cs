@@ -1,4 +1,6 @@
-﻿namespace WSLStudio.Models;
+﻿using WSLStudio.Contracts.Models;
+
+namespace WSLStudio.Models;
 
 public class Snapshot : IBaseModel
 {

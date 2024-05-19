@@ -5,13 +5,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
-using Newtonsoft.Json;
 using Serilog;
-using Serilog.Core;
+using WSLStudio.Contracts.Models.Docker.Manifests;
 using WSLStudio.Messages;
-using WSLStudio.Models;
 using WSLStudio.Models.Docker;
-using WSLStudio.Models.Docker.Manifests;
 using WSLStudio.Models.Docker.Manifests.impl;
 
 namespace WSLStudio.Helpers;

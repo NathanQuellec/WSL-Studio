@@ -1,4 +1,4 @@
-﻿namespace WSLStudio.Models.Docker.Manifests;
+﻿namespace WSLStudio.Contracts.Models.Docker.Manifests;
 
 public interface IImageManifest
 {

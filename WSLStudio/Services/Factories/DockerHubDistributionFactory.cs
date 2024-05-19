@@ -5,7 +5,7 @@ using WSLStudio.Models;
 
 namespace WSLStudio.Services.Factories;
 
-public class DockerHubDistributionFactory : DistributionFactory
+public class DockerHubDistributionFactory : AbstractDistributionFactory
 {
 
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
