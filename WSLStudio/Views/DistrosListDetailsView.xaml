@@ -367,7 +367,7 @@
                                            Margin="40 16">
                                 <TextBlock x:Name="SnapshotLastDate" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshots last date : "
+                                           Text="Snapshot last date : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
