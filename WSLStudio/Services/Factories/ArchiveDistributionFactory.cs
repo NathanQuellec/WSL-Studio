@@ -5,7 +5,7 @@ using WSLStudio.Models;
 
 namespace WSLStudio.Services.Factories;
 
-public class ArchiveDistributionFactory : DistributionFactory
+public class ArchiveDistributionFactory : AbstractDistributionFactory
 {
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin,
         string targetFolder)
@@ -19,7 +19,6 @@ public class ArchiveDistributionFactory : DistributionFactory
             {
                 throw new FileNotFoundException();
             }
-
 
             await WslHelper.ImportDistribution(distroName, installDir, resourceOrigin);
 

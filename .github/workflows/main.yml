@@ -19,7 +19,6 @@ jobs:
     env:
       Solution_Name: WSLStudio.sln
       Project_Name: WSLStudio
-      Test_Project_Name: WSLStudio.Tests.MSTest
 
     steps:
     - name: Checkout
@@ -27,19 +26,14 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v2
+    - name: Install .NET
+      uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
-
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v1.0.2
-  
+        dotnet-version: 8.0.x
+        
     - name: Restore
       run: dotnet restore $env:Solution_Name
   
-    - name: Build
-      run: msbuild $env:Solution_Name /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+    - name: Build solution
+      run: dotnet build -c Debug
 
-    #- name: Test
-    #  run: dotnet test $env:Test_Project_Name /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}

@@ -3,11 +3,11 @@
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.Contracts.ViewModels;
 using WSLStudio.Helpers;
 
-namespace WSLStudio.Services;
+namespace WSLStudio.Services.UserInterface;
 
 // For more information on navigation between pages see
 // https://github.com/microsoft/TemplateStudio/blob/main/docs/WinUI/navigation.md

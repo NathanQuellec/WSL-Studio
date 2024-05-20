@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Serilog;
 using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.Helpers;
 using WSLStudio.Messages;
 using WSLStudio.Models;
@@ -217,7 +218,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         try
         {
-            var textInputValidationHelper = new TextInputValidationHelper(distroNameInput.Text);
+            var textInputValidationHelper = new TextInputValidation(distroNameInput.Text);
             textInputValidationHelper
                 .NotNullOrWhiteSpace()
                 .IncludeWhiteSpaceChar()
@@ -520,7 +521,7 @@ public class DistrosListDetailsVM : ObservableObject
 
         try
         {
-            var textInputValidationHelper = new TextInputValidationHelper(snapshotNameInput.Text);
+            var textInputValidationHelper = new TextInputValidation(snapshotNameInput.Text);
             textInputValidationHelper
                 .NotNullOrWhiteSpace()
                 .IncludeWhiteSpaceChar()

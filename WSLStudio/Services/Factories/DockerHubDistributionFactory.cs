@@ -2,11 +2,10 @@
 using WSLStudio.Contracts.Services.Factories;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
-using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Services.Factories;
 
-public class DockerHubDistributionFactory : DistributionFactory
+public class DockerHubDistributionFactory : AbstractDistributionFactory
 {
 
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)

@@ -1,5 +1,5 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+using WSLStudio.Contracts.Models.Docker.Manifests;
 
 namespace WSLStudio.Models.Docker.Manifests;
 

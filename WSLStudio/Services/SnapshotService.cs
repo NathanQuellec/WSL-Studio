@@ -1,50 +1,23 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Text;
 using ICSharpCode.SharpZipLib.GZip;
 using Serilog;
 using WSLStudio.Contracts.Services;
 using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
+using WSLStudio.Contracts.Services.Storage;
+using WSLStudio.Services.Storage;
 
 namespace WSLStudio.Services;
 
 public class SnapshotService : ISnapshotService
 {
+    private readonly IFileStorageService _fileStorageService;
 
-    public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
+    public SnapshotService()
     {
-        Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
-
-        var snapshotsList = new ObservableCollection<Snapshot>();
-        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
-
-        try
-        {
-            var snapshotsInfosLines = File.ReadAllLines(snapshotsInfosPath);
-            for (var i = 1; i < snapshotsInfosLines.Length; i++)
-            {
-                var snapshotsInfos = snapshotsInfosLines[i].Split(';');
-                snapshotsList.Insert(0, new Snapshot()
-                {
-                    CreationDate = snapshotsInfos[0],
-                    Description = snapshotsInfos[1],
-                    DistroSize = snapshotsInfos[2],
-                    Id = Guid.Parse(snapshotsInfos[3]),
-                    Name = snapshotsInfos[4],
-                    Path = snapshotsInfos[5],
-                    Size = snapshotsInfos[6],
-                });
-            }
-
-            return snapshotsList;
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to populate list of snapshots from snapshot records file - Caused by exception {ex}");
-            return new ObservableCollection<Snapshot>();
-        }
+        _fileStorageService = new JsonFileStorageService();
     }
 
     public async Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
@@ -120,29 +93,30 @@ public class SnapshotService : ISnapshotService
         }
     }
 
-    private static async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
+    public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
+    {
+        Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
+        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.json");
+
+        try
+        {
+            var snapshotList = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
+            return snapshotList;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to populate list of snapshots from snapshot records file - Caused by exception {ex}");
+            return new ObservableCollection<Snapshot>();
+        }
+    }
+
+    private async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
     {
         Log.Information($"Saving snapshot {snapshot.Name} information in {snapshotFolder} folder");
         try
         {
-            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
-            var snapshotInfosHeader = new StringBuilder();
-            var snapshotInfos = new StringBuilder();
-            // snapshot record's attributes are saved by 
-            var properties = snapshot.GetType().GetProperties().OrderBy(property => property.Name);
-
-            // construct file header if not exist
-            if (!File.Exists(snapshotInfosFile))
-            {
-                snapshotInfosHeader.Append(string.Join(';', properties.Select(prop => prop.Name)));
-                snapshotInfosHeader.Append('\n');
-                await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfosHeader.ToString());
-            }
-
-            // add snapshots data to file
-            snapshotInfos.Append(string.Join(';', properties.Select(prop => prop.GetValue(snapshot).ToString())));
-            snapshotInfos.Append('\n');
-            await File.AppendAllTextAsync(snapshotInfosFile, snapshotInfos.ToString());
+            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.json");
+            await _fileStorageService.Save<Snapshot>(snapshotInfosFile, snapshot);
         }
         catch (Exception ex)
         {
@@ -161,10 +135,8 @@ public class SnapshotService : ISnapshotService
 
             if (snapshotsFolder != null)
             {
-                var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
-                var recordsToKeep = (await File.ReadAllLinesAsync(snapshotsInfosFile))
-                    .Where(line => line.Split(';')[0] != snapshot.Id.ToString());
-                await File.WriteAllLinesAsync(snapshotsInfosFile, recordsToKeep);
+                var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos.json");
+                await _fileStorageService.Delete<Snapshot>(snapshotsInfosFile, snapshot);
             }
         }
         catch (Exception ex)

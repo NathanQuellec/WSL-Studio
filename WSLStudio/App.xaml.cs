@@ -11,13 +11,14 @@ using WSLStudio.Services;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
-using Community.Wsl.Sdk;
-using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using WSLStudio.Views.Dialogs;
-using CommunityToolkit.WinUI.UI.Controls;
 using Serilog;
 using Serilog.Events;
+using WSLStudio.Contracts.Services.Storage;
+using WSLStudio.Contracts.Services.UserInterface;
+using WSLStudio.Services.Storage;
+using WSLStudio.Services.UserInterface;
 
 namespace WSLStudio;
 
@@ -180,6 +181,8 @@ public partial class App : Application
             services.AddSingleton<IDistributionService, DistributionService>();
             services.AddSingleton<IDistributionInfosService, DistributionInfosService>();
             services.AddSingleton<ISnapshotService, SnapshotService>();
+            services.AddSingleton<IFileStorageService, FlatFileStorageService>();
+            services.AddSingleton<IFileStorageService, JsonFileStorageService>();
 
             // Core Services
             services.AddSingleton<IFileService, FileService>();

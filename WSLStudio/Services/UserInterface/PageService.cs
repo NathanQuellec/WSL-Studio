@@ -2,11 +2,11 @@
 
 using Microsoft.UI.Xaml.Controls;
 
-using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.ViewModels;
 using WSLStudio.Views;
 
-namespace WSLStudio.Services;
+namespace WSLStudio.Services.UserInterface;
 
 public class PageService : IPageService
 {

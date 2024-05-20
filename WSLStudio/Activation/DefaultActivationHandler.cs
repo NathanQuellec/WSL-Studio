@@ -1,6 +1,6 @@
 ﻿using Microsoft.UI.Xaml;
 
-using WSLStudio.Contracts.Services;
+using WSLStudio.Contracts.Services.UserInterface;
 using WSLStudio.ViewModels;
 
 namespace WSLStudio.Activation;

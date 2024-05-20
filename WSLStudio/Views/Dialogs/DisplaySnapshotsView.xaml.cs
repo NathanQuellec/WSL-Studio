@@ -34,7 +34,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         try
         {
-            var process = new ProcessBuilderHelper("explorer.exe")
+            var process = new ProcessBuilder("explorer.exe")
                 .SetArguments(snapshotsFolderPath)
                 .Build();
             process.Start();
@@ -96,7 +96,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         try
         {
-            var snapshotToRemove = distro?.Snapshots.First(snap => snap.Id.ToString() == snapshot.Id.ToString());
+            var snapshotToRemove = distro?.Snapshots.First(snap => snap.Id.Equals(snapshot.Id));
             distro?.Snapshots.Remove(snapshotToRemove!);
 
             this.ShowAsync();

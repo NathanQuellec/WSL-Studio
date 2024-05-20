@@ -1,8 +1,10 @@
-﻿namespace WSLStudio.Models;
+﻿using WSLStudio.Contracts.Models;
 
-public class Snapshot 
+namespace WSLStudio.Models;
+
+public class Snapshot : IBaseModel
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     public string CreationDate { get; set; }
