@@ -5,7 +5,7 @@ namespace WSLStudio.Contracts.Services.Storage;
 
 public interface IFileStorageService
 {
-    Task Save(string filePath, IBaseModel elem);
+    Task Save<T>(string filePath, T elem) where T : IBaseModel;
     ObservableCollection<T> Load<T>(string filePath) where T : IBaseModel, new();
-    Task Delete(string filePath, IBaseModel elem);
+    Task Delete<T>(string filePath, T elem) where T : IBaseModel;
 }

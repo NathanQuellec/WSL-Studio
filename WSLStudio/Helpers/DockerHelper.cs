@@ -9,7 +9,7 @@ using Serilog;
 using WSLStudio.Contracts.Models.Docker.Manifests;
 using WSLStudio.Messages;
 using WSLStudio.Models.Docker;
-using WSLStudio.Models.Docker.Manifests.impl;
+using WSLStudio.Models.Docker.Manifests;
 
 namespace WSLStudio.Helpers;
 

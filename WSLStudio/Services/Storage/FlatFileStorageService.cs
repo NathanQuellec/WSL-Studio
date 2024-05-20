@@ -8,7 +8,7 @@ namespace WSLStudio.Services.Storage;
 [Obsolete]
 public class FlatFileStorageService : IFileStorageService
 {
-    public async Task Save(string filePath, IBaseModel elem)
+    public async Task Save<T>(string filePath, T elem) where T : IBaseModel
     {
         var flatFileHeader = new StringBuilder();
         var flatFileData = new StringBuilder();
@@ -55,7 +55,7 @@ public class FlatFileStorageService : IFileStorageService
         return elems;
     }
 
-    public async Task Delete(string filePath, IBaseModel elem)
+    public async Task Delete<T>(string filePath, T elem) where T : IBaseModel
     {
         var recordsToKeep = (await File.ReadAllLinesAsync(filePath))
             .Where(line => line.Split(';')[0] != elem.Id.ToString());

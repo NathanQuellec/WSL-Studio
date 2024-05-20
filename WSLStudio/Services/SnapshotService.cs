@@ -13,29 +13,11 @@ namespace WSLStudio.Services;
 
 public class SnapshotService : ISnapshotService
 {
-    private IFileStorageService _fileStorageService;
+    private readonly IFileStorageService _fileStorageService;
 
-    public SnapshotService(IFileStorageService fileStorageService)
+    public SnapshotService()
     {
-        _fileStorageService = fileStorageService;
-    }
-
-    public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
-    {
-        Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
-        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos");
-
-        try
-        {
-            _fileStorageService = new FlatFileStorageService();
-            var snapshotList  = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
-            return snapshotList;
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to populate list of snapshots from snapshot records file - Caused by exception {ex}");
-            return new ObservableCollection<Snapshot>();
-        }
+        _fileStorageService = new JsonFileStorageService();
     }
 
     public async Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
@@ -111,13 +93,29 @@ public class SnapshotService : ISnapshotService
         }
     }
 
+    public ObservableCollection<Snapshot> GetDistributionSnapshots(string distroPath)
+    {
+        Log.Information($"Populate list of snapshots from {distroPath} snapshot records file");
+        var snapshotsInfosPath = Path.Combine(distroPath, "snapshots", "SnapshotsInfos.json");
+
+        try
+        {
+            var snapshotList = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
+            return snapshotList;
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to populate list of snapshots from snapshot records file - Caused by exception {ex}");
+            return new ObservableCollection<Snapshot>();
+        }
+    }
+
     private async Task SaveDistroSnapshotInfos(Snapshot snapshot, string snapshotFolder)
     {
         Log.Information($"Saving snapshot {snapshot.Name} information in {snapshotFolder} folder");
         try
         {
-            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos");
-            _fileStorageService = new FlatFileStorageService();
+            var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.json");
             await _fileStorageService.Save(snapshotInfosFile, snapshot);
         }
         catch (Exception ex)
@@ -137,8 +135,7 @@ public class SnapshotService : ISnapshotService
 
             if (snapshotsFolder != null)
             {
-                var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos");
-                _fileStorageService = new FlatFileStorageService();
+                var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos.json");
                 await _fileStorageService.Delete(snapshotsInfosFile, snapshot);
             }
         }

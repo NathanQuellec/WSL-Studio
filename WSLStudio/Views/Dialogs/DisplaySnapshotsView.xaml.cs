@@ -96,7 +96,7 @@ public sealed partial class DisplaySnapshotsView : ContentDialog
 
         try
         {
-            var snapshotToRemove = distro?.Snapshots.First(snap => snap.Id.ToString() == snapshot.Id.ToString());
+            var snapshotToRemove = distro?.Snapshots.First(snap => snap.Id.Equals(snapshot.Id));
             distro?.Snapshots.Remove(snapshotToRemove!);
 
             this.ShowAsync();
