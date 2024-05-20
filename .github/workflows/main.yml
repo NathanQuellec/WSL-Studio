@@ -19,7 +19,6 @@ jobs:
     env:
       Solution_Name: WSLStudio.sln
       Project_Name: WSLStudio
-      Test_Project_Name: WSLStudio.Tests.MSTest
 
     steps:
     - name: Checkout
