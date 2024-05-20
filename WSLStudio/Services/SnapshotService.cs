@@ -116,7 +116,7 @@ public class SnapshotService : ISnapshotService
         try
         {
             var snapshotInfosFile = Path.Combine(snapshotFolder, "SnapshotsInfos.json");
-            await _fileStorageService.Save(snapshotInfosFile, snapshot);
+            await _fileStorageService.Save<Snapshot>(snapshotInfosFile, snapshot);
         }
         catch (Exception ex)
         {
@@ -136,7 +136,7 @@ public class SnapshotService : ISnapshotService
             if (snapshotsFolder != null)
             {
                 var snapshotsInfosFile = Path.Combine(snapshotsFolder, "SnapshotsInfos.json");
-                await _fileStorageService.Delete(snapshotsInfosFile, snapshot);
+                await _fileStorageService.Delete<Snapshot>(snapshotsInfosFile, snapshot);
             }
         }
         catch (Exception ex)
