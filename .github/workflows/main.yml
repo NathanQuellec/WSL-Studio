@@ -34,5 +34,6 @@ jobs:
     - name: Restore
       run: dotnet restore $env:Solution_Name
   
-    - name: Build
-      run: msbuild $env:Solution_Name /p:Configuration=${{ matrix.configuration }} /p:Platform=${{ matrix.platform }}
+    - name: Build solution
+      run: dotnet build -c Debug
+
