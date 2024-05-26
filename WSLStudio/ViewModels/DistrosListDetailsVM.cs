@@ -494,8 +494,9 @@ public class DistrosListDetailsVM : ObservableObject
                     .Replace(';', ' ')
                     .Replace('\n', ' ')
                     .Replace('\r', ' ');
-                ; // replace ';' characters to avoid error in SnapshotService::GetDistributionSnapshots
-                await CreateSnapshotViewModel(distribution, snapshotName, snapshotDescr);
+                ; // replace some special characters to avoid error in SnapshotService::GetDistributionSnapshots
+                var isFastSnapshot = (createSnapshotDialog.FindChild("IsFastSnapshot") as ToggleSwitch)!.IsOn;
+                await CreateSnapshotViewModel(distribution, snapshotName, snapshotDescr, isFastSnapshot);
             }
         }
 
@@ -540,7 +541,7 @@ public class DistrosListDetailsVM : ObservableObject
 
     //TODO : Refactor with CreateDistributionViewModel to avoid boilerplate code
     private async Task CreateSnapshotViewModel(Distribution distribution, string snapshotName,
-        string snapshotDescr)
+        string snapshotDescr, bool isFastSnapshot)
     {
         Log.Information($"Creating snapshot {snapshotName} of {distribution.Name} ...");
         try
@@ -548,7 +549,7 @@ public class DistrosListDetailsVM : ObservableObject
             var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
             _infoBarService.OpenInfoBar(createSnapshotInfoProgress);
             var isSnapshotCreated =
-                await _snapshotService.CreateSnapshot(distribution, snapshotName, snapshotDescr);
+                await _snapshotService.CreateSnapshot(distribution, snapshotName, snapshotDescr, isFastSnapshot);
 
             if (isSnapshotCreated)
             {

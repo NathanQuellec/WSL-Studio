@@ -175,7 +175,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Factories\" />
     <Folder Include="Themes\" />
     <Folder Include="Views\UserControls\" />
   </ItemGroup>

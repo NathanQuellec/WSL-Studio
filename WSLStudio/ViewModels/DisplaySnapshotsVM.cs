@@ -43,7 +43,7 @@ public class DisplaySnapshotsVM : ObservableObject
             var snapshot = sender.DataContext as Snapshot;
 
             _distrosViewModel.ValidateDistributionName(sender, args);
-            await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, "Archive", snapshot!.Path);
+            await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, "Vhdx", snapshot!.Path);
 
             App.IsDistributionProcessing = false;
         }

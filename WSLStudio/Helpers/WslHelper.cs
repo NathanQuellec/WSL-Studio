@@ -81,6 +81,40 @@ public static class WslHelper
             throw;
         }
     }
+    /**
+     * Import distribution from vhdx image 
+     */
+    public static async Task ImportInPlaceDistribution(string distroName, string installDir, string vhdxFilePath)
+    {
+        
+        Log.Information("Importing distribution ...");
+        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Importing your distribution ..."));
+        try
+        {
+            var process = new ProcessBuilder("cmd.exe")
+                .SetArguments($"/c md {installDir} & wsl --import-in-place {distroName} {vhdxFilePath}")
+                .SetRedirectStandardOutput(true)
+                .SetRedirectStandardError(true)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+
+            process.Start();
+            await process.WaitForExitAsync();
+
+            var isDistroImported = await CheckExistingDistribution(distroName);
+
+            if (!isDistroImported)
+            {
+                throw new ImportDistributionException("Failed to import distribution");
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to import distribution - Caused by exception {ex}");
+            throw;
+        }
+    }
 
     public static async Task<bool> CheckRunningDistribution(string distroName)
     {
@@ -133,6 +167,48 @@ public static class WslHelper
         {
             Log.Error($"Failed to start process to check existing distribution - Caused by exception : {ex}");
             return false;
+        }
+    }
+
+    public static async Task TerminateDistribution(string distroName)
+    {
+        Log.Information($"Terminating distribution {distroName} ...");
+
+        try
+        {
+            var process = new ProcessBuilder("cmd.exe")
+                .SetArguments($"/c wsl --terminate {distroName}")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+            await process.WaitForExitAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to start process to terminate distribution - Caused by exception {ex}");
+        }
+    }
+
+    public static async Task ShutdownWsl()
+    {
+        Log.Information($"Shutdown WSL ...");
+
+        try
+        {
+            var process = new ProcessBuilder("cmd.exe")
+                .SetArguments($"/c wsl --shutdown")
+                .SetRedirectStandardOutput(false)
+                .SetUseShellExecute(false)
+                .SetCreateNoWindow(true)
+                .Build();
+            process.Start();
+            await process.WaitForExitAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to shutdown WSL - Caused by exception {ex}");
         }
     }
 }
