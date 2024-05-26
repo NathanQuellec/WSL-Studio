@@ -315,13 +315,12 @@ public class DockerHelper
 
                 var uriString = $@"{DOCKER_REGISTRY}/{imageName}/blobs/{layer}";
                 var uri = new Uri(uriString);
-                var progress = new Progress<long>();
-                using var httpResponse = await httpClient.GetAsync(uri);
-                using var content = httpResponse.Content;
-                await using var layerStream = await content.ReadAsStreamAsync();
 
                 var layerFile = File.Create(destPath);
-                await layerStream.CopyToAsync(layerFile);
+
+                await using var httpStreamResponse = await httpClient.GetStreamAsync(uri);
+                await httpStreamResponse.CopyToAsync(layerFile);
+
                 layerFile.Close();
             }
 

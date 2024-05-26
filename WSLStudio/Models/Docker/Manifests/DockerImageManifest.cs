@@ -44,7 +44,7 @@ public class Config
     }
 
     [JsonProperty("size")]
-    public int Size
+    public long Size
     {
         get; set;
     }
