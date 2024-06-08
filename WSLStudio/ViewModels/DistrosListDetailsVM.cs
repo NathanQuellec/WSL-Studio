@@ -335,6 +335,10 @@ public class DistrosListDetailsVM : ObservableObject
                     resourceOriginTextBox = dialog.FindChild("ArchiveInput") as TextBox;
                     resourceOrigin = resourceOriginTextBox.Text;
                     break;
+                case "Vhdx":
+                    resourceOriginTextBox = dialog.FindChild("VhdxInput") as TextBox;
+                    resourceOrigin = resourceOriginTextBox.Text;
+                    break;
             }
 
             return Tuple.Create(distroName, creationMode, resourceOrigin);

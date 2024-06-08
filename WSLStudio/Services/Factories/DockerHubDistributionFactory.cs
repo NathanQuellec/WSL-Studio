@@ -7,7 +7,7 @@ namespace WSLStudio.Services.Factories;
 
 public class DockerHubDistributionFactory : AbstractDistributionFactory
 {
-
+    // TODO : Split code
     public async override Task<Distribution?> CreateDistribution(string distroName, string resourceOrigin, string targetFolder)
     {
         Log.Information("Creating distribution from DockerHub ...");

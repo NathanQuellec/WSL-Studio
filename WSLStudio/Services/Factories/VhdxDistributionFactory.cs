@@ -22,8 +22,15 @@ public class VhdxDistributionFactory : AbstractDistributionFactory
 
             Directory.CreateDirectory(installDir);
             var vhdxDestPath = Path.Combine(installDir, "ext4.vhdx");
-            File.Copy(resourceOrigin, vhdxDestPath);
-            await FilesHelper.ExtractGzFile(resourceOrigin, vhdxDestPath);
+
+            if (resourceOrigin.EndsWith(".gz"))
+            {
+                await FilesHelper.ExtractGzFile(resourceOrigin, vhdxDestPath);
+            }
+            else
+            {
+                File.Copy(resourceOrigin, vhdxDestPath);
+            }
 
             await WslHelper.ImportInPlaceDistribution(distroName, installDir, vhdxDestPath);
 
