@@ -20,11 +20,12 @@ public class VhdxDistributionFactory : AbstractDistributionFactory
                 throw new FileNotFoundException();
             }
 
+            Directory.CreateDirectory(installDir);
             var vhdxDestPath = Path.Combine(installDir, "ext4.vhdx");
-
             File.Copy(resourceOrigin, vhdxDestPath);
+            await FilesHelper.ExtractGzFile(resourceOrigin, vhdxDestPath);
 
-            await WslHelper.ImportInPlaceDistribution(distroName, installDir, resourceOrigin);
+            await WslHelper.ImportInPlaceDistribution(distroName, installDir, vhdxDestPath);
 
             Log.Information("Distribution creation from vhdx image file succeed.");
 
@@ -35,6 +36,7 @@ public class VhdxDistributionFactory : AbstractDistributionFactory
         catch (Exception ex)
         {
             Log.Error($"Failed to create distribution from vhdx image file - Caused by exception : {ex}");
+            Directory.Delete(installDir, true );
             throw;
         }
     }

@@ -29,6 +29,7 @@
             <x:String>Docker Hub</x:String>
             <x:String>Dockerfile</x:String>
             <x:String>Archive</x:String>
+            <x:String>Vhdx</x:String>
         </ComboBox>
 
         <controls:SwitchPresenter Value="{Binding SelectedItem, ElementName=DistroCreationMode}">
