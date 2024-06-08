@@ -7,6 +7,7 @@ using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services.Storage;
+using WSLStudio.Enums;
 using WSLStudio.Services.Storage;
 
 namespace WSLStudio.Services;
@@ -45,6 +46,8 @@ public class SnapshotService : ISnapshotService
 
         try
         {
+
+            var snapshotType = SnapshotType.Vhdx;
             if (isFastSnapshot)
             {
                 snapshotPath += ".vhdx";
@@ -53,6 +56,7 @@ public class SnapshotService : ISnapshotService
             else
             {
                 snapshotPath += ".tar";
+                snapshotType = SnapshotType.Archive;
                 await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
             }
 
@@ -64,6 +68,7 @@ public class SnapshotService : ISnapshotService
                 Id = snapshotId,
                 Name = snapshotName,
                 Description = snapshotDescr,
+                Type = snapshotType.ToString(),
                 CreationDate = currentDateTime,
                 Size = sizeOfSnap.ToString(CultureInfo.InvariantCulture),
                 DistroSize = distribution.Size,
