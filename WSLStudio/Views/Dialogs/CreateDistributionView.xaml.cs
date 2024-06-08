@@ -55,4 +55,22 @@ public sealed partial class CreateDistributionView : ContentDialog
             ArchiveInput.Text = archiveFile.Path;
         }
     }
+
+    public async void PickVhdxFile(object sender, RoutedEventArgs args)
+    {
+
+        var hwnd = App.MainWindow.GetWindowHandle();
+        FileOpenPicker filePicker = new();
+
+        WinRT.Interop.InitializeWithWindow.Initialize(filePicker, hwnd);
+
+        filePicker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
+        filePicker.FileTypeFilter.Add(".vhdx");
+
+        var vhdxFile = await filePicker.PickSingleFileAsync();
+        if (vhdxFile != null)
+        {
+            VhdxInput.Text = vhdxFile.Path;
+        }
+    }
 }

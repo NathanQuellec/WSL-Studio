@@ -8,6 +8,7 @@
     xmlns:local="using:WSLStudio.Views.Dialogs"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:functions="using:WSLStudio.Views.Functions"
     mc:Ignorable="d"
     
     Title="Create Snapshot :"
@@ -30,10 +31,18 @@
                  IsSpellCheckEnabled="True"
                  Margin="0 12 0 16"
                  MinHeight="64"/>
+        <ToggleSwitch x:Name="IsFastSnapshot" 
+                      Header="Fast Snapshot :"
+                      Margin="0 12 0 16"/>
         <InfoBar x:Name="StopRunningDistrosInfoBar"
                  Severity="Informational"
                  Title="This will stop all running instances of this distribution"
-                 IsOpen="True"
+                 IsOpen="{x:Bind Path=functions:InvertBoolean.Invert(IsFastSnapshot.IsOn), Mode=OneWay}"
+                 IsClosable="False"/>
+        <InfoBar x:Name="StopAllRunningDistrosInfoBar"
+                 Severity="Warning"
+                 Title="Warning : This will shutdown WSL and stop all your distributions"
+                 IsOpen="{x:Bind IsFastSnapshot.IsOn, Mode=OneWay}"
                  IsClosable="False"/>
         <InfoBar x:Name="SnapshotNameErrorInfoBar"
                  Severity="Error"

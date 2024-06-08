@@ -105,6 +105,7 @@ public class DistributionService : IDistributionService
                 "Dockerfile" => new DockerfileDistributionFactory(),
                 "Archive" => new ArchiveDistributionFactory(),
                 "Docker Hub" => new DockerHubDistributionFactory(),
+                "Vhdx" => new VhdxDistributionFactory(),
                 _ => throw new NullReferenceException(),
             };
 
@@ -115,7 +116,7 @@ public class DistributionService : IDistributionService
                 .GetDistributionList()
                 .FirstOrDefault(distro => distro.DistroName == newDistro.Name);
 
-            await TerminateDistribution(distroName); // to read ext4 file
+            await WslHelper.TerminateDistribution(distroName); // to read ext4 file
             newDistro.Id = distro.DistroId;
             newDistro.Path = distro.BasePath;
             newDistro.WslVersion = distro.WslVersion;
@@ -165,12 +166,12 @@ public class DistributionService : IDistributionService
 
 
     /**
-     * TODO REFACTOR
+     *
      * Rename distro name in the Windows Registry.
      * With MSIX packaging, this type of actions make changes in a virtual registry and do not edit the real one.
      * Because we want to modify the system's user registry, we use flexible virtualization in Package.appxmanifest file.
      */
-
+    [Obsolete("feature removed")]
     public async Task<bool> RenameDistribution(Distribution distribution, string newDistroName)
     {
         Log.Information($"Editing registry for {distribution.Name} with key : {distribution.Id}");
@@ -191,7 +192,7 @@ public class DistributionService : IDistributionService
                 var distroSubkeys = Registry.CurrentUser.OpenSubKey(distroRegPath, true);
 
                 var oldDistroName = distribution.Name;
-                await TerminateDistribution(newDistroName); // solve error when opening file system just after renaming distro
+                await WslHelper.TerminateDistribution(newDistroName); // solve error when opening file system just after renaming distro
                 var isFolderRenamed = RenameDistributionFolder(oldDistroName, newDistroName);
 
                 if (isFolderRenamed)
@@ -217,6 +218,7 @@ public class DistributionService : IDistributionService
         }
     }
 
+    [Obsolete("feature removed")]
     private static bool RenameDistributionFolder(string oldDistroName, string newDistroName)
     {
         var oldDistroPath = Path.Combine(App.AppDirPath, oldDistroName);
@@ -229,7 +231,6 @@ public class DistributionService : IDistributionService
                 Log.Information("Source directory does not exist.");
                 throw new DirectoryNotFoundException();
             }
-            //await TerminateDistribution(newDistroName);
             File.Copy(oldDistroPath, newDistroPath);
             Directory.Move(oldDistroPath, newDistroPath);
             Log.Information("Directory renamed successfully.");
@@ -312,27 +313,6 @@ public class DistributionService : IDistributionService
                 }
             }
             distribution.RunningProcesses.Clear();
-        }
-    }
-
-    private static async Task TerminateDistribution(string distroName)
-    {
-        Log.Information($"Terminating distribution {distroName} ...");
-
-        try
-        {
-            var process = new ProcessBuilder("cmd.exe")
-                .SetArguments($"/c wsl --terminate {distroName}")
-                .SetRedirectStandardOutput(false)
-                .SetUseShellExecute(false)
-                .SetCreateNoWindow(true)
-                .Build();
-            process.Start();
-            await process.WaitForExitAsync();
-        }
-        catch (Exception ex)
-        {
-            Log.Error($"Failed to start process to terminate distribution - Caused by exception {ex}");
         }
     }
 

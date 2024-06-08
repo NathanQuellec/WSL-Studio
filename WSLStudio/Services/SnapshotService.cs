@@ -7,6 +7,7 @@ using WSLStudio.Exceptions;
 using WSLStudio.Helpers;
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services.Storage;
+using WSLStudio.Enums;
 using WSLStudio.Services.Storage;
 
 namespace WSLStudio.Services;
@@ -20,25 +21,54 @@ public class SnapshotService : ISnapshotService
         _fileStorageService = new JsonFileStorageService();
     }
 
-    public async Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr)
+    private static async Task CreateFastSnapshot(string distroPath, string snapshotPath)
+    {
+        var distroImagePath = Path.Combine(distroPath, "ext4.vhdx");
+
+        await WslHelper.ShutdownWsl();
+        await using var distroImage = File.OpenRead(distroImagePath);
+        await using var snapshotFile = File.OpenWrite(snapshotPath);
+        await distroImage.CopyToAsync(snapshotFile);
+
+        snapshotFile.Close();
+        await distroImage.DisposeAsync();
+    }
+
+    // TODO : Refactor
+    public async Task<bool> CreateSnapshot(Distribution distribution, string snapshotName, string snapshotDescr, bool isFastSnapshot)
     {
         Log.Information($"Creating snapshot {snapshotName} from distribution {distribution.Name} ...");
 
         var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
         var snapshotFolder = FilesHelper.CreateDirectory(distribution.Path, "snapshots");
         var snapshotId = Guid.NewGuid();
-        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}.tar");
+        var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
 
         try
         {
-            await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
+
+            var snapshotType = SnapshotType.Vhdx;
+            if (isFastSnapshot)
+            {
+                snapshotPath += ".vhdx";
+                await CreateFastSnapshot(distribution.Path, snapshotPath);
+            }
+            else
+            {
+                snapshotPath += ".tar";
+                snapshotType = SnapshotType.Archive;
+                await WslHelper.ExportDistribution(distribution.Name, snapshotPath);
+            }
+
             decimal sizeOfSnap = await CompressSnapshot(snapshotPath);
             snapshotPath += ".gz"; // adding .gz extension file after successfully completed the compression
+
             var snapshot = new Snapshot()
             {
                 Id = snapshotId,
                 Name = snapshotName,
                 Description = snapshotDescr,
+                Type = snapshotType.ToString(),
                 CreationDate = currentDateTime,
                 Size = sizeOfSnap.ToString(CultureInfo.InvariantCulture),
                 DistroSize = distribution.Size,
@@ -46,9 +76,11 @@ public class SnapshotService : ISnapshotService
             };
 
             distribution.Snapshots.Insert(0, snapshot);
+
             var currentTotalSnapSize = decimal.Parse(distribution.SnapshotsTotalSize, CultureInfo.InvariantCulture);
             distribution.SnapshotsTotalSize = (currentTotalSnapSize + sizeOfSnap)
                 .ToString(CultureInfo.InvariantCulture);
+
             await SaveDistroSnapshotInfos(snapshot, snapshotFolder);
 
             return true;

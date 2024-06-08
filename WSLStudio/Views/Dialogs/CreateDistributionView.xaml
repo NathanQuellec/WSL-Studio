@@ -29,6 +29,7 @@
             <x:String>Docker Hub</x:String>
             <x:String>Dockerfile</x:String>
             <x:String>Archive</x:String>
+            <x:String>Vhdx</x:String>
         </ComboBox>
 
         <controls:SwitchPresenter Value="{Binding SelectedItem, ElementName=DistroCreationMode}">
@@ -72,6 +73,23 @@
                             Style="{StaticResource MinimalistButtonStyle}"
                             Margin="0 24 0 0 "
                             Click="PickArchiveFile">
+                        <FontIcon Glyph="&#xED25;" />
+                    </Button>
+                </Grid>
+            </controls:Case>
+
+            <controls:Case Value="Vhdx">
+                <Grid x:Name="VhdxInputContainer"
+                      Height="96">
+                    <TextBox Header="Vhdx file path :"
+                             x:Name="VhdxInput"
+                             PlaceholderText="Only WSL .vhdx image files"
+                             Height="64"
+                             Margin="0 12 0 16"/>
+                    <Button HorizontalAlignment="Right"
+                            Style="{StaticResource MinimalistButtonStyle}"
+                            Margin="0 24 0 0 "
+                            Click="PickVhdxFile">
                         <FontIcon Glyph="&#xED25;" />
                     </Button>
                 </Grid>

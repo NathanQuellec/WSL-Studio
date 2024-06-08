@@ -5,7 +5,7 @@ using WSLStudio.Contracts.Services.Storage;
 
 namespace WSLStudio.Services.Storage;
 
-[Obsolete]
+[Obsolete("Not used as storage for snapshots anymore")]
 public class FlatFileStorageService : IFileStorageService
 {
     public async Task Save<T>(string filePath, T elem) where T : IBaseModel
