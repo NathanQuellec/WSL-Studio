@@ -43,6 +43,12 @@ public class ProcessBuilder
         return this;
     }
 
+    public ProcessBuilder SetVerb(string val)
+    {
+        this._process.StartInfo.Verb = val;
+        return this;
+    }
+
     public Process Build()
     {
         return this._process;
