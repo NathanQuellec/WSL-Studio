@@ -1,4 +1,5 @@
-﻿using Community.Wsl.Sdk;
+﻿using System.ComponentModel;
+using Community.Wsl.Sdk;
 using CommunityToolkit.Mvvm.Messaging;
 using Serilog;
 using WSLStudio.Exceptions;
@@ -20,7 +21,7 @@ public static class WslHelper
 
     public static bool CheckHypervisor()
     {
-        var processBuilder = new ProcessBuilder("powershell.exe")
+        var process = new ProcessBuilder("powershell.exe")
             .SetArguments(
                 "/c (Get-WmiObject -Class \"Win32_ComputerSystem\" -ComputerName \"localhost\").HypervisorPresent")
             .SetUseShellExecute(false)
@@ -28,12 +29,43 @@ public static class WslHelper
             .SetRedirectStandardError(true)
             .SetCreateNoWindow(true)
             .Build();
-        processBuilder.Start();
+        process.Start();
 
-        var output = processBuilder.StandardOutput.ReadToEnd();
+        var output = process.StandardOutput.ReadToEnd();
         var virtualizationEnabled = bool.Parse(output);
 
         return virtualizationEnabled;
+    }
+    /**
+     * Check if WSL is installed from the microsoft store
+     */
+
+    public static async Task<bool> CheckWslMicrosoftStore()
+    {
+        var process = new ProcessBuilder("powershell.exe")
+            .SetArguments(
+                "/c  winget ls  -q 'Windows Subsystem for Linux'")
+            .SetUseShellExecute(false)
+            .SetRedirectStandardOutput(true)
+            .SetRedirectStandardError(true)
+            .SetCreateNoWindow(true)
+            .Build();
+        process.Start();
+        var output = await process.StandardOutput.ReadToEndAsync();
+
+        return output.Contains("Linux");
+    }
+
+    public static async void InstallWslFromMicrosoftStore()
+    {
+        var process = new ProcessBuilder("powershell.exe")
+            .SetArguments(
+                "/c  winget install 'Windows Subsystem for Linux'")
+            .SetUseShellExecute(true)
+            .SetVerb("runas")
+            .Build();
+        process.Start();
+        await process.WaitForExitAsync();
     }
 
     /**
@@ -41,16 +73,16 @@ public static class WslHelper
      */
     public static async Task ExportDistribution(string distroName, string destPath)
     {
-        var processBuilder = new ProcessBuilder("cmd.exe")
+        var process = new ProcessBuilder("cmd.exe")
             .SetArguments(
                 $"/c wsl --export {distroName} {destPath}")
             .SetRedirectStandardOutput(true)
             .SetUseShellExecute(false)
             .SetCreateNoWindow(true)
             .Build();
-        processBuilder.Start();
+        process.Start();
 
-        await processBuilder.WaitForExitAsync();
+        await process.WaitForExitAsync();
     }
 
     public static async Task ImportDistribution(string distroName, string installDir, string tarLocation)

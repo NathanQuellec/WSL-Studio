@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CommunityToolkit.WinUI;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 
 using WSLStudio.Activation;
@@ -102,12 +104,11 @@ public partial class App : Application
         }
     }
 
-    public static void ShowNoWslDialog()
+    public static async Task ShowNoWslDialog()
     {
-        if (MainWindow.Content is FrameworkElement fe)
-        {
-            fe.Loaded += (ss, se) => NoWslDialog();
-        }
+        var dispatchQueue = DispatcherQueue.GetForCurrentThread();
+        await Task.Run(async () =>
+            await dispatchQueue.EnqueueAsync(async () => await NoWslDialog()));
     }
 
     public static async Task VirtualizationDisabledDialog()
@@ -133,12 +134,63 @@ public partial class App : Application
         }
     }
 
-    public static void ShowVirtualizationDisabledDialog()
+    public static async Task ShowVirtualizationDisabledDialog()
     {
-        if (MainWindow.Content is FrameworkElement fe)
+        var dispatchQueue = DispatcherQueue.GetForCurrentThread();
+        await Task.Run(async () =>
+            await dispatchQueue.EnqueueAsync(async () => await VirtualizationDisabledDialog()));
+    }
+
+    public static void InstallWslFromMicrosoftStoreCommand(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+    {
+        try
         {
-            fe.Loaded += (ss, se) => VirtualizationDisabledDialog();
+            WslHelper.InstallWslFromMicrosoftStore();
         }
+        catch (Exception ex)
+        {
+            Log.Error($"Cannot installed WSL from the Microsoft Store - Caused by exception : {ex}");
+        }
+    }
+
+
+    public async Task InstallWslFromMicrosoftStoreDialog()
+    {
+        try
+        {
+            var dialog = new ContentDialog()
+            {
+                Title = "WSL is not installed from the Microsoft Store",
+                Content =
+                    "WSL Studio cannot works properly, do you want to install WSL from the Microsoft Store ?",
+                PrimaryButtonText = "Yes",
+                CloseButtonText = "No",
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = MainWindow.Content.XamlRoot,
+            };
+
+            dialog.PrimaryButtonClick += InstallWslFromMicrosoftStoreCommand;
+
+            await dialog.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error($"Failed to open VirtualizationDisabled dialog - Caused by exception : {ex}");
+            MainWindow.Close();
+        }
+    }
+
+    public async Task ShowInstallWslFromMicrosoftStoreDialog()
+    {
+        var dispatcher = DispatcherQueue.GetForCurrentThread();
+
+        await Task.Run(async () =>
+        {
+            await dispatcher.EnqueueAsync(async () =>
+            {
+                await InstallWslFromMicrosoftStoreDialog();
+            });
+        });
     }
 
     public static async void ShowIsProcessingDialog()
@@ -211,15 +263,21 @@ public partial class App : Application
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
 
+        var wslInstalled = await WslHelper.CheckWslMicrosoftStore();
+        if (!wslInstalled)
+        {
+            await ShowInstallWslFromMicrosoftStoreDialog();
+        }
+
         if (!WslHelper.CheckWsl())
         {
-            ShowNoWslDialog();
+            await ShowNoWslDialog();
         }
 
         var virtualizationEnabled = WslHelper.CheckHypervisor();
         if (!virtualizationEnabled)
         {
-            ShowVirtualizationDisabledDialog();
+            await ShowVirtualizationDisabledDialog();
         }
 
         CreateProjectFolders();
