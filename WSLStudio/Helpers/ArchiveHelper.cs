@@ -12,7 +12,7 @@ public static class ArchiveHelper
     public static async Task MergeArchive(List<string> tarPathList, string destPath)
     {
         Log.Information($"Merging archive files ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Merging image layers ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Merging image layers ..."));
 
         try
         {

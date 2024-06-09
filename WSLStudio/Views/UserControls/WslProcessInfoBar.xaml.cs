@@ -14,10 +14,17 @@ public sealed partial class WslProcessInfoBar : UserControl
         this.InitializeComponent();
 
         Log.Information("[PUB/SUB] Message received to update progress bar advancement status");
-        WeakReferenceMessenger.Default.Register<ProgressBarMessage>(this, (recipient, message) =>
+
+        WeakReferenceMessenger.Default.Register<DistroProgressBarMessage>(this, (recipient, message) =>
         {
             Log.Information("");
             CreateDistroInfoProgress.Title = message.ProgressInfo;
+        });
+
+        WeakReferenceMessenger.Default.Register<SnapshotProgressBarMessage>(this, (recipient, message) =>
+        {
+            Log.Information("");
+            CreateSnapshotInfoProgress.Title = message.ProgressInfo;
         });
     }
 }

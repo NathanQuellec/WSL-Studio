@@ -17,6 +17,8 @@
                  Height="100"
                  Width="450"/>
 
+        <!-- Distribution creation status -->
+
         <InfoBar x:Name="CreateDistroInfoProgress"
                  VerticalAlignment="Bottom"
                  Severity="Informational"
@@ -47,6 +49,9 @@
                  IsOpen="False"
                  Height="100"
                  Width="450"/>
+
+
+        <!-- Snapshot creation status -->
 
         <InfoBar x:Name="CreateSnapshotInfoProgress"
                  VerticalAlignment="Bottom"

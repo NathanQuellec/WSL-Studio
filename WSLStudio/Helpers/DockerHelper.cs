@@ -71,7 +71,7 @@ public class DockerHelper
     public async Task BuildDockerImage(string workingDirectory, string imageName)
     {
         Log.Information("Building Docker image ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Building Docker image ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Building Docker image ..."));
         try
         {
 
@@ -121,7 +121,7 @@ public class DockerHelper
     public async Task<CreateContainerResponse?> CreateDockerContainer(string imageName, string containerName)
     {
         Log.Information("Creating Docker container ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Creating Docker container ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Creating Docker container ..."));
         try
         {
 
@@ -143,7 +143,7 @@ public class DockerHelper
     public async Task ExportDockerContainer(string containerName, string targetPath)
     {
         Log.Information("Exporting Docker container ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Exporting Docker container as .tar file ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Exporting Docker container as .tar file ..."));
         try
         {
 
@@ -307,7 +307,7 @@ public class DockerHelper
             foreach (var layer in layers)
             {
                 Log.Information("[PUB/SUB] Sending distribution creation progress status to the view");
-                WeakReferenceMessenger.Default.Send(new ProgressBarMessage($"Downloading image layer {index}/{layers.Count} ..."));
+                WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage($"Downloading image layer {index}/{layers.Count} ..."));
                 index++;
 
                 var destPath = Path.Combine(App.TmpDirPath, $"{layer.Split(':')[1]}.tar.gz");

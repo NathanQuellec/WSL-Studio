@@ -431,7 +431,7 @@ public class DistrosListDetailsVM : ObservableObject
         App.IsDistributionProcessing = true;
         var createDistroInfoProgress = _infoBarService.FindInfoBar("CreateDistroInfoProgress");
         // setting initial progress bar message
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("WSL Studio creates your distribution ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("WSL Studio creates your distribution ..."));
         _infoBarService.OpenInfoBar(createDistroInfoProgress);
 
         try
@@ -548,6 +548,7 @@ public class DistrosListDetailsVM : ObservableObject
         string snapshotDescr, bool isFastSnapshot)
     {
         Log.Information($"Creating snapshot {snapshotName} of {distribution.Name} ...");
+        WeakReferenceMessenger.Default.Send(new SnapshotProgressBarMessage("WSL Studio creates your snapshot ..."));
         try
         {
             var createSnapshotInfoProgress = _infoBarService.FindInfoBar("CreateSnapshotInfoProgress");
