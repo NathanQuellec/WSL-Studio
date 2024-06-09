@@ -36,6 +36,9 @@ public static class WslHelper
         return virtualizationEnabled;
     }
 
+    /**
+     * Used to create snapshots by exporting the file system to an archive file
+     */
     public static async Task ExportDistribution(string distroName, string destPath)
     {
         var processBuilder = new ProcessBuilder("cmd.exe")
@@ -54,7 +57,7 @@ public static class WslHelper
     {
         
         Log.Information("Importing distribution ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Importing your distribution ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Importing your distribution ..."));
         try
         {
             var process = new ProcessBuilder("cmd.exe")
@@ -82,13 +85,13 @@ public static class WslHelper
         }
     }
     /**
-     * Import distribution from vhdx image 
+     * Import distribution from vhdx based snapshot 
      */
     public static async Task ImportInPlaceDistribution(string distroName, string installDir, string vhdxFilePath)
     {
         
         Log.Information("Importing distribution ...");
-        WeakReferenceMessenger.Default.Send(new ProgressBarMessage("Importing your distribution ..."));
+        WeakReferenceMessenger.Default.Send(new DistroProgressBarMessage("Importing your distribution ..."));
         try
         {
             var process = new ProcessBuilder("cmd.exe")

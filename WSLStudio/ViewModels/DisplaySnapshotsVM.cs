@@ -4,7 +4,6 @@ using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using WSLStudio.Contracts.Services;
-using WSLStudio.Enums;
 using WSLStudio.Models;
 
 namespace WSLStudio.ViewModels;
@@ -44,7 +43,7 @@ public class DisplaySnapshotsVM : ObservableObject
             var snapshot = sender.DataContext as Snapshot;
 
             _distrosViewModel.ValidateDistributionName(sender, args);
-            await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, snapshot!.Type.ToString(), snapshot!.Path);
+            await _distrosViewModel.CreateDistributionViewModel(distroNameInput!.Text, snapshot!.Type, snapshot!.Path);
 
             App.IsDistributionProcessing = false;
         }

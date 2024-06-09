@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Globalization;
+using CommunityToolkit.Mvvm.Messaging;
 using ICSharpCode.SharpZipLib.GZip;
 using Serilog;
 using WSLStudio.Contracts.Services;
@@ -8,6 +9,7 @@ using WSLStudio.Helpers;
 using WSLStudio.Models;
 using WSLStudio.Contracts.Services.Storage;
 using WSLStudio.Enums;
+using WSLStudio.Messages;
 using WSLStudio.Services.Storage;
 
 namespace WSLStudio.Services;
@@ -104,6 +106,7 @@ public class SnapshotService : ISnapshotService
     private static async Task<decimal> CompressSnapshot(string snapshotPath)
     {
         Log.Information($"Compressing snapshot from .tar to .tar.gz in location {snapshotPath}");
+        WeakReferenceMessenger.Default.Send(new SnapshotProgressBarMessage("Compressing snapshot ..."));
         try
         {
             var compressedFilePath = snapshotPath + ".gz";
