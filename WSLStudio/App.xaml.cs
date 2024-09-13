@@ -65,20 +65,23 @@ public partial class App : Application
         return service;
     }
 
-    private static void CreateProjectFolders()
+    private static async Task CreateProjectFolders()
     {
-        Log.Information("Creating project folders ...");
-        AppDirPath = FilesHelper.CreateDirectory(LocalFolder.Path, APP_FOLDER_NAME);
-        if (AppDirPath == null)
+        await Task.Run(() =>
         {
-            Log.Error("Cannot create project folders");
-            MainWindow.Close();
-        }
-        else
-        {
-            TmpDirPath = FilesHelper.CreateDirectory(AppDirPath, TMP_FOLDER_NAME);
-            LogDirPath = FilesHelper.CreateDirectory(AppDirPath, LOG_FOLDER_NAME);
-        }
+            Log.Information("Creating project folders ...");
+            AppDirPath = FilesHelper.CreateDirectory(LocalFolder.Path, APP_FOLDER_NAME);
+            if (AppDirPath == null)
+            {
+                Log.Error("Cannot create project folders");
+                MainWindow.Close();
+            }
+            else
+            {
+                TmpDirPath = FilesHelper.CreateDirectory(AppDirPath, TMP_FOLDER_NAME);
+                LogDirPath = FilesHelper.CreateDirectory(AppDirPath, LOG_FOLDER_NAME);
+            }
+        });
     }
 
     public static async Task NoWslDialog()
@@ -263,6 +266,18 @@ public partial class App : Application
         base.OnLaunched(args);
         await App.GetService<IActivationService>().ActivateAsync(args);
 
+        await CreateProjectFolders();
+
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File(Path.Combine(LogDirPath, "log.txt"),
+                rollingInterval: RollingInterval.Day,
+                rollOnFileSizeLimit: true)
+            .CreateLogger();
+
         var wslInstalled = await WslHelper.CheckWslMicrosoftStore();
         if (!wslInstalled)
         {
@@ -280,16 +295,6 @@ public partial class App : Application
             await ShowVirtualizationDisabledDialog();
         }
 
-        CreateProjectFolders();
-
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File(Path.Combine(LogDirPath, "log.txt"), 
-                            rollingInterval: RollingInterval.Day,
-                            rollOnFileSizeLimit: true)
-            .CreateLogger();
+       
     }
 }
