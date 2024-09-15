@@ -14,7 +14,7 @@
   <Identity
     Name="14543NathanQuellec.WSLStudio"
     Publisher="CN=BAAB9B9E-CD72-40AB-BE14-24DCE13BA387"
-    Version="0.7.0.0" />
+    Version="0.7.2.0" />
 
   <Properties>
     <DisplayName>WSL Studio</DisplayName>
