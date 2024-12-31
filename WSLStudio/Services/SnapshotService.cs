@@ -135,8 +135,8 @@ public class SnapshotService : ISnapshotService
 
         try
         {
-            var snapshotList = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
-            return snapshotList;
+            return new ObservableCollection<Snapshot>(
+                _fileStorageService.Load<Snapshot>(snapshotsInfosPath).Reverse());
         }
         catch (Exception ex)
         {
