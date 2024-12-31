@@ -25,7 +25,7 @@ public class DockerHubDistributionFactory : AbstractDistributionFactory
         // check if user specify a tag in the image name input
         if (resourceOrigin.Contains(':'))
         {
-            var imageElements = resourceOrigin.Split(':');
+            var imageElements = imageName.Split(':');
             imageName = imageElements.First();
             imageTag = imageElements.Last();
         }
