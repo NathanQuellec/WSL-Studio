@@ -199,7 +199,7 @@
                                            Margin="40 24">
                                     <TextBlock x:Name="OsName" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="OS Name : "
+                                           Text="Name : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            TextWrapping="Wrap"/>
@@ -215,7 +215,7 @@
                                            Margin="40 24">
                                     <TextBlock x:Name="OsVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="OS Version : "
+                                           Text="Version : "
                                            FontSize="18"
                                            FontWeight="SemiBold"/>
                                     <TextBlock Style="{StaticResource BodyTextBlockStyle}"
@@ -230,7 +230,7 @@
                                            Margin="40 24">
                                     <TextBlock x:Name="DistroSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Size : "
+                                           Text="Disk Usage : "
                                            FontSize="18"
                                            FontWeight="SemiBold"/>
                                     <TextBlock Style="{StaticResource BodyTextBlockStyle}"
@@ -307,7 +307,7 @@
                                            Margin="40 16">
                                     <TextBlock x:Name="SnapshotsList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshots : "
+                                           Text="List : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
@@ -338,10 +338,8 @@
                                            Margin="0 12 0 0 "/>
                                     <TextBlock x:Name="SnapshotsTotalSizeValue"
                                            RelativePanel.RightOf="SnapshotsTotalSize"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="{x:Bind system:String.Format('{0} GB', SnapshotsTotalSize), Mode=OneWay}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
                                 </RelativePanel>
 
@@ -356,10 +354,9 @@
                                            Margin="0 12 0 0 "/>
                                     <TextBlock x:Name="SnapshotsCountValue"
                                            RelativePanel.RightOf="SnapshotsCount"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Style="{StaticResource BodyTextBlockStyle}"
                                            Text="{x:Bind Snapshots.Count, Mode=OneWay}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
                                 </RelativePanel>
 
@@ -368,16 +365,15 @@
                                            Margin="40 16">
                                     <TextBlock x:Name="SnapshotLastDate" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Last date : "
+                                           Text="Last Date : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
                                     <TextBlock x:Name="SnapshotLastDateValue"
                                            RelativePanel.RightOf="SnapshotLastDate"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Style="{StaticResource BodyTextBlockStyle}"
                                            Text="{Binding Snapshots[0].CreationDate, FallbackValue='None'}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
                                 </RelativePanel>
                             </Grid>

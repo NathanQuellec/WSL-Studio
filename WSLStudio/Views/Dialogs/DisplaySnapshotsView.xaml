@@ -128,7 +128,7 @@
 
             <controls:DataGrid.Columns>
                 <controls:DataGridTextColumn Header="Name" Binding="{Binding Name}"/>
-                <controls:DataGridTextColumn Header="Created" Binding="{Binding CreationDate}"/>
+                <controls:DataGridTextColumn Header="Creation Date" Binding="{Binding CreationDate}"/>
                 <controls:DataGridTextColumn Header="Snapshot Size (GB)" Binding="{Binding Size}"/>
                 <controls:DataGridTextColumn Header="Distribution Size (GB)" Binding="{Binding DistroSize}"/>
             </controls:DataGrid.Columns>
