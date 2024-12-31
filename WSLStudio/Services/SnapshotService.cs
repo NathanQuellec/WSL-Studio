@@ -41,7 +41,7 @@ public class SnapshotService : ISnapshotService
     {
         Log.Information($"Creating snapshot {snapshotName} from distribution {distribution.Name} ...");
 
-        var currentDateTime = DateTime.Now.ToString("dd MMMMM yyyy HH:mm:ss");
+        var currentDateTime = DateTime.Now.ToString(CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern);
         var snapshotFolder = FilesHelper.CreateDirectory(distribution.Path, "snapshots");
         var snapshotId = Guid.NewGuid();
         var snapshotPath = Path.Combine(snapshotFolder, $"{snapshotId}_{snapshotName}");
@@ -135,8 +135,8 @@ public class SnapshotService : ISnapshotService
 
         try
         {
-            var snapshotList = _fileStorageService.Load<Snapshot>(snapshotsInfosPath);
-            return snapshotList;
+            return new ObservableCollection<Snapshot>(
+                _fileStorageService.Load<Snapshot>(snapshotsInfosPath).Reverse());
         }
         catch (Exception ex)
         {

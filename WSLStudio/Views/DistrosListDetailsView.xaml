@@ -57,7 +57,7 @@
 
             <controls:ListDetailsView.ItemTemplate>
                 <DataTemplate x:DataType="model:Distribution">
-        
+
                     <StackPanel BorderThickness="1"
                                 Height="80">
                         <StackPanel.Resources>
@@ -160,226 +160,223 @@
                 <DataTemplate x:DataType="model:Distribution">
 
                     <ScrollViewer>
-                            <Grid Background="{ThemeResource LayerFillColorAltBrush}"
-                                  CornerRadius="5">
+
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
-                                
-                                <!--<StackPanel Orientation="Horizontal"
-                                            Margin="0 0 0 24"
-                                            Grid.Column="1"
-                                            Grid.Row="0">
-                                
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                   Text="CPU : "
-                                                   FontSize="16"
-                                                   Margin="8"/>
-                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                   Text="32 %"
-                                                   FontSize="16"
-                                                   FontWeight="SemiBold"
-                                                   Margin="8"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal">
-                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                   Text="Memory : "
-                                                   FontSize="16"
-                                                   Margin="8"/>
-                                        <TextBlock Style="{StaticResource BodyTextBlockStyle}"
-                                                   Text="64 %"
-                                                   FontSize="16"
-                                                   FontWeight="SemiBold"
-                                                   Margin="8"/>
-                                    </StackPanel>
-                                </StackPanel>-->
 
-                            <TextBlock Style="{StaticResource TitleTextBlockStyle}"
-                                       Text="Distribution details"
+                            <Grid Grid.Column="0"
+                                  Background="{ThemeResource LayerFillColorAltBrush}"
+                                  CornerRadius="5"
+                                  Margin="50 50 0 50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                    Style="{StaticResource TitleTextBlockStyle}"
+                                       Text="System :"
                                        FontSize="{StaticResource LargeFontSize}"
-                                       FontWeight="SemiBold"
+                                       FontWeight="Bold"
                                        TextWrapping="Wrap"
                                        Margin="40 24 0 8"/>
-                            <RelativePanel Grid.Column="0"
+                                <RelativePanel Grid.Column="0"
                                            Width="Auto"
                                            Grid.Row="1"
                                            Margin="40 24">
-                                <TextBlock x:Name="OsName" 
+                                    <TextBlock x:Name="OsName" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="OS Name : "
+                                           Text="Name : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            TextWrapping="Wrap"/>
-                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="OsName"
                                            Text="{x:Bind OsName}"
                                            FontSize="18"
                                            Margin="12 0 0 0 "
                                            TextWrapping="Wrap"/>
-                            </RelativePanel>
-                            <RelativePanel Grid.Column="0"
+                                </RelativePanel>
+                                <RelativePanel Grid.Column="0"
                                            Grid.Row="2"
                                            Margin="40 24">
-                                <TextBlock x:Name="OsVersion" 
+                                    <TextBlock x:Name="OsVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="OS Version : "
+                                           Text="Version : "
                                            FontSize="18"
                                            FontWeight="SemiBold"/>
-                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="OsVersion"
                                            Text="{x:Bind OsVersion}"
                                            FontSize="18"
                                            Margin="12 0 0 0 "/>
-                            </RelativePanel>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
+                                <RelativePanel Grid.Column="0"
                                            Grid.Row="3"
                                            Margin="40 24">
-                                <TextBlock x:Name="DistroSize" 
+                                    <TextBlock x:Name="DistroSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Size : "
+                                           Text="Disk Usage : "
                                            FontSize="18"
                                            FontWeight="SemiBold"/>
-                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="DistroSize"
                                            Text="{x:Bind Path=system:String.Format('{0} GB', Size)}"
                                            FontSize="18"
                                            Margin="12 0 0 0 "/>
-                            </RelativePanel>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
+                                <RelativePanel Grid.Column="0"
                                            Grid.Row="4"
                                            Margin="40 24">
-                                <TextBlock x:Name="WslVersion" 
+                                    <TextBlock x:Name="WslVersion" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="WSL Version : "
                                            FontSize="18"
                                            FontWeight="SemiBold"/>
-                                <TextBlock Style="{StaticResource BodyTextBlockStyle}"
+                                    <TextBlock Style="{StaticResource BodyTextBlockStyle}"
                                            RelativePanel.RightOf="WslVersion"
                                            Text="{x:Bind WslVersion}"
                                            FontSize="18"
                                            Margin="12 0 0 0 "/>
-                            </RelativePanel>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
+                                <RelativePanel Grid.Column="0"
                                            Grid.Row="5"
                                            Margin="40 16">
-                                <TextBlock x:Name="UsersList" 
+                                    <TextBlock x:Name="UsersList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="Users : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Expander RelativePanel.RightOf="UsersList"
+                                    <Expander RelativePanel.RightOf="UsersList"
                                           IsExpanded="False"
                                           ExpandDirection="Down"
                                           Header="Users"
                                           Width="124"
                                           Margin="60 0 0 0 ">
-                                    <Expander.Content>
-                                        <ListView ItemsSource="{x:Bind Users}"/>
-                                    </Expander.Content>
-                                </Expander>
-                                <!--<Button Margin="4 0 0 0">
+                                        <Expander.Content>
+                                            <ListView ItemsSource="{x:Bind Users}"/>
+                                        </Expander.Content>
+                                    </Expander>
+                                    <!--<Button Margin="4 0 0 0">
                                     <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
                                 </Button>-->
-                            </RelativePanel>
-
-                            <RelativePanel Grid.Column="0"
-                                           Grid.Row="6"
+                                </RelativePanel>
+                            </Grid>
+                            <Grid Grid.Column="1"
+                                  Background="{ThemeResource LayerFillColorAltBrush}"
+                                  CornerRadius="5"
+                                  Margin="50">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Grid.Row="0"
+                                           Style="{StaticResource TitleTextBlockStyle}"
+                                           Text="Snapshots :"
+                                           FontSize="{StaticResource LargeFontSize}"
+                                           FontWeight="Bold"
+                                           TextWrapping="Wrap"
+                                           Margin="40 24 0 8"/>
+                                <RelativePanel Grid.Column="0"
+                                           Grid.Row="1"
                                            Margin="40 16">
-                                <TextBlock x:Name="SnapshotsList" 
+                                    <TextBlock x:Name="SnapshotsList" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshots : "
+                                           Text="List : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <Button x:Name="DisplaySnapshots"
+                                    <Button x:Name="DisplaySnapshots"
                                         RelativePanel.RightOf="SnapshotsList"
                                         Content="Display"
                                         Command="{Binding ElementName=Page, Path=ViewModel.DisplaySnapshotsListCommand}"
                                         CommandParameter="{x:Bind}"
                                         Margin=" 24 8 0 0"/>
-                                <Button RelativePanel.RightOf="DisplaySnapshots" 
+                                    <Button RelativePanel.RightOf="DisplaySnapshots" 
                                         Height="32"
                                         Margin="4 8 0 0"
                                         Command="{Binding ElementName=Page, Path=ViewModel.CreateSnapshotCommand}"
                                         CommandParameter="{x:Bind}">
-                                    <FontIcon Glyph="&#xE710;"
+                                        <FontIcon Glyph="&#xE710;"
                                               FontSize="16"/>
-                                </Button>
-                            </RelativePanel>
+                                    </Button>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
-                                           Grid.Row="7"
+                                <RelativePanel Grid.Column="0"
+                                           Grid.Row="2"
                                            Margin="40 16">
-                                <TextBlock x:Name="SnapshotsTotalSize" 
+                                    <TextBlock x:Name="SnapshotsTotalSize" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshots Total Size : "
+                                           Text="Total Size : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <TextBlock x:Name="SnapshotsTotalSizeValue"
+                                    <TextBlock x:Name="SnapshotsTotalSizeValue"
                                            RelativePanel.RightOf="SnapshotsTotalSize"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
                                            Text="{x:Bind system:String.Format('{0} GB', SnapshotsTotalSize), Mode=OneWay}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
-                            </RelativePanel>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
-                                           Grid.Row="8"
+                                <RelativePanel Grid.Column="0"
+                                           Grid.Row="3"
                                            Margin="40 16">
-                                <TextBlock x:Name="SnapshotsCount" 
+                                    <TextBlock x:Name="SnapshotsCount" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshots count : "
+                                           Text="Count : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <TextBlock x:Name="SnapshotsCountValue"
+                                    <TextBlock x:Name="SnapshotsCountValue"
                                            RelativePanel.RightOf="SnapshotsCount"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Style="{StaticResource BodyTextBlockStyle}"
                                            Text="{x:Bind Snapshots.Count, Mode=OneWay}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
-                            </RelativePanel>
+                                </RelativePanel>
 
-                            <RelativePanel Grid.Column="0"
-                                           Grid.Row="9"
+                                <RelativePanel Grid.Column="0"
+                                           Grid.Row="4"
                                            Margin="40 16">
-                                <TextBlock x:Name="SnapshotLastDate" 
+                                    <TextBlock x:Name="SnapshotLastDate" 
                                            Style="{StaticResource BodyStrongTextBlockStyle}"
-                                           Text="Snapshot last date : "
+                                           Text="Last Date : "
                                            FontSize="18"
                                            FontWeight="SemiBold"
                                            Margin="0 12 0 0 "/>
-                                <TextBlock x:Name="SnapshotLastDateValue"
+                                    <TextBlock x:Name="SnapshotLastDateValue"
                                            RelativePanel.RightOf="SnapshotLastDate"
-                                           Style="{StaticResource BodyStrongTextBlockStyle}"
+                                           Style="{StaticResource BodyTextBlockStyle}"
                                            Text="{Binding Snapshots[0].CreationDate, FallbackValue='None'}"
                                            FontSize="18"
-                                           FontWeight="SemiBold"
                                            Margin="12 12 0 0 "/>
-                            </RelativePanel>
-
+                                </RelativePanel>
+                            </Grid>
 
                         </Grid>
                     </ScrollViewer>
