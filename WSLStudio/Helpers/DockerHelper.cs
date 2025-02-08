@@ -227,6 +227,7 @@ public class DockerHelper
         // docker manifest spec
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Token);
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.v2+json"));
+        httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.distribution.manifest.list.v2+json"));
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.container.image.v1+json"));
         httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/vnd.docker.image.rootfs.diff.tar.gzip"));
 
@@ -256,7 +257,8 @@ public class DockerHelper
             switch (content.Headers.ContentType?.ToString())
             {
                 // if manifest is a fat manifest (a list of others manifest)
-                case "application/vnd.oci.image.index.v1+json":
+                case "application/vnd.oci.image.index.v1+json" or
+                     "application/vnd.docker.distribution.manifest.list.v2+json":
                 {
                     Log.Information("Fetching fat manifest");
                     var fatManifest = content.ReadFromJsonAsync<ImageFatManifest>().Result;
